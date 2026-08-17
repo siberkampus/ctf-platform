@@ -1,0 +1,16 @@
+{{define "solver_item"}}
+<div class="solver-item">
+    <img src="{{ .Avatar }}" alt="{{ .Username }}" class="solver-avatar" 
+         onerror="this.src='/static/images/avatar.png'">
+    <div class="solver-info">
+        <div class="solver-name">{{ .Username }}</div>
+        <div class="solver-time">
+            <i class="fas fa-clock"></i> 
+            {{ if .UsedHint }}
+            <span style="color:#ffbd2e;">(ipucu kullandı)</span>
+            {{ end }}
+            {{ .SolvedAt.Format "02.01.2006 15:04" }}
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .matrix-bg {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1; opacity: 0.05; pointer-events: none;
+        }
+        /* ── Navbar ── */
+        .navbar {
+            background: rgba(10,20,30,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00ff9d;
+            padding: 1rem 5%;
+            position: fixed; width: 100%; top: 0; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 0 20px rgba(0,255,157,0.2);
+        }
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem; font-weight: 700;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a {
+            color: #e0e0e0; text-decoration: none; font-weight: 500;
+            transition: 0.3s; position: relative;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0;
+            width: 0; height: 2px; background: #00ff9d; transition: 0.3s;
+        }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+        .nav-links a:hover, .nav-links a.active { color: #00ff9d; }
+        .user-points {
+            background: rgba(0,255,157,0.1); border: 1px solid #00ff9d;
+            padding: 0.3rem 1rem; border-radius: 5px; color: #00ff9d; 
+        }
+        .login-btn {
+            background: transparent; border: 2px solid #00ff9d;
+            color: #00ff9d; padding: 0.5rem 1.5rem; border-radius: 5px;
+            font-weight: 600; transition: 0.3s; cursor: pointer;
+        }
+        .login-btn:hover { background: #00ff9d; color: #0a0f0f; }
+        .register-btn {
+            background: #00ff9d; border: none; color: #0a0f0f;
+            padding: 0.5rem 1.5rem; border-radius: 5px;
+            font-weight: 600; transition: 0.3s; cursor: pointer;
+        }
+        .register-btn:hover { background: #00b86e; transform: scale(1.05); }
+
+        /* ── Container ── */
+        .container {
+            max-width: 1400px; margin: 80px auto 0; padding: 2rem 5%;
+        }
+        .breadcrumb {
+            display: flex; align-items: center; gap: 0.5rem;
+            margin-bottom: 2rem; font-size: 0.9rem; color: #6a7a8a;
+        }
+        .breadcrumb a { color: #b0b0b0; text-decoration: none; transition: 0.3s; }
+        .breadcrumb a:hover { color: #00ff9d; }
+        .breadcrumb i { font-size: 0.7rem; color: #2a3a4a; }
+
+        /* ── Profil Header ── */
+        .profile-header {
+            background: rgba(20,30,40,0.8); border: 1px solid #2a3a4a;
+            border-radius: 15px; padding: 2rem; margin-bottom: 2rem;
+            position: relative; overflow: hidden;
+        }
+        .profile-cover {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100px;
+            background: linear-gradient(90deg, #00ff9d20, #00b8ff20);
+            border-bottom: 1px solid #00ff9d33;
+        }
+        .profile-info {
+            position: relative; display: flex; gap: 2rem;
+            align-items: flex-end; margin-top: 50px; flex-wrap: wrap;
+        }
+        .profile-avatar {
+            width: 150px; height: 150px; border-radius: 50%;
+            border: 4px solid #00ff9d;
+            box-shadow: 0 0 40px rgba(0,255,157,0.3);
+            overflow: hidden; background: #1a1f2f; flex-shrink: 0;
+        }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-details { flex: 1; min-width: 200px; }
+        .profile-name {
+            display: flex; align-items: center; gap: 1rem;
+            flex-wrap: wrap; margin-bottom: 0.5rem;
+        }
+        .profile-username {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.2rem; color: #00ff9d;
+        }
+        .profile-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .badge {
+            padding: 0.3rem 1rem; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .badge-vip { background: linear-gradient(45deg, #ffd700, #ffa500); color: #0a0f0f; }
+        .badge-verified { background: #00ff9d; color: #0a0f0f; }
+        .profile-meta {
+            display: flex; gap: 1.5rem; margin: 1rem 0; flex-wrap: wrap;
+        }
+        .profile-meta-item {
+            display: flex; align-items: center; gap: 0.5rem; color: #b0b0b0;
+        }
+        .profile-meta-item i { color: #00ff9d; width: 16px; }
+        .profile-meta-item a { color: #b0b0b0; text-decoration: none; }
+        .profile-meta-item a:hover { color: #00ff9d; }
+        .profile-stats {
+            display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;
+        }
+        .profile-stat { text-align: center; }
+        .profile-stat-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem; color: #00ff9d;
+        }
+        .profile-stat-label { font-size: 0.8rem; color: #6a7a8a; }
+        .profile-actions { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn-edit {
+            padding: 0.7rem 1.8rem; background: transparent;
+            border: 1px solid #00ff9d; border-radius: 5px;
+            color: #00ff9d; cursor: pointer; transition: 0.3s; font-weight: 600;
+        }
+        .btn-edit:hover { background: #00ff9d; color: #0a0f0f; }
+
+        /* ── İçerik Grid ── */
+        .content-grid {
+            display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem;
+        }
+        .left-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+        .info-card {
+            background: rgba(20,30,40,0.8); border: 1px solid #2a3a4a;
+            border-radius: 10px; padding: 1.5rem;
+        }
+        .card-title {
+            font-family: 'Share Tech Mono', monospace; color: #00ff9d;
+            font-size: 1rem; margin-bottom: 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .bio-text { color: #b0b0b0; line-height: 1.6; margin-bottom: 1rem; font-size: 0.95rem; }
+        .bio-empty { color: #6a7a8a; font-style: italic; font-size: 0.9rem; }
+        .info-list { list-style: none; }
+        .info-list li {
+            display: flex; align-items: center; gap: 0.8rem;
+            padding: 0.6rem 0; border-bottom: 1px solid #2a3a4a; font-size: 0.9rem;
+        }
+        .info-list li:last-child { border-bottom: none; }
+        .info-list i { width: 16px; color: #00ff9d; }
+
+        /* ── Rozetler ── */
+        .badges-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+        }
+        .badge-item {
+            text-align: center; cursor: default; transition: 0.3s;
+        }
+        .badge-item:hover { transform: translateY(-4px); }
+        .badge-icon {
+            width: 55px; height: 55px; margin: 0 auto 0.5rem;
+            background: rgba(0,255,157,0.1); border: 2px solid #00ff9d;
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 1.3rem; color: #00ff9d;
+        }
+        .badge-name { font-size: 0.75rem; color: #e0e0e0; margin-bottom: 0.2rem; }
+        .badge-desc { font-size: 0.65rem; color: #6a7a8a; }
+        .empty-state { color: #6a7a8a; text-align: center; font-size: 0.9rem; padding: 1rem 0; }
+
+        /* ── Sağ Panel Tablar ── */
+        .right-panel {
+            background: rgba(20,30,40,0.8); border: 1px solid #2a3a4a;
+            border-radius: 10px; overflow: hidden;
+        }
+        .tabs {
+            display: flex; border-bottom: 1px solid #2a3a4a;
+            background: rgba(0,0,0,0.3); overflow-x: auto;
+        }
+        .tab {
+            padding: 1rem 1.8rem; color: #b0b0b0; cursor: pointer;
+            transition: 0.3s; white-space: nowrap;
+            border-bottom: 2px solid transparent;
+        }
+        .tab:hover { color: #00ff9d; }
+        .tab.active { color: #00ff9d; border-bottom-color: #00ff9d; }
+        .tab-content { padding: 1.5rem; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        /* ── İstatistik Kartları ── */
+        .stats-overview {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a;
+            border-radius: 8px; padding: 1rem; text-align: center;
+        }
+        .stat-card-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem; color: #00ff9d;
+        }
+        .stat-card-label { font-size: 0.8rem; color: #6a7a8a; margin-top: 0.2rem; }
+
+        /* ── Grafik ── */
+        .chart-container {
+            background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a;
+            border-radius: 8px; padding: 1.2rem; margin-bottom: 2rem; height: 260px;
+        }
+
+        /* ── Zorluk Dağılımı ── */
+        .difficulty-section { margin-bottom: 2rem; }
+        .difficulty-section h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d; margin-bottom: 1rem; font-size: 1rem;
+        }
+        .difficulty-bar { margin-bottom: 0.8rem; }
+        .difficulty-bar-header {
+            display: flex; justify-content: space-between;
+            font-size: 0.85rem; margin-bottom: 0.3rem;
+        }
+        .diff-easy { color: #00ff9d; }
+        .diff-medium { color: #ffbd2e; }
+        .diff-hard { color: #ff5f56; }
+        .diff-expert { color: #ff00c8; }
+        .bar-bg { height: 8px; background: #2a3a4a; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+        /* ── Makine Kartları ── */
+        .machines-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 1rem; margin-top: 1rem;
+        }
+        .machine-card {
+            background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a;
+            border-radius: 8px; padding: 1rem; transition: 0.3s; cursor: pointer;
+        }
+        .machine-card:hover {
+            transform: translateY(-3px); border-color: #00ff9d;
+            box-shadow: 0 5px 20px rgba(0,255,157,0.15);
+        }
+        .machine-card-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;
+        }
+        .machine-card-name {
+            font-family: 'Share Tech Mono', monospace; color: #00ff9d; font-size: 0.95rem;
+        }
+        .diff-badge {
+            font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 3px;
+        }
+        .diff-badge-easy { background: rgba(0,255,157,0.2); color: #00ff9d; }
+        .diff-badge-medium { background: rgba(255,189,46,0.2); color: #ffbd2e; }
+        .diff-badge-hard { background: rgba(255,95,86,0.2); color: #ff5f56; }
+        .diff-badge-expert { background: rgba(255,0,200,0.2); color: #ff00c8; }
+        .machine-card-meta { font-size: 0.8rem; color: #6a7a8a; display: flex; gap: 1rem; }
+        .machine-card-meta i { color: #00ff9d; margin-right: 0.2rem; }
+
+        /* ── Rozetler Tab ── */
+        .badges-tab-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1.2rem; margin-top: 1rem;
+        }
+        .badge-tab-card {
+            background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a;
+            border-radius: 8px; padding: 1.2rem 1rem; text-align: center; transition: 0.3s;
+        }
+        .badge-tab-card:hover { transform: translateY(-3px); border-color: #00ff9d; }
+        .badge-tab-icon { font-size: 2.5rem; color: #00ff9d; margin-bottom: 0.8rem; }
+        .badge-tab-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+        .badge-tab-desc { font-size: 0.7rem; color: #6a7a8a; margin-bottom: 0.3rem; }
+        .badge-tab-date { font-size: 0.65rem; color: #4a5a6a; }
+        .badge-tab-points { font-size: 0.75rem; color: #ffd700; margin-top: 0.3rem; }
+
+        /* ── Aktivite Timeline ── */
+        .timeline { margin-top: 1rem; }
+        .timeline-item {
+            display: flex; gap: 1rem; padding: 0.9rem 0;
+            border-bottom: 1px solid #2a3a4a;
+        }
+        .timeline-item:last-child { border-bottom: none; }
+        .timeline-icon {
+            width: 38px; height: 38px; flex-shrink: 0;
+            background: rgba(0,255,157,0.1); border: 1px solid #00ff9d;
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; color: #00ff9d; font-size: 0.9rem;
+        }
+        .timeline-content { flex: 1; }
+        .timeline-title { font-weight: 600; margin-bottom: 0.2rem; font-size: 0.9rem; }
+        .timeline-meta { font-size: 0.8rem; color: #6a7a8a; }
+        .timeline-meta i { color: #00ff9d; margin-right: 0.3rem; }
+
+        /* ── Footer ── */
+        .footer {
+            background: rgba(10,15,20,0.95); padding: 3rem 5%;
+            margin-top: 4rem; border-top: 1px solid #00ff9d;
+        }
+        .footer-content {
+            max-width: 1400px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem;
+        }
+        .footer-section h3 { font-family: 'Share Tech Mono', monospace; color: #00ff9d; margin-bottom: 1rem; }
+        .footer-section ul { list-style: none; }
+        .footer-section ul li { margin: 0.5rem 0; }
+        .footer-section ul li a { color: #b0b0b0; text-decoration: none; transition: 0.3s; }
+        .footer-section ul li a:hover { color: #00ff9d; padding-left: 5px; }
+        .social-links { display: flex; gap: 1rem; margin-top: 1rem; }
+        .social-links a { color: #b0b0b0; font-size: 1.5rem; transition: 0.3s; }
+        .social-links a:hover { color: #00ff9d; transform: translateY(-3px); }
+
+        /* ── Özel Dialog Sistem Stilleri ── */
+        .hl-dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            animation: dlOverlayIn 0.15s ease;
+        }
+
+        .hl-dialog-overlay.open {
+            display: flex;
+        }
+
+        @keyframes dlOverlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .hl-dialog {
+            background: #0d1117;
+            border: 1px solid #2a3a4a;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 157, 0.08);
+            animation: dlIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        @keyframes dlIn {
+            from { opacity: 0; transform: scale(0.88) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .hl-dialog-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 2rem 1rem;
+        }
+
+        .hl-dialog-icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .hl-dialog-icon-circle.warn {
+            background: rgba(255, 189, 46, 0.12);
+            border: 1px solid rgba(255, 189, 46, 0.35);
+            color: #ffbd2e;
+        }
+
+        .hl-dialog-icon-circle.info {
+            background: rgba(0, 184, 255, 0.1);
+            border: 1px solid rgba(0, 184, 255, 0.3);
+            color: #00b8ff;
+        }
+
+        .hl-dialog-icon-circle.danger {
+            background: rgba(255, 95, 86, 0.1);
+            border: 1px solid rgba(255, 95, 86, 0.3);
+            color: #ff5f56;
+        }
+
+        .hl-dialog-icon-circle.success {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            color: #00ff9d;
+        }
+
+        .hl-dialog-body {
+            padding: 0 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .hl-dialog-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.05rem;
+            color: #e0e0e0;
+            margin-bottom: 0.6rem;
+        }
+
+        .hl-dialog-message {
+            font-size: 0.9rem;
+            color: #8a9a8a;
+            line-height: 1.6;
+        }
+
+        .hl-dialog-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #1e2a38;
+            justify-content: flex-end;
+        }
+
+        .hl-dialog-actions.centered {
+            justify-content: center;
+        }
+
+        .hl-btn {
+            padding: 0.55rem 1.4rem;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .hl-btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a3a4a;
+            color: #8a9a8a;
+        }
+
+        .hl-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: #e0e0e0;
+            border-color: #3a4a5a;
+        }
+
+        .hl-btn-confirm {
+            background: rgba(255, 95, 86, 0.15);
+            border: 1px solid rgba(255, 95, 86, 0.4);
+            color: #ff5f56;
+        }
+
+        .hl-btn-confirm:hover {
+            background: rgba(255, 95, 86, 0.28);
+            box-shadow: 0 0 14px rgba(255, 95, 86, 0.25);
+        }
+
+        .hl-btn-ok {
+            background: rgba(0, 255, 157, 0.12);
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            color: #00ff9d;
+        }
+
+        .hl-btn-ok:hover {
+            background: rgba(0, 255, 157, 0.22);
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.2);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .profile-info { flex-direction: column; align-items: center; text-align: center; }
+            .profile-meta { justify-content: center; }
+            .profile-stats { justify-content: center; }
+            .profile-actions { justify-content: center; }
+        }
+        @media (max-width: 768px) {
+            .navbar { padding: 1rem; }
+            .nav-links { display: none; }
+            .profile-username { font-size: 1.8rem; }
+            .stats-overview { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+<div class="matrix-bg"></div>
+
+<!-- ÖZEL DIALOG: ONAY (confirm) -->
+<div class="hl-dialog-overlay" id="dlConfirm">
+    <div class="hl-dialog">
+        <div class="hl-dialog-icon">
+            <div class="hl-dialog-icon-circle warn">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+        </div>
+        <div class="hl-dialog-body">
+            <div class="hl-dialog-title" id="dlConfirmTitle">Çıkış Yap</div>
+            <div class="hl-dialog-message" id="dlConfirmMsg">Oturumunuzu kapatmak istediğinize emin misiniz?</div>
+        </div>
+        <div class="hl-dialog-actions">
+            <button class="hl-btn hl-btn-cancel" onclick="dlConfirmResolve(false)">
+                <i class="fas fa-times"></i> Vazgeç
+            </button>
+            <button class="hl-btn hl-btn-confirm" id="dlConfirmBtn" onclick="dlConfirmResolve(true)">
+                <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ÖZEL DIALOG: BİLGİ / UYARI (alert) -->
+<div class="hl-dialog-overlay" id="dlAlert">
+    <div class="hl-dialog">
+        <div class="hl-dialog-icon">
+            <div class="hl-dialog-icon-circle info" id="dlAlertIcon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+        </div>
+        <div class="hl-dialog-body">
+            <div class="hl-dialog-title" id="dlAlertTitle">Bilgi</div>
+            <div class="hl-dialog-message" id="dlAlertMsg">Mesaj</div>
+        </div>
+        <div class="hl-dialog-actions centered">
+            <button class="hl-btn hl-btn-ok" onclick="dlAlertClose()">
+                <i class="fas fa-check"></i> Tamam
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Navbar ── -->
+<nav class="navbar">
+    <div class="logo"><i class="fas fa-skull"></i> HACKLAB</div>
+    <div class="nav-links">
+        <a href="/">Ana Sayfa</a>
+        <a href="/machines">Makineler</a>
+        <a href="/academy">Akademi</a>
+        <a href="/leaderboard">Liderlik</a>
+        <a href="/vip">VIP</a>
+        {{if .CurrentUser}}
+        <a href="/profile/{{.CurrentUser.Username}}" class="active">Profil</a>
+        <a href="/dashboard">Panel</a>
+        {{if .IsAdmin}}<a href="/admin" style="color: #ffd700;">Admin</a>{{end}}
+        <span class="user-points"> {{.CurrentUser.Points}} Puan</span>
+        <button class="login-btn" onclick="customLogout()">Çıkış</button>
+        {{else}}
+        <button class="login-btn" onclick="window.location.href='/login'">Giriş</button>
+        <button class="register-btn" onclick="window.location.href='/register'">Kayıt Ol</button>
+        {{end}}
+    </div>
+</nav>
+
+<!-- ── Container ── -->
+<div class="container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/">Ana Sayfa</a>
+        <i class="fas fa-chevron-right"></i>
+        <a href="/leaderboard">Liderlik</a>
+        <i class="fas fa-chevron-right"></i>
+        <span style="color: #00ff9d;">@{{.ProfileUser.Username}}</span>
+    </div>
+
+    <!-- ── Profil Header ── -->
+    <div class="profile-header">
+        <div class="profile-cover"></div>
+        <div class="profile-info">
+            <!-- Avatar -->
+            <div class="profile-avatar">
+                <img src="{{.ProfileUser.Avatar}}" alt="@{{.ProfileUser.Username}}"
+                     onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'">
+            </div>
+
+            <!-- Detaylar -->
+            <div class="profile-details">
+                <div class="profile-name">
+                    <h1 class="profile-username">@{{.ProfileUser.Username}}</h1>
+                    <div class="profile-badges">
+                        {{if .ProfileUser.IsVIP}}<span class="badge badge-vip">VIP</span>{{end}}
+                    </div>
+                </div>
+
+                <div class="profile-meta">
+                    {{if .ProfileUser.Country}}
+                    <span class="profile-meta-item">
+                        <i class="fas fa-map-marker-alt"></i> {{.ProfileUser.Country}}
+                    </span>
+                    {{end}}
+                    <span class="profile-meta-item">
+                        <i class="fas fa-calendar"></i> Katılma: {{formatDate .ProfileUser.CreatedAt}}
+                    </span>
+                    {{if .ProfileUser.Website}}
+                    <span class="profile-meta-item">
+                        <i class="fas fa-globe"></i>
+                        <a href="https://{{.ProfileUser.Website}}" target="_blank" rel="noopener">{{.ProfileUser.Website}}</a>
+                    </span>
+                    {{end}}
+                </div>
+
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">{{.Stats.TotalPoints}}</div>
+                        <div class="profile-stat-label">Toplam Puan</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">{{.Stats.TotalMachines}}</div>
+                        <div class="profile-stat-label">Çözülen Makine</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">%{{.Stats.Accuracy}}</div>
+                        <div class="profile-stat-label">Başarı</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">#{{.Stats.Rank}}</div>
+                        <div class="profile-stat-label">Sıralama</div>
+                    </div>
+                </div>
+
+                {{if .IsOwnProfile}}
+                <div class="profile-actions">
+                    <button class="btn-edit" onclick="window.location.href='/settings'">
+                        <i class="fas fa-edit"></i> Profili Düzenle
+                    </button>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- ── İçerik Grid ── -->
+    <div class="content-grid">
+        <!-- ── Sol Panel ── -->
+        <div class="left-panel">
+
+            <!-- Hakkında -->
+            <div class="info-card">
+                <div class="card-title"><i class="fas fa-user"></i> HAKKINDA</div>
+                {{if .ProfileUser.Bio}}
+                <p class="bio-text">{{.ProfileUser.Bio}}</p>
+                {{else}}
+                <p class="bio-empty">Henüz biyografi eklenmemiş.</p>
+                {{end}}
+            </div>
+
+            <!-- İstatistikler -->
+            <div class="info-card">
+                <div class="card-title"><i class="fas fa-chart-bar"></i> İSTATİSTİKLER</div>
+                <ul class="info-list">
+                    <li>
+                        <i class="fas fa-flag"></i>
+                        <span>{{.Stats.TotalQuestions}} soru çözüldü</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-server"></i>
+                        <span>{{.Stats.TotalMachines}} makine tamamlandı</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-crown"></i>
+                        <span>{{.Stats.VIPCount}} VIP makine</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-fire"></i>
+                        <span>{{.Stats.Streak}} günlük seri</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-medal"></i>
+                        <span>{{len .Badges}} rozet kazanıldı</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Rozetler (özet) -->
+            {{if .Badges}}
+            <div class="info-card">
+                <div class="card-title"><i class="fas fa-medal"></i> ROZETLER</div>
+                <div class="badges-grid">
+                    {{range first 3 .Badges}}
+                    <div class="badge-item">
+                        <div class="badge-icon"><i class="fas {{.Icon}}"></i></div>
+                        <div class="badge-name">{{.Name}}</div>
+                        <div class="badge-desc">{{truncate .Description 30}}</div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+
+        </div>
+
+        <!-- ── Sağ Panel ── -->
+        <div class="right-panel">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('overview')">
+                    <i class="fas fa-chart-line"></i> Genel Bakış
+                </div>
+                <div class="tab" onclick="switchTab('machines')">
+                    <i class="fas fa-server"></i> Makineler ({{len .SolvedMachines}})
+                </div>
+                <div class="tab" onclick="switchTab('badges')">
+                    <i class="fas fa-medal"></i> Rozetler ({{len .Badges}})
+                </div>
+                <div class="tab" onclick="switchTab('activity')">
+                    <i class="fas fa-history"></i> Aktivite
+                </div>
+            </div>
+
+            <div class="tab-content">
+
+                <!-- ── Genel Bakış ── -->
+                <div class="tab-pane active" id="overview">
+                    <div class="stats-overview">
+                        <div class="stat-card">
+                            <div class="stat-card-value">{{.Stats.TotalMachines}}</div>
+                            <div class="stat-card-label">Çözülen Makine</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-value">{{.Stats.TotalQuestions}}</div>
+                            <div class="stat-card-label">Çözülen Soru</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-value">{{.Stats.VIPCount}}</div>
+                            <div class="stat-card-label">VIP Makine</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-value">{{len .Badges}}</div>
+                            <div class="stat-card-label">Rozet</div>
+                        </div>
+                    </div>
+
+                    <!-- Haftalık aktivite grafiği -->
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+
+                    <!-- Zorluk dağılımı (makine listesinden hesaplanır JS ile) -->
+                    <div class="difficulty-section">
+                        <h3><i class="fas fa-chart-pie"></i> Zorluk Dağılımı</h3>
+                        <div id="difficultyBars">
+                            <div class="empty-state">Hesaplanıyor...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Çözülen Makineler ── -->
+                <div class="tab-pane" id="machines">
+                    {{if .SolvedMachines}}
+                    <div class="machines-grid">
+                        {{range .SolvedMachines}}
+                        <div class="machine-card" onclick="window.location.href='/machines/{{.ID}}'">
+                            <div class="machine-card-header">
+                                <span class="machine-card-name">{{.Name}}</span>
+                                <span class="diff-badge diff-badge-{{.Difficulty}}">
+                                    {{difficultyLabel .Difficulty}}
+                                </span>
+                            </div>
+                            <div class="machine-card-meta">
+                                <span><i class="fas fa-star"></i> {{.Points}} puan</span>
+                                <span><i class="fas fa-calendar"></i> {{formatDate .SolvedAt}}</span>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                    {{else}}
+                    <div class="empty-state" style="padding: 3rem;">
+                        <i class="fas fa-server" style="font-size: 3rem; color: #2a3a4a; display: block; margin-bottom: 1rem;"></i>
+                        Henüz çözülen makine yok.
+                    </div>
+                    {{end}}
+                </div>
+
+                <!-- ── Rozetler ── -->
+                <div class="tab-pane" id="badges">
+                    {{if .Badges}}
+                    <div class="badges-tab-grid">
+                        {{range .Badges}}
+                        <div class="badge-tab-card">
+                            <div class="badge-tab-icon"><i class="fas {{.Icon}}"></i></div>
+                            <div class="badge-tab-title">{{.Name}}</div>
+                            <div class="badge-tab-desc">{{.Description}}</div>
+                            <div class="badge-tab-date"><i class="fas fa-calendar"></i> {{formatDate .EarnedAt}}</div>
+                            {{if .PointsReward}}
+                            <div class="badge-tab-points">+{{.PointsReward}} puan</div>
+                            {{end}}
+                        </div>
+                        {{end}}
+                    </div>
+                    {{else}}
+                    <div class="empty-state" style="padding: 3rem;">
+                        <i class="fas fa-medal" style="font-size: 3rem; color: #2a3a4a; display: block; margin-bottom: 1rem;"></i>
+                        Henüz rozet kazanılmamış.
+                    </div>
+                    {{end}}
+                </div>
+
+                <!-- ── Aktivite ── -->
+                <div class="tab-pane" id="activity">
+                    {{if .RecentActivity}}
+                    <div class="timeline">
+                        {{range .RecentActivity}}
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                <i class="fas {{actionIcon .ActionType}}"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">{{actionTitle .}}</div>
+                                <div class="timeline-meta">
+                                    <i class="fas fa-clock"></i> {{formatDateTime .CreatedAt}}
+                                </div>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                    {{else}}
+                    <div class="empty-state" style="padding: 3rem;">
+                        <i class="fas fa-history" style="font-size: 3rem; color: #2a3a4a; display: block; margin-bottom: 1rem;"></i>
+                        Henüz aktivite yok.
+                    </div>
+                    {{end}}
+                </div>
+
+            </div><!-- /tab-content -->
+        </div><!-- /right-panel -->
+    </div><!-- /content-grid -->
+</div><!-- /container -->
+
+<!-- ── Footer ── -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>HACKLAB</h3>
+            <p>Güvenlik araştırmacıları ve etik hacker'lar için CTF platformu.</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-discord"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-section">
+            <h3>Hızlı Linkler</h3>
+            <ul>
+                <li><a href="/machines">Tüm Makineler</a></li>
+                <li><a href="/leaderboard">Leaderboard</a></li>
+                <li><a href="/blog">Blog</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>Destek</h3>
+            <ul>
+                <li><a href="/faq">SSS</a></li>
+                <li><a href="/contact">İletişim</a></li>
+                <li><a href="/discord">Discord</a></li>
+                <li><a href="/docs">Dokümantasyon</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>Yasal</h3>
+            <ul>
+                <li><a href="/terms">Kullanım Şartları</a></li>
+                <li><a href="/privacy">Gizlilik Politikası</a></li>
+            </ul>
+        </div>
+    </div>
+    <div style="text-align:center; margin-top:3rem; color:#404040;">
+        © HACKLAB — Bayrakları toplamaya hazır mısın?
+    </div>
+</footer>
+
+<script>
+    // =============================================
+    // ÖZEL DIALOG SİSTEMİ (Promise tabanlı)
+    // =============================================
+    let _dlConfirmResolve = null;
+    let _dlAlertIsOpen = false;
+
+    function showConfirm(title, message, confirmLabel = null) {
+        document.getElementById('dlConfirmTitle').textContent = title || 'Onay';
+        document.getElementById('dlConfirmMsg').textContent = message || 'Bu işlemi onaylıyor musunuz?';
+        const confirmBtn = document.getElementById('dlConfirmBtn');
+        if (confirmLabel) {
+            confirmBtn.innerHTML = confirmLabel;
+        } else {
+            confirmBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Çıkış Yap';
+        }
+        document.getElementById('dlConfirm').classList.add('open');
+        return new Promise(resolve => {
+            _dlConfirmResolve = resolve;
+        });
+    }
+
+    function dlConfirmResolve(value) {
+        document.getElementById('dlConfirm').classList.remove('open');
+        if (_dlConfirmResolve) {
+            _dlConfirmResolve(value);
+            _dlConfirmResolve = null;
+        }
+    }
+
+    function showAlert(title, message, type = 'info') {
+        if (_dlAlertIsOpen) return;
+        const titleEl = document.getElementById('dlAlertTitle');
+        const msgEl = document.getElementById('dlAlertMsg');
+        const iconEl = document.getElementById('dlAlertIcon');
+        
+        titleEl.textContent = title || 'Bilgi';
+        msgEl.textContent = message || '';
+        
+        // İkon tipini ayarla
+        iconEl.className = 'hl-dialog-icon-circle';
+        if (type === 'success') {
+            iconEl.classList.add('success');
+            iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
+        } else if (type === 'error') {
+            iconEl.classList.add('danger');
+            iconEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        } else if (type === 'warning') {
+            iconEl.classList.add('warn');
+            iconEl.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+        } else {
+            iconEl.classList.add('info');
+            iconEl.innerHTML = '<i class="fas fa-info-circle"></i>';
+        }
+        
+        document.getElementById('dlAlert').classList.add('open');
+        _dlAlertIsOpen = true;
+    }
+
+    function dlAlertClose() {
+        document.getElementById('dlAlert').classList.remove('open');
+        _dlAlertIsOpen = false;
+    }
+
+    // Overlay dışına tıklayınca kapat
+    document.getElementById('dlConfirm').addEventListener('click', function(e) {
+        if (e.target === this) dlConfirmResolve(false);
+    });
+    document.getElementById('dlAlert').addEventListener('click', function(e) {
+        if (e.target === this) dlAlertClose();
+    });
+
+    // ESC tuşu ile kapat
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('dlConfirm').classList.contains('open')) dlConfirmResolve(false);
+            if (document.getElementById('dlAlert').classList.contains('open')) dlAlertClose();
+        }
+    });
+
+    // ── Grafik verisi Go'dan gömülü ──────────────────────────────────
+    const chartLabels = [{{range .ChartData.Labels}}"{{.}}",{{end}}];
+    const chartData   = [{{range (index .ChartData.Datasets 0).Data}}{{.}},{{end}}];
+
+    // ── Makine verileri (zorluk dağılımı için) ───────────────────────
+    const solvedMachines = [
+        {{range .SolvedMachines}}
+        { id: {{.ID}}, name: "{{.Name}}", difficulty: "{{.Difficulty}}" },
+        {{end}}
+    ];
+
+    // ── Tab ──────────────────────────────────────────────────────────
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.getElementById(tab).classList.add('active');
+    }
+
+    // ── Grafik ───────────────────────────────────────────────────────
+    window.addEventListener('load', function() {
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Çözülen Sorular',
+                    data: chartData,
+                    borderColor: '#00ff9d',
+                    backgroundColor: 'rgba(0,255,157,0.08)',
+                    tension: 0.4, fill: true,
+                    pointBackgroundColor: '#00ff9d',
+                    pointRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#2a3a4a' }, ticks: { color: '#b0b0b0' } },
+                    x: { grid: { display: false }, ticks: { color: '#b0b0b0' } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Zorluk dağılımı hesapla
+        buildDifficultyBars();
+    });
+
+    function buildDifficultyBars() {
+        const counts = { easy: 0, medium: 0, hard: 0, expert: 0 };
+        solvedMachines.forEach(m => { if (counts[m.difficulty] !== undefined) counts[m.difficulty]++; });
+        const total = solvedMachines.length || 1;
+
+        const labels = { easy: 'Kolay', medium: 'Orta', hard: 'Zor', expert: 'Uzman' };
+        const colors = { easy: '#00ff9d', medium: '#ffbd2e', hard: '#ff5f56', expert: '#ff00c8' };
+
+        const container = document.getElementById('difficultyBars');
+        container.innerHTML = Object.entries(counts).map(([key, val]) => `
+            <div class="difficulty-bar">
+                <div class="difficulty-bar-header">
+                    <span class="diff-${key}">${labels[key]}</span>
+                    <span>${val} makine</span>
+                </div>
+                <div class="bar-bg">
+                    <div class="bar-fill" style="width:${Math.round(val/total*100)}%; background:${colors[key]};"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ── Özel Çıkış ───────────────────────────────────────────────────
+    async function customLogout() {
+        const confirmed = await showConfirm(
+            'Çıkış Yap',
+            'Oturumunuzu kapatmak istediğinize emin misiniz?',
+            '<i class="fas fa-sign-out-alt"></i> Çıkış Yap'
+        );
+        if (!confirmed) return;
+        
+        try {
+            const response = await fetch('/api/auth/logout', { method: 'POST' });
+            if (response.ok) {
+                showAlert('Başarılı', 'Çıkış yapıldı. Yönlendiriliyorsunuz...', 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showAlert('Hata', 'Çıkış yapılırken bir hata oluştu', 'error');
+            }
+        } catch (error) {
+            showAlert('Hata', 'Çıkış yapılırken bir hata oluştu', 'error');
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<div class="machine-progress-item" data-solved="{{ .Solved }}" data-total="{{ .Total }}">
+    <div class="machine-progress-header">
+        <span class="machine-name">{{ .Name }}</span>
+        <span class="machine-difficulty">{{ .Difficulty }}</span>
+    </div>
+    <div class="machine-progress-bar">
+        <div class="machine-progress-inner"></div>
+    </div>
+    <div class="machine-progress-meta">
+        <span>{{ .Solved }} / {{ .Total }} soru çözüldü</span>
+    </div>
+</div>
+

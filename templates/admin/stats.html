@@ -1,0 +1,599 @@
+{{define "content"}}
+<div class="stats-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h2><i class="fas fa-chart-bar"></i> Sistem İstatistikleri</h2>
+            <p>Platformun detaylı istatistiklerini görüntüleyin</p>
+        </div>
+        <div class="header-right">
+            <button class="btn-primary" onclick="exportStats()">
+                <i class="fas fa-download"></i> Dışa Aktar
+            </button>
+        </div>
+    </div>
+
+    <!-- Özet Kartları -->
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="card-icon"><i class="fas fa-users"></i></div>
+            <div class="card-content">
+                <div class="card-value" id="totalUsers">0</div>
+                <div class="card-label">Toplam Kullanıcı</div>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="card-icon"><i class="fas fa-server"></i></div>
+            <div class="card-content">
+                <div class="card-value" id="totalMachines">0</div>
+                <div class="card-label">Toplam Makine</div>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="card-icon"><i class="fas fa-flag"></i></div>
+            <div class="card-content">
+                <div class="card-value" id="totalSubmissions">0</div>
+                <div class="card-label">Toplam Çözüm</div>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="card-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="card-content">
+                <div class="card-value" id="successRate">0%</div>
+                <div class="card-label">Başarı Oranı</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistik Grid -->
+    <div class="stats-grid">
+        <!-- Kullanıcı İstatistikleri -->
+        <div class="stats-section">
+            <h3 class="section-title"><i class="fas fa-users"></i> Kullanıcı İstatistikleri</h3>
+            <div class="stats-list">
+                <div class="stat-item">
+                    <span class="stat-label">Aktif Kullanıcılar (24s)</span>
+                    <span class="stat-value" id="activeUsers">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Yeni Kullanıcılar (Bugün)</span>
+                    <span class="stat-value" id="newUsersToday">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">VIP Kullanıcılar</span>
+                    <span class="stat-value" id="vipUsers">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ortalama Puan</span>
+                    <span class="stat-value" id="avgPoints">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">En Yüksek Puan</span>
+                    <span class="stat-value" id="topPoints">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Makine İstatistikleri -->
+        <div class="stats-section">
+            <h3 class="section-title"><i class="fas fa-server"></i> Makine İstatistikleri</h3>
+            <div class="stats-list">
+                <div class="stat-item">
+                    <span class="stat-label">Aktif Makine</span>
+                    <span class="stat-value" id="activeMachines">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Kolay</span>
+                    <span class="stat-value" id="easyMachines">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Orta</span>
+                    <span class="stat-value" id="mediumMachines">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Zor</span>
+                    <span class="stat-value" id="hardMachines">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Uzman</span>
+                    <span class="stat-value" id="expertMachines">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Çözüm İstatistikleri -->
+        <div class="stats-section">
+            <h3 class="section-title"><i class="fas fa-flag"></i> Çözüm İstatistikleri</h3>
+            <div class="stats-list">
+                <div class="stat-item">
+                    <span class="stat-label">Başarılı Çözümler</span>
+                    <span class="stat-value" id="acceptedSubmissions">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Başarısız Çözümler</span>
+                    <span class="stat-value" id="rejectedSubmissions">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Bugünkü Çözümler</span>
+                    <span class="stat-value" id="todaySubmissions">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ortalama Çözüm/Kullanıcı</span>
+                    <span class="stat-value" id="avgSubmissions">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIP İstatistikleri -->
+    <div class="vip-section">
+        <h3 class="section-title"><i class="fas fa-crown"></i> VIP İstatistikleri</h3>
+        <div class="vip-grid">
+            <div class="vip-card">
+                <div class="vip-icon"><i class="fas fa-crown"></i></div>
+                <div class="vip-content">
+                    <div class="vip-value" id="totalVIPUsers">0</div>
+                    <div class="vip-label">Toplam VIP Kullanıcı</div>
+                </div>
+            </div>
+            <div class="vip-card">
+                <div class="vip-icon"><i class="fas fa-coins"></i></div>
+                <div class="vip-content">
+                    <div class="vip-value" id="totalRevenue">₺0</div>
+                    <div class="vip-label">Toplam VIP Geliri</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Son Kullanıcılar -->
+    <div class="recent-section">
+        <h3 class="section-title"><i class="fas fa-clock"></i> Son Kullanıcılar</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Kullanıcı Adı</th>
+                        <th>Email</th>
+                        <th>Puan</th>
+                        <th>VIP</th>
+                        <th>Kayıt Tarihi</th>
+                    </tr>
+                </thead>
+                <tbody id="recentUsersTable">
+                    <tr><td colspan="6" class="text-center">Yükleniyor...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stats-page {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-left h2 {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        margin-bottom: 0.3rem;
+    }
+
+    .header-left p {
+        color: #6a7a8a;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        padding: 0.5rem 1.5rem;
+        background: linear-gradient(45deg, #00ff9d, #00b86e);
+        border: none;
+        border-radius: 8px;
+        color: #0a0f0f;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 255, 157, 0.4);
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .summary-card {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #2a3a4a;
+        border-radius: 15px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: 0.3s;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+        border-color: #00ff9d;
+        box-shadow: 0 10px 30px rgba(0, 255, 157, 0.2);
+    }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(0, 255, 157, 0.1);
+        border: 1px solid #00ff9d;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: #00ff9d;
+    }
+
+    .card-content {
+        flex: 1;
+    }
+
+    .card-value {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 2rem;
+        color: #00ff9d;
+        line-height: 1.2;
+    }
+
+    .card-label {
+        color: #b0b0b0;
+        font-size: 0.9rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .stats-section {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 15px;
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .section-title i {
+        margin-right: 0.5rem;
+    }
+
+    .stats-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #2a3a4a;
+    }
+
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+
+    .stat-label {
+        color: #b0b0b0;
+        font-size: 0.9rem;
+    }
+
+    .stat-value {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        font-weight: 600;
+    }
+
+    .vip-section {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 15px;
+        padding: 1.5rem;
+    }
+
+    .vip-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .vip-card {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #ffd700;
+        border-radius: 10px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .vip-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid #ffd700;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #ffd700;
+    }
+
+    .vip-value {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 1.5rem;
+        color: #ffd700;
+    }
+
+    .vip-label {
+        color: #b0b0b0;
+        font-size: 0.8rem;
+    }
+
+    .recent-section {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 15px;
+        padding: 1.5rem;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table th {
+        background: rgba(0, 255, 157, 0.1);
+        padding: 0.8rem;
+        text-align: left;
+        color: #b0b0b0;
+        font-size: 0.8rem;
+    }
+
+    .data-table td {
+        padding: 0.8rem;
+        border-bottom: 1px solid #2a3a4a;
+    }
+
+    .data-table tr:hover {
+        background: rgba(0, 255, 157, 0.05);
+    }
+
+    .badge-vip {
+        background: linear-gradient(45deg, #ffd700, #ffa500);
+        color: #0a0f0f;
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .text-center {
+        text-align: center;
+        color: #6a7a8a;
+        padding: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        .vip-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    // API endpoint'leri
+    const API = {
+        stats: '/admin/api/stats',
+        users: '/admin/api/stats/users',
+        machines: '/admin/api/machines'
+    };
+
+    async function loadStats() {
+        try {
+            // 1. Ana istatistikler
+            const statsRes = await fetch(API.stats);
+            const stats = await statsRes.json();
+
+            // 2. Kullanıcı listesi
+            const usersRes = await fetch(API.users);
+            let users = await usersRes.json();
+            if (!Array.isArray(users)) {
+                console.warn('Kullanıcılar beklenen formatta değil:', users);
+                users = [];
+            }
+
+            // 3. Makine listesi - AdminMachines { machines: [], pagination: {} } formatında
+            const machinesRes = await fetch(API.machines);
+            const machinesData = await machinesRes.json();
+            const machines = machinesData.machines || [];
+            
+            console.log('Makineler:', machines);
+
+            // Özet Kartları
+            document.getElementById('totalUsers').textContent = stats.total_users || 0;
+            document.getElementById('totalMachines').textContent = stats.total_machines || 0;
+            document.getElementById('totalSubmissions').textContent = stats.total_submissions || 0;
+            document.getElementById('successRate').textContent = (stats.success_rate || 0).toFixed(1) + '%';
+
+            // Kullanıcı İstatistikleri
+            document.getElementById('activeUsers').textContent = stats.active_users || 0;
+            document.getElementById('newUsersToday').textContent = stats.new_users_today || 0;
+            document.getElementById('vipUsers').textContent = stats.total_vip_users || 0;
+            document.getElementById('avgPoints').textContent = (stats.average_points || 0).toFixed(1);
+            document.getElementById('topPoints').textContent = stats.top_user_points || 0;
+
+            // Makine İstatistikleri
+            const activeMachines = machines.filter(m => m.is_active === true).length;
+            const easyMachines = machines.filter(m => m.difficulty === 'easy' && m.is_active === true).length;
+            const mediumMachines = machines.filter(m => m.difficulty === 'medium' && m.is_active === true).length;
+            const hardMachines = machines.filter(m => m.difficulty === 'hard' && m.is_active === true).length;
+            const expertMachines = machines.filter(m => m.difficulty === 'expert' && m.is_active === true).length;
+
+            document.getElementById('activeMachines').textContent = activeMachines;
+            document.getElementById('easyMachines').textContent = easyMachines;
+            document.getElementById('mediumMachines').textContent = mediumMachines;
+            document.getElementById('hardMachines').textContent = hardMachines;
+            document.getElementById('expertMachines').textContent = expertMachines;
+
+            // Çözüm İstatistikleri
+            const acceptedSubmissions = users.reduce((sum, u) => sum + (u.accepted_count || 0), 0);
+            const totalSubmissions = stats.total_submissions || 0;
+            const rejectedSubmissions = totalSubmissions - acceptedSubmissions;
+
+            document.getElementById('acceptedSubmissions').textContent = acceptedSubmissions;
+            document.getElementById('rejectedSubmissions').textContent = rejectedSubmissions;
+            document.getElementById('todaySubmissions').textContent = stats.submissions_today || 0;
+            
+            const avgSubmissions = stats.total_users > 0 ? (totalSubmissions / stats.total_users).toFixed(1) : 0;
+            document.getElementById('avgSubmissions').textContent = avgSubmissions;
+
+            // VIP İstatistikleri
+            document.getElementById('totalVIPUsers').textContent = stats.total_vip_users || 0;
+            document.getElementById('totalRevenue').textContent = '₺' + (stats.vip_revenue || 0).toFixed(2);
+
+            // Son Kullanıcılar Tablosu
+            renderRecentUsers(users);
+
+        } catch (error) {
+            console.error('İstatistikler yüklenirken hata:', error);
+            showError();
+        }
+    }
+
+    function renderRecentUsers(users) {
+        const tbody = document.getElementById('recentUsersTable');
+        
+        if (!users || users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Kullanıcı bulunamadı</td></tr>';
+            return;
+        }
+
+        const recentUsers = users.slice(0, 10);
+        let html = '';
+        
+        recentUsers.forEach(user => {
+            html += `
+                <tr>
+                    <td>#${user.id}</td>
+                    <td>${escapeHtml(user.username)}</td>
+                    <td>${escapeHtml(user.email)}</td>
+                    <td class="stat-value">${user.points || 0}</td>
+                    <td>${user.is_vip ? '<span class="badge-vip">VIP</span>' : '-'}</td>
+                    <td>${user.member_since || '-'}</td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function showError() {
+        const elements = ['totalUsers', 'totalMachines', 'totalSubmissions', 'successRate',
+            'activeUsers', 'newUsersToday', 'vipUsers', 'avgPoints', 'topPoints',
+            'activeMachines', 'easyMachines', 'mediumMachines', 'hardMachines', 'expertMachines',
+            'acceptedSubmissions', 'rejectedSubmissions', 'todaySubmissions', 'avgSubmissions',
+            'totalVIPUsers', 'totalRevenue'];
+        
+        elements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '?';
+        });
+        
+        const tbody = document.getElementById('recentUsersTable');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center">Veriler yüklenemedi</td></tr>';
+    }
+
+    async function exportStats() {
+        try {
+            const response = await fetch(API.stats);
+            const stats = await response.json();
+            
+            let csv = 'Kategori,Değer\n';
+            csv += `Toplam Kullanıcı,${stats.total_users}\n`;
+            csv += `Toplam Makine,${stats.total_machines}\n`;
+            csv += `Toplam Çözüm,${stats.total_submissions}\n`;
+            csv += `Başarı Oranı,${stats.success_rate}%\n`;
+            csv += `VIP Kullanıcı,${stats.total_vip_users}\n`;
+            csv += `VIP Gelir,₺${stats.vip_revenue}\n`;
+            csv += `Aktif Kullanıcı,${stats.active_users}\n`;
+            csv += `Yeni Kullanıcı (Bugün),${stats.new_users_today}\n`;
+            csv += `Ortalama Puan,${stats.average_points}\n`;
+            csv += `En Yüksek Puan,${stats.top_user_points}\n`;
+            csv += `Bugünkü Çözüm,${stats.submissions_today}\n`;
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.setAttribute('download', `istatistikler-${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+        } catch (error) {
+            console.error('Dışa aktarma hatası:', error);
+            alert('İstatistikler dışa aktarılamadı');
+        }
+    }
+
+    // Sayfa yüklendiğinde verileri getir
+    document.addEventListener('DOMContentLoaded', loadStats);
+</script>
+{{end}}

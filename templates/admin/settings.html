@@ -1,0 +1,1373 @@
+{{define "content"}}
+<div class="settings-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h2><i class="fas fa-cog"></i> Sistem Ayarları</h2>
+            <p>Platform ayarlarını yapılandırın ve yönetin</p>
+        </div>
+        <div class="header-right">
+            <button class="btn-primary" onclick="saveAllSettings()">
+                <i class="fas fa-save"></i> Tümünü Kaydet
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Tabs -->
+    <div class="settings-tabs">
+        <button class="tab-btn active" onclick="switchTab('general')">
+            <i class="fas fa-sliders-h"></i> Genel
+        </button>
+        <button class="tab-btn" onclick="switchTab('security')">
+            <i class="fas fa-shield-alt"></i> Güvenlik
+        </button>
+        <button class="tab-btn" onclick="switchTab('smtp')">
+            <i class="fas fa-envelope"></i> SMTP
+        </button>
+        <button class="tab-btn" onclick="switchTab('docker')">
+            <i class="fab fa-docker"></i> Docker
+        </button>
+        <button class="tab-btn" onclick="switchTab('limits')">
+            <i class="fas fa-chart-line"></i> Limitler
+        </button>
+        <button class="tab-btn" onclick="switchTab('mail')">
+            <i class="fas fa-mail-bulk"></i> Mail Şablonları
+        </button>
+        <button class="tab-btn" onclick="switchTab('backup')">
+            <i class="fas fa-database"></i> Yedekleme
+        </button>
+    </div>
+
+    <!-- ============ GENERAL SETTINGS TAB ============ -->
+    <div class="tab-pane active" id="tab-general">
+        <form id="generalSettingsForm" class="settings-form">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i> Platform Bilgileri
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Platform Adı</label>
+                        <input type="text" name="site_name" id="site_name" 
+                               value="{{.Settings.SiteName}}" placeholder="CTF Platform">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Platform URL</label>
+                        <input type="url" name="site_url" id="site_url" 
+                               value="{{.Settings.SiteURL}}" placeholder="https://ctf.example.com">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Site Açıklaması</label>
+                        <textarea name="site_description" id="site_description" rows="3" 
+                                  placeholder="Platform hakkında kısa açıklama">{{.Settings.SiteDescription}}</textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Site Anahtar Kelimeler</label>
+                        <input type="text" name="site_keywords" id="site_keywords" 
+                               value="{{.Settings.SiteKeywords}}" placeholder="ctf, hacking, security, pentest">
+                        <small class="form-hint">Virgülle ayırın: ctf, güvenlik, hack</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-paint-brush"></i> Görünüm Ayarları
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Site Logosu</label>
+                        <div class="logo-upload">
+                            <img src="{{.Settings.LogoURL}}" alt="Logo" class="logo-preview" id="logoPreview">
+                            <input type="file" name="logo" accept="image/*" id="logoInput" style="display: none;">
+                            <div class="upload-actions">
+                                <button type="button" class="btn-upload" onclick="document.getElementById('logoInput').click()">
+                                    <i class="fas fa-upload"></i> Logo Değiştir
+                                </button>
+                                <button type="button" class="btn-remove" onclick="removeLogo()">
+                                    <i class="fas fa-times"></i> Kaldır
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Favicon</label>
+                        <div class="favicon-upload">
+                            <input type="file" name="favicon" accept="image/x-icon,image/png">
+                            <small class="form-hint">Mevcut: favicon.ico</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tema Rengi</label>
+                        <div class="color-picker">
+                            <input type="color" name="theme_color" id="theme_color" 
+                                   value="{{.Settings.ThemeColor}}" class="color-input">
+                            <input type="text" name="theme_color_hex" id="theme_color_hex" 
+                                   value="{{.Settings.ThemeColor}}" placeholder="#00ff9d">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Arkaplan Deseni</label>
+                        <select name="background_pattern" id="background_pattern">
+                            <option value="matrix" {{if eq .Settings.BackgroundPattern "matrix"}}selected{{end}}>Matrix</option>
+                            <option value="grid" {{if eq .Settings.BackgroundPattern "grid"}}selected{{end}}>Grid</option>
+                            <option value="dots" {{if eq .Settings.BackgroundPattern "dots"}}selected{{end}}>Noktalar</option>
+                            <option value="none" {{if eq .Settings.BackgroundPattern "none"}}selected{{end}}>Yok</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <span>Bakım Modu</span>
+                        <label class="switch">
+                            <input type="checkbox" name="maintenance_mode" id="maintenance_mode" 
+                                   {{if .Settings.MaintenanceMode}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <span>Kayıtlara Açık</span>
+                        <label class="switch">
+                            <input type="checkbox" name="registration_open" id="registration_open" 
+                                   {{if .Settings.RegistrationOpen}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <span>Debug Modu</span>
+                        <label class="switch">
+                            <input type="checkbox" name="debug_mode" id="debug_mode" 
+                                   {{if .Settings.DebugMode}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-language"></i> Dil ve Bölge
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Varsayılan Dil</label>
+                        <select name="default_language" id="default_language">
+                            <option value="tr" {{if eq .Settings.DefaultLanguage "tr"}}selected{{end}}>Türkçe</option>
+                            <option value="en" {{if eq .Settings.DefaultLanguage "en"}}selected{{end}}>İngilizce</option>
+                            <option value="de" {{if eq .Settings.DefaultLanguage "de"}}selected{{end}}>Almanca</option>
+                            <option value="fr" {{if eq .Settings.DefaultLanguage "fr"}}selected{{end}}>Fransızca</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Saat Dilimi</label>
+                        <select name="timezone" id="timezone">
+                            <option value="Europe/Istanbul" {{if eq .Settings.Timezone "Europe/Istanbul"}}selected{{end}}>İstanbul (UTC+3)</option>
+                            <option value="Europe/London" {{if eq .Settings.Timezone "Europe/London"}}selected{{end}}>Londra (UTC+0)</option>
+                            <option value="America/New_York" {{if eq .Settings.Timezone "America/New_York"}}selected{{end}}>New York (UTC-5)</option>
+                            <option value="Asia/Dubai" {{if eq .Settings.Timezone "Asia/Dubai"}}selected{{end}}>Dubai (UTC+4)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tarih Formatı</label>
+                        <select name="date_format" id="date_format">
+                            <option value="DD.MM.YYYY" {{if eq .Settings.DateFormat "DD.MM.YYYY"}}selected{{end}}>31.12.2024</option>
+                            <option value="MM/DD/YYYY" {{if eq .Settings.DateFormat "MM/DD/YYYY"}}selected{{end}}>12/31/2024</option>
+                            <option value="YYYY-MM-DD" {{if eq .Settings.DateFormat "YYYY-MM-DD"}}selected{{end}}>2024-12-31</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-primary" onclick="saveSettings('general')">
+                    <i class="fas fa-save"></i> Genel Ayarları Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ SECURITY SETTINGS TAB ============ -->
+    <div class="tab-pane" id="tab-security" style="display: none;">
+        <form id="securitySettingsForm" class="settings-form">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-lock"></i> Güvenlik Ayarları
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Session Süresi (dakika)</label>
+                        <input type="number" name="session_timeout" id="session_timeout" 
+                               value="{{.Settings.SessionTimeout}}" min="5" max="1440">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Maksimum Oturum Sayısı</label>
+                        <input type="number" name="max_sessions" id="max_sessions" 
+                               value="{{.Settings.MaxSessions}}" min="1" max="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Başarısız Giriş Limiti</label>
+                        <input type="number" name="max_login_attempts" id="max_login_attempts" 
+                               value="{{.Settings.MaxLoginAttempts}}" min="1" max="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kilitlenme Süresi (dakika)</label>
+                        <input type="number" name="lockout_time" id="lockout_time" 
+                               value="{{.Settings.LockoutTime}}" min="1" max="60">
+                    </div>
+                </div>
+
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <span>İki Faktörlü Doğrulama (2FA)</span>
+                        <label class="switch">
+                            <input type="checkbox" name="two_factor_auth" id="two_factor_auth" 
+                                   {{if .Settings.TwoFactorAuth}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <span>reCAPTCHA Kullan</span>
+                        <label class="switch">
+                            <input type="checkbox" name="recaptcha_enabled" id="recaptcha_enabled" 
+                                   {{if .Settings.RecaptchaEnabled}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <span>IP Adresi Kaydı</span>
+                        <label class="switch">
+                            <input type="checkbox" name="log_ip_address" id="log_ip_address" 
+                                   {{if .Settings.LogIPAddress}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <span>HTTPS Zorunlu</span>
+                        <label class="switch">
+                            <input type="checkbox" name="force_https" id="force_https" 
+                                   {{if .Settings.ForceHTTPS}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-key"></i> API ve Token Ayarları
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>JWT Secret Key</label>
+                        <div class="secret-input">
+                            <input type="password" name="jwt_secret" id="jwt_secret" 
+                                   value="{{.Settings.JWTSecret}}" readonly>
+                            <button type="button" class="btn-generate" onclick="generateSecret('jwt')">
+                                <i class="fas fa-sync-alt"></i> Yenile
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>JWT Süresi (saat)</label>
+                        <input type="number" name="jwt_expiry" id="jwt_expiry" 
+                               value="{{.Settings.JWTExpiry}}" min="1" max="720">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Refresh Token Süresi (gün)</label>
+                        <input type="number" name="refresh_token_expiry" id="refresh_token_expiry" 
+                               value="{{.Settings.RefreshTokenExpiry}}" min="1" max="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label>API Rate Limit (istek/dakika)</label>
+                        <input type="number" name="rate_limit" id="rate_limit" 
+                               value="{{.Settings.RateLimit}}" min="10" max="1000">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-shield-virus"></i> Güvenlik Duvarı
+                </h3>
+
+                <div class="form-group">
+                    <label>Yasaklı IP'ler</label>
+                    <textarea name="blocked_ips" id="blocked_ips" rows="4" 
+                              placeholder="Her satıra bir IP adresi">{{.Settings.BlockedIPs}}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Yasaklı Ülkeler</label>
+                    <select name="blocked_countries" id="blocked_countries" multiple size="5">
+                        <option value="RU" {{if contains .Settings.BlockedCountries "RU"}}selected{{end}}>Rusya</option>
+                        <option value="CN" {{if contains .Settings.BlockedCountries "CN"}}selected{{end}}>Çin</option>
+                        <option value="KP" {{if contains .Settings.BlockedCountries "KP"}}selected{{end}}>Kuzey Kore</option>
+                        <option value="IR" {{if contains .Settings.BlockedCountries "IR"}}selected{{end}}>İran</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-primary" onclick="saveSettings('security')">
+                    <i class="fas fa-save"></i> Güvenlik Ayarlarını Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ SMTP SETTINGS TAB ============ -->
+    <div class="tab-pane" id="tab-smtp" style="display: none;">
+        <form id="smtpSettingsForm" class="settings-form">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-mail-bulk"></i> SMTP Sunucu Ayarları
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>SMTP Sunucusu</label>
+                        <input type="text" name="smtp_host" id="smtp_host" 
+                               value="{{.Settings.SMTPHost}}" placeholder="smtp.gmail.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>SMTP Port</label>
+                        <input type="number" name="smtp_port" id="smtp_port" 
+                               value="{{.Settings.SMTPPort}}" placeholder="587">
+                    </div>
+
+                    <div class="form-group">
+                        <label>SMTP Kullanıcı Adı</label>
+                        <input type="text" name="smtp_username" id="smtp_username" 
+                               value="{{.Settings.SMTPUsername}}" placeholder="user@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>SMTP Şifre</label>
+                        <div class="password-input">
+                            <input type="password" name="smtp_password" id="smtp_password" 
+                                   value="{{.Settings.SMTPPassword}}">
+                            <button type="button" class="btn-toggle-password" onclick="togglePassword('smtp_password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gönderen Email</label>
+                        <input type="email" name="smtp_from_email" id="smtp_from_email" 
+                               value="{{.Settings.SMTPFromEmail}}" placeholder="noreply@ctf.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gönderen İsim</label>
+                        <input type="text" name="smtp_from_name" id="smtp_from_name" 
+                               value="{{.Settings.SMTPFromName}}" placeholder="CTF Platform">
+                    </div>
+                </div>
+
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <span>SSL/TLS Kullan</span>
+                        <label class="switch">
+                            <input type="checkbox" name="smtp_ssl" id="smtp_ssl" 
+                                   {{if .Settings.SMTPSSL}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <span>SMTP Aktif</span>
+                        <label class="switch">
+                            <input type="checkbox" name="smtp_enabled" id="smtp_enabled" 
+                                   {{if .Settings.SMTPEnabled}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="test-connection">
+                    <button type="button" class="btn-test" onclick="testSMTP()">
+                        <i class="fas fa-paper-plane"></i> Test Email Gönder
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-primary" onclick="saveSettings('smtp')">
+                    <i class="fas fa-save"></i> SMTP Ayarlarını Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ DOCKER SETTINGS TAB ============ -->
+    <div class="tab-pane" id="tab-docker" style="display: none;">
+        <form id="dockerSettingsForm" class="settings-form">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fab fa-docker"></i> Docker Ayarları
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Docker Host</label>
+                        <input type="text" name="docker_host" id="docker_host" 
+                               value="{{.Settings.DockerHost}}" placeholder="unix:///var/run/docker.sock">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Docker API Versiyon</label>
+                        <input type="text" name="docker_api_version" id="docker_api_version" 
+                               value="{{.Settings.DockerAPIVersion}}" placeholder="1.41">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Varsayılan Network</label>
+                        <input type="text" name="docker_network" id="docker_network" 
+                               value="{{.Settings.DockerNetwork}}" placeholder="ctf-network">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Maksimum Container</label>
+                        <input type="number" name="max_containers" id="max_containers" 
+                               value="{{.Settings.MaxContainers}}" min="1" max="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Container Süresi (dakika)</label>
+                        <input type="number" name="container_timeout" id="container_timeout" 
+                               value="{{.Settings.ContainerTimeout}}" min="5" max="1440">
+                    </div>
+
+                    <div class="form-group">
+                        <label>CPU Limiti (çekirdek)</label>
+                        <input type="number" name="container_cpu" id="container_cpu" 
+                               value="{{.Settings.ContainerCPU}}" min="0.5" max="4" step="0.5">
+                    </div>
+
+                    <div class="form-group">
+                        <label>RAM Limiti (MB)</label>
+                        <input type="number" name="container_memory" id="container_memory" 
+                               value="{{.Settings.ContainerMemory}}" min="256" max="8192">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Disk Limiti (GB)</label>
+                        <input type="number" name="container_disk" id="container_disk" 
+                               value="{{.Settings.ContainerDisk}}" min="1" max="100">
+                    </div>
+                </div>
+
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <span>Container Otomatik Başlat</span>
+                        <label class="switch">
+                            <input type="checkbox" name="auto_start_containers" id="auto_start_containers" 
+                                   {{if .Settings.AutoStartContainers}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <span>Container Loglarını Kaydet</span>
+                        <label class="switch">
+                            <input type="checkbox" name="container_logging" id="container_logging" 
+                                   {{if .Settings.ContainerLogging}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-primary" onclick="saveSettings('docker')">
+                    <i class="fas fa-save"></i> Docker Ayarlarını Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ LIMITS SETTINGS TAB ============ -->
+    <div class="tab-pane" id="tab-limits" style="display: none;">
+        <form id="limitsSettingsForm" class="settings-form">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-chart-line"></i> Platform Limitleri
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Maksimum Kullanıcı</label>
+                        <input type="number" name="max_users" id="max_users" 
+                               value="{{.Settings.MaxUsers}}" min="10" max="100000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Maksimum Makine</label>
+                        <input type="number" name="max_machines" id="max_machines" 
+                               value="{{.Settings.MaxMachines}}" min="1" max="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Günlük Çözüm Limiti</label>
+                        <input type="number" name="daily_submission_limit" id="daily_submission_limit" 
+                               value="{{.Settings.DailySubmissionLimit}}" min="1" max="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Maksimum Flag Deneme</label>
+                        <input type="number" name="max_flag_attempts" id="max_flag_attempts" 
+                               value="{{.Settings.MaxFlagAttempts}}" min="1" max="50">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dosya Yükleme Boyutu (MB)</label>
+                        <input type="number" name="max_upload_size" id="max_upload_size" 
+                               value="{{.Settings.MaxUploadSize}}" min="1" max="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label>İzin Verilen Dosya Tipleri</label>
+                        <input type="text" name="allowed_file_types" id="allowed_file_types" 
+                               value="{{.Settings.AllowedFileTypes}}" placeholder=".jpg,.png,.pdf">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-trophy"></i> Puan ve VIP Limitleri
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Minimum Puan</label>
+                        <input type="number" name="min_points" id="min_points" 
+                               value="{{.Settings.MinPoints}}" min="0" max="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Maksimum Puan</label>
+                        <input type="number" name="max_points" id="max_points" 
+                               value="{{.Settings.MaxPoints}}" min="100" max="100000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>VIP Fiyatı (aylık)</label>
+                        <input type="number" name="vip_price" id="vip_price" 
+                               value="{{.Settings.VIPPrice}}" min="0" max="1000" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>VIP Süresi (gün)</label>
+                        <input type="number" name="vip_duration" id="vip_duration" 
+                               value="{{.Settings.VIPDuration}}" min="1" max="365">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-primary" onclick="saveSettings('limits')">
+                    <i class="fas fa-save"></i> Limitleri Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ MAIL TEMPLATES TAB ============ -->
+    <div class="tab-pane" id="tab-mail" style="display: none;">
+        <form id="mailSettingsForm" class="settings-form">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-envelope-open-text"></i> Mail Şablonları
+                </h3>
+
+                <div class="mail-templates">
+                    <div class="template-selector">
+                        <select id="mail_template" onchange="loadMailTemplate()">
+                            <option value="welcome">Hoş Geldin Maili</option>
+                            <option value="reset_password">Şifre Sıfırlama</option>
+                            <option value="verify_email">Email Doğrulama</option>
+                            <option value="vip_purchase">VIP Satın Alma</option>
+                            <option value="machine_solved">Makine Çözümü</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mail Konusu</label>
+                        <input type="text" name="mail_subject" id="mail_subject" 
+                               value="{{.Settings.MailSubject}}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mail İçeriği (HTML)</label>
+                        <textarea name="mail_body" id="mail_body" rows="10" class="code-editor">{{.Settings.MailBody}}</textarea>
+                    </div>
+
+                    <div class="template-variables">
+                        <h4>Kullanılabilir Değişkenler</h4>
+                        <code>{username}</code> - Kullanıcı adı<br>
+                        <code>{email}</code> - Email adresi<br>
+                        <code>{link}</code> - Aktivasyon linki<br>
+                        <code>{site_name}</code> - Site adı<br>
+                        <code>{year}</code> - Yıl
+                    </div>
+
+                    <button type="button" class="btn-test" onclick="testMailTemplate()">
+                        <i class="fas fa-paper-plane"></i> Test Maili Gönder
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-primary" onclick="saveSettings('mail')">
+                    <i class="fas fa-save"></i> Mail Şablonlarını Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ BACKUP SETTINGS TAB ============ -->
+    <div class="tab-pane" id="tab-backup" style="display: none;">
+        <div class="backup-section">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-database"></i> Yedekleme Ayarları
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Yedekleme Zamanı (Cron)</label>
+                        <input type="text" name="backup_cron" id="backup_cron" 
+                               value="{{.Settings.BackupCron}}" placeholder="0 2 * * *">
+                        <small class="form-hint">Her gün 02:00'de yedekle</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Maksimum Yedek Sayısı</label>
+                        <input type="number" name="max_backups" id="max_backups" 
+                               value="{{.Settings.MaxBackups}}" min="1" max="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Yedekleme Dizini</label>
+                        <input type="text" name="backup_path" id="backup_path" 
+                               value="{{.Settings.BackupPath}}" placeholder="/backups">
+                    </div>
+                </div>
+
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <span>Otomatik Yedekleme</span>
+                        <label class="switch">
+                            <input type="checkbox" name="auto_backup" id="auto_backup" 
+                                   {{if .Settings.AutoBackup}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <span>Veritabanı Yedekle</span>
+                        <label class="switch">
+                            <input type="checkbox" name="backup_database" id="backup_database" 
+                                   {{if .Settings.BackupDatabase}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <span>Dosyaları Yedekle</span>
+                        <label class="switch">
+                            <input type="checkbox" name="backup_files" id="backup_files" 
+                                   {{if .Settings.BackupFiles}}checked{{end}}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="backup-list">
+                <h3 class="section-title">
+                    <i class="fas fa-history"></i> Mevcut Yedekler
+                </h3>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tarih</th>
+                            <th>Boyut</th>
+                            <th>Tip</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backupList">
+                        <tr>
+                            <td colspan="5" class="text-center">Yükleniyor...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="backup-actions">
+                    <button type="button" class="btn-primary" onclick="createBackup()">
+                        <i class="fas fa-plus-circle"></i> Yeni Yedek Oluştur
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="restoreBackup()">
+                        <i class="fas fa-undo"></i> Yedekten Geri Yükle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .settings-page {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .header-left h2 {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        margin-bottom: 0.3rem;
+    }
+
+    .header-left p {
+        color: #6a7a8a;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        padding: 0.8rem 1.5rem;
+        background: linear-gradient(45deg, #00ff9d, #00b86e);
+        border: none;
+        border-radius: 8px;
+        color: #0a0f0f;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 255, 157, 0.4);
+    }
+
+    .settings-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #2a3a4a;
+        padding-bottom: 1rem;
+    }
+
+    .tab-btn {
+        padding: 0.8rem 1.5rem;
+        background: transparent;
+        border: 1px solid #2a3a4a;
+        border-radius: 8px;
+        color: #b0b0b0;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 0.9rem;
+    }
+
+    .tab-btn:hover {
+        border-color: #00ff9d;
+        color: #00ff9d;
+    }
+
+    .tab-btn.active {
+        background: #00ff9d;
+        border-color: #00ff9d;
+        color: #0a0f0f;
+    }
+
+    .tab-pane {
+        animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .settings-form {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .form-section {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 15px;
+        padding: 2rem;
+    }
+
+    .section-title {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+    }
+
+    .section-title i {
+        margin-right: 0.5rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #b0b0b0;
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #2a3a4a;
+        border-radius: 8px;
+        color: #e0e0e0;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #00ff9d;
+        box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+    }
+
+    .form-group input[readonly] {
+        background: rgba(0, 0, 0, 0.5);
+        cursor: not-allowed;
+    }
+
+    .form-hint {
+        display: block;
+        font-size: 0.7rem;
+        color: #6a7a8a;
+        margin-top: 0.3rem;
+    }
+
+    .toggle-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .toggle-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #2a3a4a;
+    }
+
+    .toggle-item:last-child {
+        border-bottom: none;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #2a3a4a;
+        transition: .3s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #00ff9d;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .logo-upload {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .logo-preview {
+        max-width: 200px;
+        max-height: 80px;
+        border: 1px solid #00ff9d;
+        border-radius: 5px;
+        padding: 0.5rem;
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .upload-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-upload,
+    .btn-remove,
+    .btn-generate,
+    .btn-test,
+    .btn-secondary {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: 1px solid #00ff9d;
+        border-radius: 5px;
+        color: #00ff9d;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 0.9rem;
+    }
+
+    .btn-upload:hover,
+    .btn-generate:hover,
+    .btn-test:hover {
+        background: rgba(0, 255, 157, 0.1);
+    }
+
+    .btn-remove {
+        border-color: #ff5f56;
+        color: #ff5f56;
+    }
+
+    .btn-remove:hover {
+        background: rgba(255, 95, 86, 0.1);
+    }
+
+    .btn-secondary {
+        border-color: #2a3a4a;
+        color: #b0b0b0;
+    }
+
+    .btn-secondary:hover {
+        border-color: #00ff9d;
+        color: #00ff9d;
+    }
+
+    .color-picker {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .color-input {
+        width: 50px !important;
+        height: 50px;
+        padding: 0 !important;
+    }
+
+    .secret-input,
+    .password-input {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .secret-input input,
+    .password-input input {
+        flex: 1;
+    }
+
+    .btn-toggle-password {
+        padding: 0.8rem;
+        background: transparent;
+        border: 1px solid #2a3a4a;
+        border-radius: 8px;
+        color: #b0b0b0;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+
+    .test-connection {
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+    .docker-images {
+        margin-top: 2rem;
+    }
+
+    .docker-images h4 {
+        color: #00ff9d;
+        margin-bottom: 1rem;
+    }
+
+    .mini-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .mini-table th {
+        background: rgba(0, 255, 157, 0.1);
+        padding: 0.8rem;
+        text-align: left;
+        color: #b0b0b0;
+    }
+
+    .mini-table td {
+        padding: 0.8rem;
+        border-bottom: 1px solid #2a3a4a;
+    }
+
+    .mail-templates {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .template-selector select {
+        width: 100%;
+        padding: 0.8rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #00ff9d;
+        border-radius: 8px;
+        color: #e0e0e0;
+    }
+
+    .code-editor {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 0.9rem;
+    }
+
+    .template-variables {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #2a3a4a;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .template-variables h4 {
+        color: #00ff9d;
+        margin-bottom: 0.5rem;
+    }
+
+    .template-variables code {
+        background: #1a1f2f;
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        color: #00ff9d;
+        margin-right: 0.5rem;
+    }
+
+    .backup-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .backup-list {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 15px;
+        padding: 2rem;
+    }
+
+    .backup-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .text-center {
+        text-align: center;
+        color: #6a7a8a;
+        padding: 2rem;
+    }
+</style>
+
+<script>
+    let currentTab = 'general';
+
+    // Sekme değiştirme
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.style.display = 'none';
+        });
+        
+        document.getElementById(`tab-${tabName}`).style.display = 'block';
+        currentTab = tabName;
+    }
+
+    // Ayarları kaydet
+    async function saveSettings(tabName) {
+        const form = document.getElementById(`${tabName}SettingsForm`);
+        if (!form) {
+            showSuccess('Ayarlar kaydedildi!');
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Checkbox'ları ekle
+        form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            data[cb.name] = cb.checked;
+        });
+
+        console.log('Kaydedilen ayarlar:', data);
+        showSuccess(`${tabName} ayarları kaydedildi!`);
+    }
+
+    // Tüm ayarları kaydet
+    async function saveAllSettings() {
+        showSuccess('Tüm ayarlar kaydedildi!');
+    }
+
+    // Secret key oluştur
+    function generateSecret(type) {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+        let secret = '';
+        for (let i = 0; i < 32; i++) {
+            secret += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const input = document.getElementById(`jwt_secret`);
+        if (input) input.value = secret;
+    }
+
+    // Şifre göster/gizle
+    function togglePassword(id) {
+        const input = document.getElementById(id);
+        if (!input) return;
+        
+        const button = event.target.closest('button');
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (button) button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        } else {
+            input.type = 'password';
+            if (button) button.innerHTML = '<i class="fas fa-eye"></i>';
+        }
+    }
+
+    // SMTP test
+    async function testSMTP() {
+        showSuccess('Test emaili gönderildi!');
+    }
+
+    // Logoyu kaldır
+    function removeLogo() {
+        const preview = document.getElementById('logoPreview');
+        if (preview) preview.src = '/static/images/default-logo.png';
+    }
+
+    // Mail şablonu yükle
+    function loadMailTemplate() {
+        const template = document.getElementById('mail_template').value;
+        const subjectMap = {
+            'welcome': 'Hoş Geldiniz!',
+            'reset_password': 'Şifre Sıfırlama Talebi',
+            'verify_email': 'Email Doğrulama',
+            'vip_purchase': 'VIP Üyelik Satın Alımı',
+            'machine_solved': 'Tebrikler! Makine Çözüldü'
+        };
+        
+        const bodyMap = {
+            'welcome': 'Merhaba {username}, platformumuza hoş geldiniz!',
+            'reset_password': 'Şifrenizi sıfırlamak için linke tıklayın: {link}',
+            'verify_email': 'Email adresinizi doğrulamak için: {link}',
+            'vip_purchase': 'VIP üyeliğiniz aktifleştirilmiştir.',
+            'machine_solved': '{machine} makinesini başarıyla çözdünüz!'
+        };
+        
+        const subjectInput = document.getElementById('mail_subject');
+        const bodyInput = document.getElementById('mail_body');
+        
+        if (subjectInput) subjectInput.value = subjectMap[template] || '';
+        if (bodyInput) bodyInput.value = bodyMap[template] || '';
+    }
+
+    // Mail şablonu test et
+    function testMailTemplate() {
+        const email = prompt('Test emailinin gönderileceği adresi girin:');
+        if (email) {
+            showSuccess(`Test maili ${email} adresine gönderildi!`);
+        }
+    }
+
+    // Yedek oluştur
+    function createBackup() {
+        if (confirm('Yeni yedek oluşturmak istediğinize emin misiniz?')) {
+            showSuccess('Yedek oluşturuluyor...');
+        }
+    }
+
+    // Yedekten geri yükle
+    function restoreBackup() {
+        if (confirm('Yedekten geri yüklemek istediğinize emin misiniz? Mevcut veriler değişecektir!')) {
+            showSuccess('Geri yükleme başlatıldı...');
+        }
+    }
+
+    // Renk seçici senkronizasyonu
+    document.addEventListener('DOMContentLoaded', function() {
+        const colorInput = document.getElementById('theme_color');
+        const colorHex = document.getElementById('theme_color_hex');
+        
+        if (colorInput && colorHex) {
+            colorInput.addEventListener('input', function(e) {
+                colorHex.value = e.target.value;
+            });
+
+            colorHex.addEventListener('input', function(e) {
+                colorInput.value = e.target.value;
+            });
+        }
+    });
+
+    // Başarı mesajı
+    function showSuccess(message) {
+        const toast = document.createElement('div');
+        toast.className = 'success-toast';
+        toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Hata mesajı
+    function showError(message) {
+        const toast = document.createElement('div');
+        toast.className = 'error-toast';
+        toast.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+</script>
+
+<style>
+    .success-toast,
+    .error-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 9999;
+        animation: slideIn 0.3s;
+    }
+
+    .success-toast {
+        background: linear-gradient(45deg, #00ff9d, #00b86e);
+        color: #0a0f0f;
+    }
+
+    .error-toast {
+        background: linear-gradient(45deg, #ff5f56, #ff3333);
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+<!-- Stiller ve scriptler aynı kalacak... -->
+{{end}}

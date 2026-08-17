@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Matrix efekti */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .matrix-bg::before {
+            content: "01001100 01100101 01100001 01100100 01100101 01110010 01100010 01101111 01100001 01110010 01100100 00100000 01000011 01010100 01000110 00100000 01010010 01100001 01101110 01101011 01101001 01101110 01100111";
+            position: absolute;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            animation: matrix 20s linear infinite;
+        }
+
+        @keyframes matrix {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(100%);
+            }
+        }
+
+        /* ============================================
+           ANA NAVBAR STİLLERİ (ORTak)
+           ============================================ */
+        .navbar {
+            background: rgba(10, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00ff9d;
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00ff9d;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #00ff9d;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-points {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #00ff9d;
+            padding: 0.3rem 1rem;
+            border-radius: 5px;
+            color: #00ff9d;
+            font-weight: 600;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #00ff9d;
+            cursor: pointer;
+            transition: 0.3s;
+            object-fit: cover;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+        }
+
+        /* Buton Stilleri */
+        .login-btn {
+            background: transparent;
+            border: 2px solid #00ff9d;
+            color: #00ff9d;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .login-btn:hover {
+            background: #00ff9d;
+            color: #0a0f0f;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .register-btn {
+            background: #00ff9d;
+            border: none;
+            color: #0a0f0f;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .register-btn:hover {
+            background: #00b86e;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+            transform: scale(1.05);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 80px auto 0;
+            padding: 2rem 5%;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.5rem;
+            color: #00ff9d;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title::before {
+            content: '[';
+            margin-right: 10px;
+            color: #00ff9d;
+        }
+
+        .page-title::after {
+            content: ']';
+            margin-left: 10px;
+            color: #00ff9d;
+        }
+
+        .page-subtitle {
+            color: #b0b0b0;
+            font-size: 1rem;
+        }
+
+        .podium-section {
+            margin-bottom: 3rem;
+        }
+
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .podium-item {
+            text-align: center;
+            position: relative;
+            animation: podiumAppear 0.5s ease-out;
+        }
+
+        @keyframes podiumAppear {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .podium-1 {
+            animation-delay: 0.2s;
+        }
+
+        .podium-2 {
+            animation-delay: 0.1s;
+        }
+
+        .podium-3 {
+            animation-delay: 0s;
+        }
+
+        .podium-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .podium-1 .podium-avatar {
+            border-color: #ffd700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+        }
+
+        .podium-2 .podium-avatar {
+            border-color: #c0c0c0;
+            box-shadow: 0 0 40px rgba(192, 192, 192, 0.3);
+        }
+
+        .podium-3 .podium-avatar {
+            border-color: #cd7f32;
+            box-shadow: 0 0 40px rgba(205, 127, 50, 0.3);
+        }
+
+        .podium-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .podium-crown {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+        }
+
+        .podium-1 .podium-crown {
+            color: #ffd700;
+        }
+
+        .podium-2 .podium-crown {
+            color: #c0c0c0;
+        }
+
+        .podium-3 .podium-crown {
+            color: #cd7f32;
+        }
+
+        .podium-name {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .podium-1 .podium-name {
+            color: #ffd700;
+        }
+
+        .podium-2 .podium-name {
+            color: #c0c0c0;
+        }
+
+        .podium-3 .podium-name {
+            color: #cd7f32;
+        }
+
+        .podium-points {
+            font-size: 1.1rem;
+            color: #00ff9d;
+        }
+
+        .podium-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #b0b0b0;
+        }
+
+        .filters-section {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters-title {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            position: relative;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.8rem 2rem 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            appearance: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #00ff9d;
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 1rem;
+            bottom: 0.8rem;
+            color: #6a7a8a;
+            pointer-events: none;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-filter {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(45deg, #00ff9d, #00b86e);
+            border: none;
+            border-radius: 5px;
+            color: #0a0f0f;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
+        }
+
+        .btn-reset {
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-reset:hover {
+            border-color: #ff5f56;
+            color: #ff5f56;
+        }
+
+        .leaderboard-section {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid #2a3a4a;
+        }
+
+        .leaderboard-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .leaderboard-stat {
+            text-align: center;
+        }
+
+        .leaderboard-stat-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.2rem;
+            color: #00ff9d;
+        }
+
+        .leaderboard-stat-label {
+            font-size: 0.7rem;
+            color: #6a7a8a;
+        }
+
+        .leaderboard-update {
+            color: #6a7a8a;
+            font-size: 0.9rem;
+        }
+
+        .leaderboard-update i {
+            color: #00ff9d;
+            margin-right: 0.5rem;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th {
+            text-align: left;
+            padding: 1rem 1.5rem;
+            color: #00ff9d;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            border-bottom: 2px solid #00ff9d;
+        }
+
+        .leaderboard-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #2a3a4a;
+        }
+
+        .leaderboard-table tbody tr {
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .leaderboard-table tbody tr:hover {
+            background: rgba(0, 255, 157, 0.1);
+        }
+
+        .rank-cell {
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 700;
+            width: 60px;
+        }
+
+        .rank-1 {
+            color: #ffd700;
+        }
+
+        .rank-2 {
+            color: #c0c0c0;
+        }
+
+        .rank-3 {
+            color: #cd7f32;
+        }
+
+        .rank-4,
+        .rank-5,
+        .rank-6,
+        .rank-7,
+        .rank-8,
+        .rank-9,
+        .rank-10 {
+            color: #00ff9d;
+        }
+
+        .rank-change {
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .rank-up {
+            color: #00ff9d;
+        }
+
+        .rank-down {
+            color: #ff5f56;
+        }
+
+        .rank-same {
+            color: #6a7a8a;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #00ff9d;
+            object-fit: cover;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .user-badge {
+            font-size: 0.7rem;
+            color: #6a7a8a;
+        }
+
+        .user-badge i {
+            color: #ffd700;
+            margin-right: 0.2rem;
+        }
+
+        .points-cell {
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 600;
+            color: #00ff9d;
+        }
+
+        .solved-cell {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .accuracy-cell {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .trend-indicator {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+        }
+
+        .vip-badge {
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            color: #0a0f0f;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 2rem 0;
+        }
+
+        .page-item {
+            list-style: none;
+        }
+
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .page-link:hover,
+        .page-link.active {
+            background: #00ff9d;
+            border-color: #00ff9d;
+            color: #0a0f0f;
+        }
+
+        .page-dots {
+            color: #6a7a8a;
+            padding: 0 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff9d;
+            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: #00ff9d;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-main {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+        }
+
+        .stat-change.positive {
+            color: #00ff9d;
+        }
+
+        .stat-change.negative {
+            color: #ff5f56;
+        }
+
+        .country-flag {
+            width: 20px;
+            height: 15px;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .footer {
+            background: rgba(10, 15, 20, 0.95);
+            padding: 3rem 5%;
+            margin-top: 4rem;
+            border-top: 1px solid #00ff9d;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin: 0.5rem 0;
+        }
+
+        .footer-section ul li a {
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .footer-section ul li a:hover {
+            color: #00ff9d;
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: #b0b0b0;
+            font-size: 1.5rem;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #00ff9d;
+            transform: translateY(-3px);
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 3rem;
+            color: #00ff9d;
+            font-size: 1.2rem;
+        }
+
+        .loading-spinner i {
+            margin-right: 0.5rem;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 3rem;
+            color: #ff5f56;
+            font-size: 1.2rem;
+        }
+
+        /* Academy Styles */
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.5rem;
+            color: #00ff9d;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            color: #b0b0b0;
+            font-size: 1.1rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 15px;
+            padding: 1rem 2rem;
+        }
+
+        .stat-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            color: #00ff9d;
+        }
+
+        .stat-label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .category-section {
+            margin-bottom: 3rem;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #2a3a4a;
+        }
+
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #00ff9d;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #00ff9d;
+        }
+
+        .category-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            color: #00ff9d;
+        }
+
+        .category-desc {
+            color: #6a7a8a;
+            margin-top: 0.3rem;
+        }
+
+        .category-progress {
+            margin-left: auto;
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .lesson-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: 0.3s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .lesson-card:hover {
+            border-color: #00ff9d;
+            transform: translateY(-3px);
+        }
+
+        .lesson-card.completed {
+            border-color: #00ff9d;
+            background: rgba(0, 255, 157, 0.05);
+        }
+
+        .lesson-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            color: #6a7a8a;
+        }
+
+        .lesson-meta i {
+            margin-right: 0.3rem;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .difficulty-beginner {
+            background: rgba(0, 255, 157, 0.2);
+            color: #00ff9d;
+        }
+
+        .difficulty-intermediate {
+            background: rgba(255, 189, 46, 0.2);
+            color: #ffbd2e;
+        }
+
+        .difficulty-advanced {
+            background: rgba(255, 95, 86, 0.2);
+            color: #ff5f56;
+        }
+
+        .difficulty-expert {
+            background: rgba(255, 0, 200, 0.2);
+            color: #ff00c8;
+        }
+
+        .completed-badge {
+            color: #00ff9d;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-login {
+            background: transparent;
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* =============================================
+           ÖZEL DIALOG SİSTEMİ (KULLANICI DOSTU)
+           ============================================= */
+        .hl-dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            animation: dlOverlayIn 0.15s ease;
+        }
+
+        .hl-dialog-overlay.open {
+            display: flex;
+        }
+
+        @keyframes dlOverlayIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .hl-dialog {
+            background: #0d1117;
+            border: 1px solid #2a3a4a;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 157, 0.08);
+            animation: dlIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        @keyframes dlIn {
+            from {
+                opacity: 0;
+                transform: scale(0.88) translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .hl-dialog-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 2rem 1rem;
+        }
+
+        .hl-dialog-icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .hl-dialog-icon-circle.warn {
+            background: rgba(255, 189, 46, 0.12);
+            border: 1px solid rgba(255, 189, 46, 0.35);
+            color: #ffbd2e;
+        }
+
+        .hl-dialog-icon-circle.info {
+            background: rgba(0, 184, 255, 0.1);
+            border: 1px solid rgba(0, 184, 255, 0.3);
+            color: #00b8ff;
+        }
+
+        .hl-dialog-icon-circle.danger {
+            background: rgba(255, 95, 86, 0.1);
+            border: 1px solid rgba(255, 95, 86, 0.3);
+            color: #ff5f56;
+        }
+
+        .hl-dialog-body {
+            padding: 0 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .hl-dialog-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.05rem;
+            color: #e0e0e0;
+            margin-bottom: 0.6rem;
+        }
+
+        .hl-dialog-message {
+            font-size: 0.9rem;
+            color: #8a9a8a;
+            line-height: 1.6;
+        }
+
+        .hl-dialog-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #1e2a38;
+            justify-content: flex-end;
+        }
+
+        .hl-dialog-actions.centered {
+            justify-content: center;
+        }
+
+        .hl-btn {
+            padding: 0.55rem 1.4rem;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .hl-btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a3a4a;
+            color: #8a9a8a;
+        }
+
+        .hl-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: #e0e0e0;
+            border-color: #3a4a5a;
+        }
+
+        .hl-btn-confirm {
+            background: rgba(255, 95, 86, 0.15);
+            border: 1px solid rgba(255, 95, 86, 0.4);
+            color: #ff5f56;
+        }
+
+        .hl-btn-confirm:hover {
+            background: rgba(255, 95, 86, 0.28);
+            box-shadow: 0 0 14px rgba(255, 95, 86, 0.25);
+        }
+
+        .hl-btn-ok {
+            background: rgba(0, 255, 157, 0.12);
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            color: #00ff9d;
+        }
+
+        .hl-btn-ok:hover {
+            background: rgba(0, 255, 157, 0.22);
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1f2f;
+            border: 1px solid #00ff9d;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            padding: 2rem;
+            position: relative;
+            animation: modalSlide 0.3s;
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #b0b0b0;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #ff5f56;
+        }
+
+        .modal-body {
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #e0e0e0;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00ff9d;
+        }
+
+        .btn-modal {
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-modal-primary {
+            background: linear-gradient(45deg, #00ff9d, #00b86e);
+            border: none;
+            color: #0a0f0f;
+        }
+
+        .btn-modal-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
+        }
+
+        .text-center {
+            text-align: center;
+            padding: 2rem;
+            color: #b0b0b0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .podium {
+                gap: 1rem;
+            }
+
+            .podium-avatar {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .podium {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .podium-item {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .leaderboard-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .leaderboard-table {
+                font-size: 0.9rem;
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 0.8rem;
+            }
+
+            .user-cell {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
+            }
+
+            .user-avatar-small {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: center;
+            }
+
+            .lessons-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .leaderboard-table th:nth-child(5),
+            .leaderboard-table td:nth-child(5),
+            .leaderboard-table th:nth-child(6),
+            .leaderboard-table td:nth-child(6) {
+                display: none;
+            }
+
+            .rank-change {
+                display: none;
+            }
+        }
+</style>
+</head>
+<body>
+    <!-- =============================================
+         ÖZEL DIALOG: ÇIKIŞ ONAY
+         ============================================= -->
+    <div class="hl-dialog-overlay" id="dlConfirm">
+        <div class="hl-dialog">
+            <div class="hl-dialog-icon">
+                <div class="hl-dialog-icon-circle warn">
+                    <i class="fas fa-right-from-bracket"></i>
+                </div>
+            </div>
+            <div class="hl-dialog-body">
+                <div class="hl-dialog-title">Çıkış Yap</div>
+                <div class="hl-dialog-message">Oturumunuzu kapatmak istediğinize emin misiniz?</div>
+            </div>
+            <div class="hl-dialog-actions">
+                <button class="hl-btn hl-btn-cancel" onclick="dlConfirmResolve(false)">
+                    <i class="fas fa-xmark"></i> Vazgeç
+                </button>
+                <button class="hl-btn hl-btn-confirm" onclick="dlConfirmResolve(true)">
+                    <i class="fas fa-right-from-bracket"></i> Çıkış Yap
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+    <div class="logo">
+        <i class="fas fa-skull"></i> HACKLAB
+    </div>
+    <div class="nav-links">
+        <a href="/">Ana Sayfa</a>
+        <a href="/machines">Makineler</a>
+        <a href="/academy">Akademi</a>
+        <a href="/leaderboard">Liderlik</a>
+        <a href="/vip">VIP</a>
+        {{if .IsAuthenticated}}
+        <a href="/profile/{{.User.Username}}">Profil</a>
+        <a href="/dashboard">Panel</a>
+        {{if .IsAdmin}}
+        <a href="/admin" style="color: #ffd700;">Admin</a>
+        {{end}}
+        <span class="user-points">{{.User.Points}} Puan</span>
+        <button class="login-btn" onclick="logout()">Çıkış</button>
+        {{else}}
+        <button class="login-btn" onclick="window.location.href='/login'">Giriş</button>
+        <button class="register-btn" onclick="window.location.href='/register'">Kayıt Ol</button>
+        {{end}}
+    </div>
+</nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1><i class="fas fa-graduation-cap"></i> Akademi</h1>
+            <p>Siber güvenlik alanında kendini geliştir, dersleri tamamla ve puan kazan!</p>
+        </div>
+
+        {{if .IsAuthenticated}}
+        <div class="stats-bar">
+            <div class="stat-item"><div class="stat-value">{{.TotalCompleted}}/{{.TotalLessons}}</div><div class="stat-label">Tamamlanan Ders</div></div>
+            <div class="stat-item"><div class="stat-value">{{.TotalPoints}}</div><div class="stat-label">Kazanılan Puan</div></div>
+            <div class="stat-item"><div class="stat-value">{{percentage .TotalCompleted .TotalLessons}}%</div><div class="stat-label">İlerleme</div></div>
+        </div>
+        {{end}}
+
+        {{range .Categories}}
+        <div class="category-section">
+            <div class="category-header">
+                <div class="category-icon"><i class="fas {{.Icon}}"></i></div>
+                <div>
+                    <div class="category-title">{{.Name}}</div>
+                    <div class="category-desc">{{.Description}}</div>
+                </div>
+                <div class="category-progress">{{.CompletedCount}}/{{.LessonCount}} ders tamamlandı</div>
+            </div>
+            <div class="lessons-grid">
+                {{range .Lessons}}
+                <a href="/academy/lesson/{{.Slug}}" class="lesson-card {{if .IsCompleted}}completed{{end}}">
+                    <div class="lesson-title">{{.Title}}</div>
+                    <div class="lesson-meta">
+                        <span><i class="fas fa-clock"></i> {{.Duration}} dk</span>
+                        <span><i class="fas fa-star"></i> {{.TotalPoints}} puan</span>
+                        <span class="difficulty-badge difficulty-{{difficultyClass .Difficulty}}">
+                        {{difficultyLabel .Difficulty}}
+                        </span>
+                    </div>
+                    {{if .IsCompleted}}
+                    <div class="completed-badge"><i class="fas fa-check-circle"></i> Tamamlandı</div>
+                    {{end}}
+                </a>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <script>
+        // =============================================
+        // DIALOG SİSTEMİ (KULLANICI DOSTU)
+        // =============================================
+        let _dlConfirmResolve = null;
+
+        function showConfirm(title, message, confirmLabel, confirmClass) {
+            const dialog = document.getElementById('dlConfirm');
+            const titleEl = document.querySelector('#dlConfirm .hl-dialog-title');
+            const msgEl = document.querySelector('#dlConfirm .hl-dialog-message');
+            const confirmBtn = document.querySelector('#dlConfirm .hl-btn-confirm');
+            
+            if (titleEl) titleEl.textContent = title || 'Emin misiniz?';
+            if (msgEl) msgEl.textContent = message || '';
+            if (confirmLabel && confirmBtn) confirmBtn.innerHTML = confirmLabel;
+            if (confirmClass && confirmBtn) confirmBtn.className = 'hl-btn ' + confirmClass;
+            
+            dialog.classList.add('open');
+            
+            return new Promise(resolve => {
+                _dlConfirmResolve = resolve;
+            });
+        }
+
+        function dlConfirmResolve(value) {
+            const dialog = document.getElementById('dlConfirm');
+            dialog.classList.remove('open');
+            if (_dlConfirmResolve) {
+                _dlConfirmResolve(value);
+                _dlConfirmResolve = null;
+            }
+        }
+
+        // ESC tuşu ile kapat
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const confirmDialog = document.getElementById('dlConfirm');
+                if (confirmDialog && confirmDialog.classList.contains('open')) {
+                    dlConfirmResolve(false);
+                }
+            }
+        });
+
+        // Overlay dışına tıklayınca kapat
+        document.getElementById('dlConfirm').addEventListener('click', function(e) {
+            if (e.target === this) dlConfirmResolve(false);
+        });
+
+        // =============================================
+        // LOGOUT FONKSİYONU
+        // =============================================
+        async function logout() {
+            const confirmed = await showConfirm(
+                'Çıkış Yap',
+                'Oturumunuzu kapatmak istediğinize emin misiniz?',
+                '<i class="fas fa-right-from-bracket"></i> Çıkış Yap',
+                'hl-btn-confirm'
+            );
+            
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/api/auth/logout', { method: 'POST' });
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    console.error('Logout failed');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Hata durumunda sayfayı yenile
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

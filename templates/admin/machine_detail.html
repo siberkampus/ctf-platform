@@ -1,0 +1,701 @@
+{{define "content"}}
+<div class="machine-detail-page" data-machine-id="{{.Machine.ID}}">
+    <!-- Header -->
+    <div class="detail-header">
+        <div class="header-left">
+            <a href="/admin/machines" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Geri Dön
+            </a>
+            <h1>Makine Detayı</h1>
+        </div>
+        <div class="header-actions">
+            <a href="/admin/machines/edit/{{.Machine.ID}}" class="btn-edit">
+                <i class="fas fa-edit"></i>
+                Düzenle
+            </a>
+        </div>
+    </div>
+
+    <!-- Makine Kartı -->
+    <div class="machine-card">
+        <div class="machine-image">
+            {{if .Machine.ImageURL}}
+            <img src="{{.Machine.ImageURL}}" alt="{{.Machine.Name}}">
+            {{else}}
+            <div class="no-image">
+                <i class="fas fa-server"></i>
+            </div>
+            {{end}}
+        </div>
+        <div class="machine-info">
+            <div class="machine-header">
+                <h2>{{.Machine.Name}}</h2>
+                <div class="badge-group">
+                    <span class="difficulty-badge {{.Machine.Difficulty}}">
+                        {{if eq .Machine.Difficulty "easy"}}Kolay
+                        {{else if eq .Machine.Difficulty "medium"}}Orta
+                        {{else if eq .Machine.Difficulty "hard"}}Zor
+                        {{else if eq .Machine.Difficulty "expert"}}Uzman
+                        {{else}}{{.Machine.Difficulty}}{{end}}
+                    </span>
+                    
+                    <span class="status-badge {{if .Machine.IsActive}}active{{else}}inactive{{end}}">
+                        {{if .Machine.IsActive}}Aktif{{else}}Pasif{{end}}
+                    </span>
+                    
+                    {{if .Machine.IsVIPOnly}}
+                    <span class="vip-badge">
+                        <i class="fas fa-crown"></i> VIP
+                    </span>
+                    {{end}}
+                </div>
+            </div>
+            
+            <div class="machine-meta">
+                <div class="meta-item">
+                    <i class="fas fa-star"></i>
+                    <span class="meta-label">Puan:</span>
+                    <span class="meta-value">{{.Machine.PointsReward}}</span>
+                </div>
+                
+                <div class="meta-item">
+                    <i class="fas fa-tag"></i>
+                    <span class="meta-label">ID:</span>
+                    <span class="meta-value">#{{.Machine.ID}}</span>
+                </div>
+            </div>
+            
+            <div class="machine-description">
+                <h3>Açıklama</h3>
+                <p>{{.Machine.Description}}</p>
+            </div>
+            
+            {{if .Machine.DockerImage}}
+            <div class="docker-info">
+                <h3>Docker Image</h3>
+                <div class="docker-image-box">
+                    <i class="fab fa-docker"></i>
+                    <code>{{.Machine.DockerImage}}</code>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    <!-- Sorular Bölümü -->
+    <div class="questions-section">
+        <div class="section-header">
+            <h3><i class="fas fa-question-circle"></i> Makine Soruları</h3>
+            <button class="btn-add" onclick="addQuestion({{.Machine.ID}})">
+                <i class="fas fa-plus"></i>
+                Yeni Soru
+            </button>
+        </div>
+        
+        <div class="questions-list" id="questionsList">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Sorular yükleniyor...
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.machine-detail-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Header */
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.back-btn {
+    color: #8a9aa8;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.back-btn:hover {
+    color: #00ff9d;
+}
+
+.header-left h1 {
+    color: #00ff9d;
+    font-size: 24px;
+    font-family: 'Share Tech Mono', monospace;
+    margin: 0;
+}
+
+.btn-edit {
+    background: transparent;
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+    background: #00ff9d;
+    color: #0a0f0f;
+}
+
+/* Machine Card */
+.machine-card {
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+}
+
+.machine-image {
+    background: #1e2a2a;
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #1e2a2a;
+}
+
+.machine-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image {
+    text-align: center;
+    color: #2a3a3a;
+}
+
+.no-image i {
+    font-size: 64px;
+    margin-bottom: 8px;
+}
+
+.machine-info {
+    padding: 24px;
+}
+
+.machine-header {
+    margin-bottom: 16px;
+}
+
+.machine-header h2 {
+    color: #00ff9d;
+    font-size: 28px;
+    margin: 0 0 12px 0;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.badge-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.difficulty-badge {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.difficulty-badge.easy {
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+}
+
+.difficulty-badge.medium {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid #ffc107;
+    color: #ffc107;
+}
+
+.difficulty-badge.hard {
+    background: rgba(255, 95, 86, 0.1);
+    border: 1px solid #ff5f56;
+    color: #ff5f56;
+}
+
+.difficulty-badge.expert {
+    background: rgba(156, 39, 176, 0.1);
+    border: 1px solid #9c27b0;
+    color: #9c27b0;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.status-badge.active {
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+}
+
+.status-badge.inactive {
+    background: rgba(255, 95, 86, 0.1);
+    border: 1px solid #ff5f56;
+    color: #ff5f56;
+}
+
+.vip-badge {
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: #0a0f0f;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.machine-meta {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #1e2a2a;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.meta-item i {
+    color: #00ff9d;
+    font-size: 14px;
+}
+
+.meta-label {
+    color: #8a9aa8;
+    font-size: 13px;
+}
+
+.meta-value {
+    color: #e0e0e0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.machine-description {
+    margin-bottom: 20px;
+}
+
+.machine-description h3 {
+    color: #00ff9d;
+    font-size: 16px;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.machine-description p {
+    color: #e0e0e0;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-line;
+}
+
+.docker-info h3 {
+    color: #00ff9d;
+    font-size: 16px;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.docker-image-box {
+    background: #1e2a2a;
+    border: 1px solid #2a3a3a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.docker-image-box i {
+    color: #00ff9d;
+    font-size: 20px;
+}
+
+.docker-image-box code {
+    color: #e0e0e0;
+    font-size: 13px;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* Questions Section */
+.questions-section {
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h3 {
+    color: #00ff9d;
+    font-size: 18px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-add {
+    background: transparent;
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background: #00ff9d;
+    color: #0a0f0f;
+}
+
+.questions-list {
+    min-height: 200px;
+}
+
+.loading-spinner {
+    text-align: center;
+    color: #8a9aa8;
+    padding: 40px;
+}
+
+.loading-spinner i {
+    margin-right: 8px;
+    color: #00ff9d;
+}
+
+/* Question Cards */
+.question-card {
+    background: #1e2a2a;
+    border: 1px solid #2a3a3a;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+.question-card:hover {
+    border-color: #00ff9d;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.question-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.question-order {
+    background: #00ff9d;
+    color: #0a0f0f;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.question-title h4 {
+    color: #e0e0e0;
+    font-size: 16px;
+    margin: 0;
+}
+
+.question-status {
+    display: flex;
+    gap: 8px;
+}
+
+.badge-active {
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.badge-inactive {
+    background: rgba(255, 95, 86, 0.1);
+    border: 1px solid #ff5f56;
+    color: #ff5f56;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.question-body {
+    margin-bottom: 12px;
+}
+
+.question-description {
+    color: #8a9aa8;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.question-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #5a6a6a;
+}
+
+.question-meta i {
+    margin-right: 4px;
+    color: #00ff9d;
+}
+
+.question-footer {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.question-action {
+    background: transparent;
+    border: 1px solid #2a3a3a;
+    color: #8a9aa8;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.question-action:hover {
+    border-color: #00ff9d;
+    color: #00ff9d;
+}
+
+.question-action.delete:hover {
+    border-color: #ff5f56;
+    color: #ff5f56;
+}
+
+.no-questions {
+    text-align: center;
+    padding: 40px;
+    color: #8a9aa8;
+}
+
+.no-questions i {
+    font-size: 48px;
+    color: #2a3a3a;
+    margin-bottom: 16px;
+}
+
+.no-questions p {
+    margin-bottom: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .machine-card {
+        grid-template-columns: 1fr;
+    }
+    
+    .machine-image {
+        border-right: none;
+        border-bottom: 1px solid #1e2a2a;
+        min-height: 200px;
+    }
+    
+    .machine-meta {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadQuestions();
+});
+
+function loadQuestions() {
+    const machineId = document.querySelector('.machine-detail-page').dataset.machineId;
+    const questionsList = document.getElementById('questionsList');
+    
+    fetch(`/admin/api/machines/${machineId}/questions`)
+        .then(response => response.json())
+        .then(questions => {
+            if (questions.length === 0) {
+                questionsList.innerHTML = `
+                    <div class="no-questions">
+                        <i class="fas fa-question-circle"></i>
+                        <p>Bu makineye ait soru bulunmuyor.</p>
+                        <button class="btn-add" onclick="addQuestion(${machineId})">
+                            <i class="fas fa-plus"></i>
+                            İlk Soruyu Ekle
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            questions.sort((a, b) => a.question_order - b.question_order).forEach(q => {
+                html += `
+                    <div class="question-card">
+                        <div class="question-header">
+                            <div class="question-title">
+                                <span class="question-order">${q.question_order}</span>
+                                <h4>${q.title}</h4>
+                            </div>
+                            <div class="question-status">
+                                <span class="${q.is_active ? 'badge-active' : 'badge-inactive'}">
+                                    ${q.is_active ? 'Aktif' : 'Pasif'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="question-body">
+                            <div class="question-description">${q.description || 'Açıklama yok'}</div>
+                            <div class="question-meta">
+                                <span><i class="fas fa-star"></i> ${q.points_reward} puan</span>
+                                ${q.hint ? `<span><i class="fas fa-lightbulb"></i> ${q.hint_cost} puan</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="question-footer">
+                            <button class="question-action" onclick="editQuestion(${q.id})" title="Düzenle">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="question-action" onclick="toggleQuestionStatus(${q.id})" title="Durum Değiştir">
+                                <i class="fas fa-power-off"></i>
+                            </button>
+                            <button class="question-action delete" onclick="deleteQuestion(${q.id})" title="Sil">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            questionsList.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            questionsList.innerHTML = `
+                <div class="no-questions" style="color: #ff5f56;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Sorular yüklenirken bir hata oluştu.</p>
+                </div>
+            `;
+        });
+}
+
+function addQuestion(machineId) {
+    window.location.href = `/admin/machines/${machineId}/questions/add`;
+}
+
+function editQuestion(questionId) {
+    window.location.href = `/admin/questions/${questionId}`;
+}
+
+function toggleQuestionStatus(questionId) {
+    if (confirm('Soru durumunu değiştirmek istediğinize emin misiniz?')) {
+        fetch(`/admin/api/questions/${questionId}/toggle-status`, { method: 'POST' })
+        .then(response => {
+            if (response.ok) {
+                loadQuestions();
+            } else {
+                alert('İşlem sırasında bir hata oluştu!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+
+function deleteQuestion(questionId) {
+    if (confirm('Bu soruyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
+        fetch(`/admin/api/questions/${questionId}`, { method: 'DELETE' })
+        .then(response => {
+            if (response.ok) {
+                loadQuestions();
+            } else {
+                alert('Silme işlemi sırasında bir hata oluştu!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+</script>
+{{end}}

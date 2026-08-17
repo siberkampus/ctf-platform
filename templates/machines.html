@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makineler - CTF HACK PLATFORMU</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .matrix-bg::before {
+            content: "01001101 01100001 01100011 01101000 01101001 01101110 01100101 01110011 00100000 01000011 01010100 01000110 00100000 01010000 01101100 01100001 01110100 01100110 01101111 01110010 01101101";
+            position: absolute;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            animation: matrix 20s linear infinite;
+        }
+
+        @keyframes matrix {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .navbar {
+            background: rgba(10, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00ff9d;
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00ff9d;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #00ff9d;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-points {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #00ff9d;
+            padding: 0.3rem 1rem;
+            border-radius: 5px;
+            color: #00ff9d;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #00ff9d;
+            cursor: pointer;
+            transition: 0.3s;
+            object-fit: cover;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 80px auto 0;
+            padding: 2rem 5%;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            color: #00ff9d;
+        }
+
+        .page-title::before {
+            content: '[';
+            margin-right: 10px;
+            color: #00ff9d;
+        }
+
+        .page-title::after {
+            content: ']';
+            margin-left: 10px;
+            color: #00ff9d;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 2rem;
+            background: rgba(20, 30, 40, 0.8);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            border: 1px solid #2a3a4a;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            color: #00ff9d;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #b0b0b0;
+        }
+
+        .filters-section {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters-title {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            position: relative;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .filter-select, .filter-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: #00ff9d;
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+        }
+
+        .filter-select {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 1rem;
+            bottom: 0.8rem;
+            color: #6a7a8a;
+            pointer-events: none;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6a7a8a;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .btn-filter {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(45deg, #00ff9d, #00b86e);
+            border: none;
+            border-radius: 5px;
+            color: #0a0f0f;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
+        }
+
+        .btn-reset {
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-reset:hover {
+            border-color: #ff5f56;
+            color: #ff5f56;
+        }
+
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .filter-tag {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #00ff9d;
+            border-radius: 20px;
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+            color: #00ff9d;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-tag i {
+            cursor: pointer;
+        }
+
+        .filter-tag i:hover {
+            color: #ff5f56;
+        }
+
+        .machines-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-count {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .results-count span {
+            color: #00ff9d;
+            font-weight: 600;
+        }
+
+        .sort-options {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sort-label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .sort-select {
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #e0e0e0;
+            appearance: none;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .view-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .view-btn.active {
+            background: #00ff9d;
+            color: #0a0f0f;
+            border-color: #00ff9d;
+        }
+
+        .machine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .machine-grid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .machine-card {
+            background: rgba(20, 30, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .machine-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff9d;
+            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.2);
+        }
+
+        .machine-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 157, 0.05), transparent);
+            transform: rotate(45deg);
+            animation: shine 6s infinite;
+            pointer-events: none;
+        }
+
+        .machine-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1;
+        }
+
+        .badge-vip {
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            color: #0a0f0f;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-new {
+            background: #00ff9d;
+            color: #0a0f0f;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .machine-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .machine-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #00ff9d;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #00ff9d;
+        }
+
+        .machine-title {
+            flex: 1;
+        }
+
+        .machine-name {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.3rem;
+            color: #00ff9d;
+            margin-bottom: 0.3rem;
+        }
+
+        .machine-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: #b0b0b0;
+        }
+
+        .machine-meta i {
+            color: #00ff9d;
+            margin-right: 0.3rem;
+        }
+
+        .machine-difficulty {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .difficulty-easy {
+            background: rgba(0, 255, 157, 0.2);
+            color: #00ff9d;
+            border: 1px solid #00ff9d;
+        }
+
+        .difficulty-medium {
+            background: rgba(255, 189, 46, 0.2);
+            color: #ffbd2e;
+            border: 1px solid #ffbd2e;
+        }
+
+        .difficulty-hard {
+            background: rgba(255, 95, 86, 0.2);
+            color: #ff5f56;
+            border: 1px solid #ff5f56;
+        }
+
+        .difficulty-expert {
+            background: rgba(255, 0, 200, 0.2);
+            color: #ff00c8;
+            border: 1px solid #ff00c8;
+        }
+
+        .machine-description {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .machine-progress {
+            margin-bottom: 1rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #b0b0b0;
+            margin-bottom: 0.3rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #2a3a4a;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff9d, #00b8ff);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .machine-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 1rem 0;
+            border-top: 1px solid #2a3a4a;
+            border-bottom: 1px solid #2a3a4a;
+        }
+
+        .machine-stat {
+            text-align: center;
+        }
+
+        .stat-icon {
+            color: #00ff9d;
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            color: #e0e0e0;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #6a7a8a;
+        }
+
+        .machine-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 3px;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            color: #b0b0b0;
+        }
+
+        .machine-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .machine-points {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            font-size: 1.2rem;
+        }
+
+        .machine-points small {
+            font-size: 0.7rem;
+            color: #6a7a8a;
+        }
+
+        .btn-start {
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            border: 1px solid #00ff9d;
+            border-radius: 5px;
+            color: #00ff9d;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            background: #00ff9d;
+            color: #0a0f0f;
+            transform: translateX(5px);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #6a7a8a;
+            color: #6a7a8a;
+        }
+
+        .btn-start i {
+            font-size: 0.9rem;
+        }
+
+        .machine-grid.list-view .machine-card {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 2rem;
+            padding: 1rem 1.5rem;
+        }
+
+        .machine-grid.list-view .machine-header {
+            margin-bottom: 0;
+            width: 250px;
+        }
+
+        .machine-grid.list-view .machine-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .machine-grid.list-view .machine-stats {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding: 0;
+            border: none;
+            margin-bottom: 0;
+            min-width: 200px;
+        }
+
+        .machine-grid.list-view .machine-footer {
+            width: auto;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 3rem 0;
+        }
+
+        .page-item {
+            list-style: none;
+        }
+
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .page-link:hover,
+        .page-link.active {
+            background: #00ff9d;
+            border-color: #00ff9d;
+            color: #0a0f0f;
+        }
+
+        .page-dots {
+            color: #6a7a8a;
+            padding: 0 0.5rem;
+        }
+
+        .footer {
+            background: rgba(10, 15, 20, 0.95);
+            padding: 3rem 5%;
+            margin-top: 4rem;
+            border-top: 1px solid #00ff9d;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin: 0.5rem 0;
+        }
+
+        .footer-section ul li a {
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .footer-section ul li a:hover {
+            color: #00ff9d;
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: #b0b0b0;
+            font-size: 1.5rem;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #00ff9d;
+            transform: translateY(-3px);
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1f2f;
+            border: 1px solid #00ff9d;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            padding: 2rem;
+            position: relative;
+            animation: modalSlide 0.3s;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(-50px); opacity: 0; }
+            to   { transform: translateY(0);     opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #b0b0b0;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.3s;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #ff5f56;
+        }
+
+        .modal-body {
+            margin-bottom: 2rem;
+        }
+
+        .modal-body p {
+            color: #b0b0b0;
+            margin-bottom: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-modal {
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-modal-primary {
+            background: linear-gradient(45deg, #00ff9d, #00b86e);
+            border: none;
+            color: #0a0f0f;
+        }
+
+        .btn-modal-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
+        }
+
+        .btn-modal-secondary {
+            background: transparent;
+            border: 1px solid #2a3a4a;
+            color: #b0b0b0;
+        }
+
+        .btn-modal-secondary:hover {
+            border-color: #ff5f56;
+            color: #ff5f56;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 3rem;
+            color: #00ff9d;
+            font-size: 1.2rem;
+        }
+
+        .loading-spinner i {
+            margin-right: 0.5rem;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 3rem;
+            color: #ff5f56;
+            font-size: 1.2rem;
+        }
+
+        /* ===== FORM ===== */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #e0e0e0;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00ff9d;
+        }
+
+        .login-btn {
+            background: transparent;
+            border: 2px solid #00ff9d;
+            color: #00ff9d;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background: #00ff9d;
+            color: #0a0f0f;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+        }
+
+        .register-btn {
+            background: #00ff9d;
+            border: none;
+            color: #0a0f0f;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .register-btn:hover {
+            background: #00b86e;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* Özel Dialog Sistem Stilleri */
+        .hl-dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            animation: dlOverlayIn 0.15s ease;
+        }
+
+        .hl-dialog-overlay.open {
+            display: flex;
+        }
+
+        @keyframes dlOverlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .hl-dialog {
+            background: #0d1117;
+            border: 1px solid #2a3a4a;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 157, 0.08);
+            animation: dlIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        @keyframes dlIn {
+            from { opacity: 0; transform: scale(0.88) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .hl-dialog-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 2rem 1rem;
+        }
+
+        .hl-dialog-icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .hl-dialog-icon-circle.warn {
+            background: rgba(255, 189, 46, 0.12);
+            border: 1px solid rgba(255, 189, 46, 0.35);
+            color: #ffbd2e;
+        }
+
+        .hl-dialog-icon-circle.info {
+            background: rgba(0, 184, 255, 0.1);
+            border: 1px solid rgba(0, 184, 255, 0.3);
+            color: #00b8ff;
+        }
+
+        .hl-dialog-icon-circle.danger {
+            background: rgba(255, 95, 86, 0.1);
+            border: 1px solid rgba(255, 95, 86, 0.3);
+            color: #ff5f56;
+        }
+
+        .hl-dialog-icon-circle.success {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            color: #00ff9d;
+        }
+
+        .hl-dialog-body {
+            padding: 0 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .hl-dialog-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.05rem;
+            color: #e0e0e0;
+            margin-bottom: 0.6rem;
+        }
+
+        .hl-dialog-message {
+            font-size: 0.9rem;
+            color: #8a9a8a;
+            line-height: 1.6;
+        }
+
+        .hl-dialog-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #1e2a38;
+            justify-content: flex-end;
+        }
+
+        .hl-dialog-actions.centered {
+            justify-content: center;
+        }
+
+        .hl-btn {
+            padding: 0.55rem 1.4rem;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .hl-btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a3a4a;
+            color: #8a9a8a;
+        }
+
+        .hl-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: #e0e0e0;
+            border-color: #3a4a5a;
+        }
+
+        .hl-btn-confirm {
+            background: rgba(255, 95, 86, 0.15);
+            border: 1px solid rgba(255, 95, 86, 0.4);
+            color: #ff5f56;
+        }
+
+        .hl-btn-confirm:hover {
+            background: rgba(255, 95, 86, 0.28);
+            box-shadow: 0 0 14px rgba(255, 95, 86, 0.25);
+        }
+
+        .hl-btn-ok {
+            background: rgba(0, 255, 157, 0.12);
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            color: #00ff9d;
+        }
+
+        .hl-btn-ok:hover {
+            background: rgba(0, 255, 157, 0.22);
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.2);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .machine-grid.list-view .machine-card {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .machine-grid.list-view .machine-info {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 1rem; }
+            .nav-links { display: none; }
+            .page-header { flex-direction: column; align-items: flex-start; }
+            .user-stats { width: 100%; justify-content: space-around; }
+            .filters-grid { grid-template-columns: 1fr; }
+            .machines-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .sort-options { width: 100%; justify-content: space-between; }
+            .machine-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .machine-footer { flex-direction: column; gap: 1rem; align-items: flex-start; }
+            .btn-start { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg"></div>
+
+    <!-- ÖZEL DIALOG: ONAY (confirm) -->
+    <div class="hl-dialog-overlay" id="dlConfirm">
+        <div class="hl-dialog">
+            <div class="hl-dialog-icon">
+                <div class="hl-dialog-icon-circle warn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+            <div class="hl-dialog-body">
+                <div class="hl-dialog-title" id="dlConfirmTitle">Onay</div>
+                <div class="hl-dialog-message" id="dlConfirmMsg">Bu işlemi onaylıyor musunuz?</div>
+            </div>
+            <div class="hl-dialog-actions">
+                <button class="hl-btn hl-btn-cancel" onclick="dlConfirmResolve(false)">
+                    <i class="fas fa-times"></i> Vazgeç
+                </button>
+                <button class="hl-btn hl-btn-confirm" id="dlConfirmBtn" onclick="dlConfirmResolve(true)">
+                    <i class="fas fa-check"></i> Onayla
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÖZEL DIALOG: BİLGİ / UYARI (alert) -->
+    <div class="hl-dialog-overlay" id="dlAlert">
+        <div class="hl-dialog">
+            <div class="hl-dialog-icon">
+                <div class="hl-dialog-icon-circle info" id="dlAlertIcon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+            </div>
+            <div class="hl-dialog-body">
+                <div class="hl-dialog-title" id="dlAlertTitle">Bilgi</div>
+                <div class="hl-dialog-message" id="dlAlertMsg">Mesaj</div>
+            </div>
+            <div class="hl-dialog-actions centered">
+                <button class="hl-btn hl-btn-ok" onclick="dlAlertClose()">
+                    <i class="fas fa-check"></i> Tamam
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-skull"></i> HACKLAB
+        </div>
+        <div class="nav-links">
+            <a href="/">Ana Sayfa</a>
+            <a href="/machines">Makineler</a>
+            <a href="/academy">Akademi</a>
+            <a href="/leaderboard">Liderlik</a>
+            <a href="/vip">VIP</a>
+            {{if .User}}
+            <a href="/profile/{{.User.Username}}">Profil</a>
+            <a href="/dashboard">Panel</a>
+            {{if and .User .IsAdmin}}
+            <a href="/admin" style="color: #ffd700;">Admin</a>
+            {{end}}
+            <span class="user-points">{{.User.Points}} Puan</span>
+            <button class="login-btn" onclick="customLogout()">Çıkış</button>
+            {{else}}
+            <button class="login-btn" onclick="window.location.href='/login'">Giriş</button>
+            <button class="register-btn" onclick="window.location.href='/register'">Kayıt Ol</button>
+            {{end}}
+        </div>
+    </nav>
+
+    <!-- Ana Container -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">MAKİNELER</h1>
+            <div class="user-stats">
+                <div class="stat">
+                    <div class="stat-value" id="solvedCount">{{if .User}}{{.UserStats.SolvedCount}}{{else}}0{{end}}</div>
+                    <div class="stat-label">Çözülen</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="totalMachines">{{.TotalMachines}}</div>
+                    <div class="stat-label">Toplam</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="userRank">#{{if .User}}{{.User.Rank}}{{else}}?{{end}}</div>
+                    <div class="stat-label">Sıralama</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtreler -->
+        <div class="filters-section">
+            <div class="filters-title">
+                <i class="fas fa-filter"></i> FİLTRELE
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Zorluk</label>
+                    <select class="filter-select" id="difficultyFilter">
+                        <option value="all">Tümü</option>
+                        <option value="easy">Kolay</option>
+                        <option value="medium">Orta</option>
+                        <option value="hard">Zor</option>
+                        <option value="expert">Uzman</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Durum</label>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="all">Tümü</option>
+                        <option value="unsolved">Çözülmemiş</option>
+                        <option value="in-progress">Devam Ediyor</option>
+                        <option value="solved">Çözülmüş</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Erişim</label>
+                    <select class="filter-select" id="accessFilter">
+                        <option value="all">Tümü</option>
+                        <option value="free">Herkese Açık</option>
+                        <option value="vip">Sadece VIP</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="filter-group search-box">
+                    <label class="filter-label">Ara</label>
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="filter-input" id="searchFilter" placeholder="Makine adı...">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-filter" onclick="applyFilters()">
+                    <i class="fas fa-check"></i> Uygula
+                </button>
+                <button class="btn-reset" onclick="resetFilters()">
+                    <i class="fas fa-undo"></i> Sıfırla
+                </button>
+            </div>
+            <div class="active-filters" id="activeFilters"></div>
+        </div>
+
+        <!-- Makineler Header -->
+        <div class="machines-header">
+            <div class="results-count">
+                <span id="displayCount">0</span> / <span id="totalCount">{{.TotalMachines}}</span> makine gösteriliyor
+            </div>
+            <div class="sort-options">
+                <span class="sort-label">Sırala:</span>
+                <select class="sort-select" id="sortFilter" onchange="applyFilters()">
+                    <option value="newest">En Yeni</option>
+                    <option value="oldest">En Eski</option>
+                    <option value="most-solved">En Çok Çözülen</option>
+                    <option value="least-solved">En Az Çözülen</option>
+                    <option value="highest-points">En Yüksek Puan</option>
+                    <option value="lowest-points">En Düşük Puan</option>
+                </select>
+                <div class="view-options">
+                    <button class="view-btn active" onclick="changeView('grid')" id="gridViewBtn">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="view-btn" onclick="changeView('list')" id="listViewBtn">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Makine Grid -->
+        <div class="machine-grid" id="machineGrid">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Makineler yükleniyor...
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <ul class="pagination" id="pagination"></ul>
+    </div>
+
+    <!-- Start Machine Modal -->
+    <div class="modal" id="startModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-terminal"></i> Makine Başlat</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMachineName"></p>
+                <p>Makine başlatılıyor... Bu işlem birkaç saniye sürebilir.</p>
+                <div style="text-align: center; margin: 2rem 0;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #00ff9d;"></i>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal btn-modal-secondary" onclick="closeModal()">İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Giriş Yap</h3>
+                <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Kullanıcı Adı / E-posta</label>
+                        <input type="text" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn-modal btn-modal-primary">Giriş Yap</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Kayıt Ol</h3>
+                <button class="modal-close" onclick="closeRegisterModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label>Kullanıcı Adı</label>
+                        <input type="text" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>E-posta</label>
+                        <input type="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre Tekrar</label>
+                        <input type="password" name="password_confirm" required>
+                    </div>
+                    <button type="submit" class="btn-modal btn-modal-primary">Kayıt Ol</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>HACKLAB</h3>
+                <p>Güvenlik araştırmacıları ve etik hacker'lar için CTF platformu.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Hızlı Linkler</h3>
+                <ul>
+                    <li><a href="/machines">Tüm Makineler</a></li>
+                    <li><a href="/leaderboard">Leaderboard</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Destek</h3>
+                <ul>
+                    <li><a href="/faq">SSS</a></li>
+                    <li><a href="/contact">İletişim</a></li>
+                    <li><a href="/discord">Discord</a></li>
+                    <li><a href="/docs">Dokümantasyon</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Yasal</h3>
+                <ul>
+                    <li><a href="/terms">Kullanım Şartları</a></li>
+                    <li><a href="/privacy">Gizlilik Politikası</a></li>
+                </ul>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 3rem; color: #404040;">
+            © {{.CurrentYear}} HACKLAB - Bayrakları toplamaya hazır mısın?
+        </div>
+    </footer>
+
+    <script>
+        // =============================================
+        // ÖZEL DIALOG SİSTEMİ (Promise tabanlı)
+        // =============================================
+        let _dlConfirmResolve = null;
+        let _dlAlertIsOpen = false;
+
+        function showConfirm(title, message, confirmLabel = null) {
+            document.getElementById('dlConfirmTitle').textContent = title || 'Onay';
+            document.getElementById('dlConfirmMsg').textContent = message || 'Bu işlemi onaylıyor musunuz?';
+            const confirmBtn = document.getElementById('dlConfirmBtn');
+            if (confirmLabel) {
+                confirmBtn.innerHTML = confirmLabel;
+            } else {
+                confirmBtn.innerHTML = '<i class="fas fa-check"></i> Onayla';
+            }
+            document.getElementById('dlConfirm').classList.add('open');
+            return new Promise(resolve => {
+                _dlConfirmResolve = resolve;
+            });
+        }
+
+        function dlConfirmResolve(value) {
+            document.getElementById('dlConfirm').classList.remove('open');
+            if (_dlConfirmResolve) {
+                _dlConfirmResolve(value);
+                _dlConfirmResolve = null;
+            }
+        }
+
+        function showAlert(title, message, type = 'info') {
+            if (_dlAlertIsOpen) return;
+            const titleEl = document.getElementById('dlAlertTitle');
+            const msgEl = document.getElementById('dlAlertMsg');
+            const iconEl = document.getElementById('dlAlertIcon');
+            
+            titleEl.textContent = title || 'Bilgi';
+            msgEl.textContent = message || '';
+            
+            // İkon tipini ayarla
+            iconEl.className = 'hl-dialog-icon-circle';
+            if (type === 'success') {
+                iconEl.classList.add('success');
+                iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
+            } else if (type === 'error') {
+                iconEl.classList.add('danger');
+                iconEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            } else if (type === 'warning') {
+                iconEl.classList.add('warn');
+                iconEl.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+            } else {
+                iconEl.classList.add('info');
+                iconEl.innerHTML = '<i class="fas fa-info-circle"></i>';
+            }
+            
+            document.getElementById('dlAlert').classList.add('open');
+            _dlAlertIsOpen = true;
+        }
+
+        function dlAlertClose() {
+            document.getElementById('dlAlert').classList.remove('open');
+            _dlAlertIsOpen = false;
+        }
+
+        // Overlay dışına tıklayınca kapat
+        document.getElementById('dlConfirm').addEventListener('click', function(e) {
+            if (e.target === this) dlConfirmResolve(false);
+        });
+        document.getElementById('dlAlert').addEventListener('click', function(e) {
+            if (e.target === this) dlAlertClose();
+        });
+
+        // ESC tuşu ile kapat
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('dlConfirm').classList.contains('open')) dlConfirmResolve(false);
+                if (document.getElementById('dlAlert').classList.contains('open')) dlAlertClose();
+            }
+        });
+
+        // ─── Global değişkenler ───────────────────────────────────────────────
+        const isLoggedIn = {{if .User}}true{{else}}false{{end}};
+        const currentUser = {{if .User}}"{{.User.Username}}"{{else}}null{{end}};
+        const isVIP = {{if .User}}{{.User.IsVIP}}{{else}}false{{end}};
+
+        let allMachines       = [];
+        let filteredMachines  = [];
+        let currentView       = 'grid';
+        let currentPage       = 1;
+        const itemsPerPage    = 6;
+        let userSolvedMachines = {};
+
+        let startMachineTimeout = null;
+
+        // ─── Sayfa yüklendiğinde ─────────────────────────────────────────────
+        window.addEventListener('load', function () {
+            loadMachines();
+            if (isLoggedIn) loadUserProgress();
+        });
+
+        window.addEventListener('pageshow', function () {
+            closeModal();
+        });
+
+        // ─── Özel Çıkış ──────────────────────────────────────────────────────
+        async function customLogout() {
+            const confirmed = await showConfirm(
+                'Çıkış Yap',
+                'Oturumunuzu kapatmak istediğinize emin misiniz?',
+                '<i class="fas fa-sign-out-alt"></i> Çıkış Yap'
+            );
+            if (!confirmed) return;
+            
+            try {
+                const response = await fetch('/api/auth/logout', { method: 'POST' });
+                if (response.ok) window.location.reload();
+                else showAlert('Hata', 'Çıkış yapılırken bir hata oluştu', 'error');
+            } catch {
+                showAlert('Hata', 'Çıkış yapılırken bir hata oluştu', 'error');
+            }
+        }
+
+        // ─── Makineleri API'den yükle ────────────────────────────────────────
+        async function loadMachines() {
+            try {
+                const response = await fetch('/api/machines');
+                const data     = await response.json();
+
+                if (!Array.isArray(data)) {
+                    console.error('API yanıtı dizi değil:', data);
+                    document.getElementById('machineGrid').innerHTML = `
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Makine verileri hatalı formatta geldi.
+                        </div>`;
+                    return;
+                }
+
+                allMachines = data.map(machine => ({
+                    id:              machine.ID,
+                    name:            machine.Name,
+                    description:     machine.Description,
+                    difficulty:      machine.Difficulty,
+                    points:          machine.PointsReward,
+                    solved:          machine.SolveCount   || 0,
+                    totalQuestions:  machine.QuestionCount || 0,
+                    solvedQuestions: 0,
+                    isVIP:           machine.IsVIPOnly,
+                    isNew:           isNewMachine(machine.CreatedAt),
+                    tags:            machine.Tags    || [],
+                    creator:         machine.Creator || '@system',
+                    created:         formatDate(machine.CreatedAt),
+                    icon:            getMachineIcon(machine.Difficulty)
+                }));
+
+                filteredMachines = [...allMachines];
+                renderMachines();
+                updateActiveFilters();
+
+            } catch (error) {
+                console.error('Makineler yüklenemedi:', error);
+                document.getElementById('machineGrid').innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Makineler yüklenirken bir hata oluştu: ${error.message}
+                    </div>`;
+            }
+        }
+
+        // ─── Kullanıcı ilerlemesini yükle ────────────────────────────────────
+        async function loadUserProgress() {
+            try {
+                const response = await fetch('/api/user/progress');
+                const data     = await response.json();
+
+                userSolvedMachines = data.solvedMachines || {};
+
+                allMachines = allMachines.map(machine => ({
+                    ...machine,
+                    solvedQuestions: userSolvedMachines[machine.id] || 0
+                }));
+
+                filteredMachines = [...allMachines];
+                renderMachines();
+            } catch (error) {
+                console.error('Kullanıcı ilerlemesi yüklenemedi:', error);
+            }
+        }
+
+        // ─── Render ──────────────────────────────────────────────────────────
+        function renderMachines() {
+            const grid  = document.getElementById('machineGrid');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end   = start + itemsPerPage;
+            const paged = filteredMachines.slice(start, end);
+
+            grid.innerHTML = paged.length
+                ? paged.map(m => createMachineCard(m)).join('')
+                : `<div class="error-message">
+                       <i class="fas fa-search"></i>
+                       Filtreleme kriterlerine uygun makine bulunamadı.
+                   </div>`;
+
+            document.getElementById('displayCount').textContent = paged.length;
+            document.getElementById('totalCount').textContent   = filteredMachines.length;
+
+            renderPagination();
+        }
+
+        function createMachineCard(machine) {
+            const pct = machine.totalQuestions > 0
+                ? (machine.solvedQuestions / machine.totalQuestions) * 100
+                : 0;
+
+            return `
+                <div class="machine-card">
+                    <div class="machine-badge">
+                        ${machine.isNew  ? '<span class="badge-new">YENİ</span>' : ''}
+                        ${machine.isVIP  ? '<span class="badge-vip">VIP</span>'  : ''}
+                    </div>
+                    <div class="machine-header">
+                        <div class="machine-icon">${machine.icon}</div>
+                        <div class="machine-title">
+                            <div class="machine-name">${escapeHtml(machine.name)}</div>
+                            <div class="machine-meta">
+                                <span><i class="fas fa-user"></i> ${escapeHtml(machine.creator)}</span>
+                                <span><i class="fas fa-calendar"></i> ${machine.created}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="machine-difficulty difficulty-${machine.difficulty}">
+                        <i class="fas fa-${getDifficultyIcon(machine.difficulty)}"></i>
+                        ${getDifficultyText(machine.difficulty)}
+                    </div>
+                    <div class="machine-description">${escapeHtml(machine.description)}</div>
+                    <div class="machine-progress">
+                        <div class="progress-header">
+                            <span>İlerleme</span>
+                            <span>${machine.solvedQuestions}/${machine.totalQuestions}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                    <div class="machine-stats">
+                        <div class="machine-stat">
+                            <div class="stat-icon"><i class="fas fa-flag"></i></div>
+                            <div class="stat-value">${machine.solvedQuestions}</div>
+                            <div class="stat-label">Çözülen</div>
+                        </div>
+                        <div class="machine-stat">
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-value">${formatNumber(machine.solved)}</div>
+                            <div class="stat-label">Toplam Çözüm</div>
+                        </div>
+                        <div class="machine-stat">
+                            <div class="stat-icon"><i class="fas fa-star"></i></div>
+                            <div class="stat-value">${machine.points}</div>
+                            <div class="stat-label">Puan</div>
+                        </div>
+                    </div>
+                    <div class="machine-tags">
+                        ${machine.tags.map(tag => `<span class="tag">#${escapeHtml(tag)}</span>`).join('')}
+                    </div>
+                    <div class="machine-footer">
+                        <div class="machine-points">
+                            ${machine.points} <small>puan</small>
+                        </div>
+                        <button class="btn-start"
+                                onclick="startMachine(${machine.id})"
+                                ${!isLoggedIn || (machine.isVIP && !isVIP) ? 'disabled' : ''}>
+                            <i class="fas fa-play"></i>
+                            ${machine.isVIP ? 'VIP BAŞLAT' : 'BAŞLAT'}
+                        </button>
+                    </div>
+                </div>`;
+        }
+
+        // ─── Pagination ───────────────────────────────────────────────────────
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredMachines.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+
+            if (totalPages <= 1) { pagination.innerHTML = ''; return; }
+
+            let html = `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1})"
+                       ${currentPage === 1 ? 'style="pointer-events:none;opacity:.5;"' : ''}>
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>`;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    html += `<li class="page-item">
+                        <a class="page-link ${i === currentPage ? 'active' : ''}" href="#" onclick="changePage(${i})">${i}</a>
+                    </li>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += `<li class="page-dots">...</li>`;
+                }
+            }
+
+            html += `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1})"
+                       ${currentPage === totalPages ? 'style="pointer-events:none;opacity:.5;"' : ''}>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>`;
+
+            pagination.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredMachines.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderMachines();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ─── Filtreler ────────────────────────────────────────────────────────
+        function applyFilters() {
+            const difficulty = document.getElementById('difficultyFilter').value;
+            const status     = document.getElementById('statusFilter').value;
+            const access     = document.getElementById('accessFilter').value;
+            const search     = document.getElementById('searchFilter').value.toLowerCase();
+            const sort       = document.getElementById('sortFilter').value;
+
+            filteredMachines = allMachines.filter(machine => {
+                if (difficulty !== 'all' && machine.difficulty !== difficulty) return false;
+                if (access === 'vip'  && !machine.isVIP) return false;
+                if (access === 'free' &&  machine.isVIP) return false;
+
+                if (status !== 'all' && isLoggedIn) {
+                    const solved    = machine.solvedQuestions > 0;
+                    const completed = machine.solvedQuestions === machine.totalQuestions;
+                    if (status === 'solved'      && !completed)             return false;
+                    if (status === 'in-progress' && (completed || !solved)) return false;
+                    if (status === 'unsolved'    && solved)                 return false;
+                }
+
+                if (search &&
+                    !machine.name.toLowerCase().includes(search) &&
+                    !machine.description.toLowerCase().includes(search)) return false;
+
+                return true;
+            });
+
+            switch (sort) {
+                case 'newest':         filteredMachines.sort((a, b) => new Date(b.created) - new Date(a.created)); break;
+                case 'oldest':         filteredMachines.sort((a, b) => new Date(a.created) - new Date(b.created)); break;
+                case 'most-solved':    filteredMachines.sort((a, b) => b.solved  - a.solved);  break;
+                case 'least-solved':   filteredMachines.sort((a, b) => a.solved  - b.solved);  break;
+                case 'highest-points': filteredMachines.sort((a, b) => b.points  - a.points);  break;
+                case 'lowest-points':  filteredMachines.sort((a, b) => a.points  - b.points);  break;
+            }
+
+            currentPage = 1;
+            renderMachines();
+            updateActiveFilters();
+        }
+
+        function updateActiveFilters() {
+            const difficulty = document.getElementById('difficultyFilter').value;
+            const status     = document.getElementById('statusFilter').value;
+            const access     = document.getElementById('accessFilter').value;
+            const search     = document.getElementById('searchFilter').value;
+            const filters    = [];
+
+            if (difficulty !== 'all')
+                filters.push(`<span class="filter-tag">${getDifficultyText(difficulty)} <i class="fas fa-times" onclick="removeFilter('difficulty')"></i></span>`);
+
+            if (status !== 'all' && isLoggedIn) {
+                const txt = status === 'unsolved' ? 'Çözülmemiş' : status === 'in-progress' ? 'Devam Ediyor' : 'Çözülmüş';
+                filters.push(`<span class="filter-tag">${txt} <i class="fas fa-times" onclick="removeFilter('status')"></i></span>`);
+            }
+
+            if (access !== 'all') {
+                const txt = access === 'vip' ? 'Sadece VIP' : 'Herkese Açık';
+                filters.push(`<span class="filter-tag">${txt} <i class="fas fa-times" onclick="removeFilter('access')"></i></span>`);
+            }
+
+            if (search)
+                filters.push(`<span class="filter-tag">"${escapeHtml(search)}" <i class="fas fa-times" onclick="removeFilter('search')"></i></span>`);
+
+            document.getElementById('activeFilters').innerHTML = filters.join('');
+        }
+
+        function removeFilter(type) {
+            if (type === 'difficulty') document.getElementById('difficultyFilter').value = 'all';
+            if (type === 'status')     document.getElementById('statusFilter').value     = 'all';
+            if (type === 'access')     document.getElementById('accessFilter').value     = 'all';
+            if (type === 'search')     document.getElementById('searchFilter').value     = '';
+            applyFilters();
+        }
+
+        function resetFilters() {
+            document.getElementById('difficultyFilter').value = 'all';
+            document.getElementById('statusFilter').value     = 'all';
+            document.getElementById('accessFilter').value     = 'all';
+            document.getElementById('searchFilter').value     = '';
+            document.getElementById('sortFilter').value       = 'newest';
+            filteredMachines = [...allMachines];
+            currentPage = 1;
+            renderMachines();
+            updateActiveFilters();
+        }
+
+        // ─── Görünüm ──────────────────────────────────────────────────────────
+        function changeView(view) {
+            currentView = view;
+            const grid    = document.getElementById('machineGrid');
+            const gridBtn = document.getElementById('gridViewBtn');
+            const listBtn = document.getElementById('listViewBtn');
+
+            if (view === 'grid') {
+                grid.classList.remove('list-view');
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+            } else {
+                grid.classList.add('list-view');
+                listBtn.classList.add('active');
+                gridBtn.classList.remove('active');
+            }
+            renderMachines();
+        }
+
+        // ─── Makine Başlat ───────────────────────────────────────────────────
+        async function startMachine(machineId) {
+            if (!isLoggedIn) { 
+                window.location.href = '/login'; 
+                return; 
+            }
+
+            const machine = allMachines.find(m => m.id === machineId);
+
+            if (machine.isVIP && !isVIP) {
+                showAlert('VIP Gerekiyor', 'Bu makine VIP üyelik gerektiriyor!', 'warning');
+                setTimeout(() => { window.location.href = '/vip'; }, 2000);
+                return;
+            }
+
+            document.getElementById('modalMachineName').textContent = `${machine.name} başlatılıyor...`;
+            document.getElementById('startModal').classList.add('show');
+
+            startMachineTimeout = setTimeout(() => {
+                window.location.href = `/machine/${machineId}`;
+            }, 2000);
+        }
+
+        function closeModal() {
+            if (startMachineTimeout) {
+                clearTimeout(startMachineTimeout);
+                startMachineTimeout = null;
+            }
+            document.getElementById('startModal').classList.remove('show');
+        }
+
+        function closeLoginModal()    { document.getElementById('loginModal').classList.remove('show'); }
+        function closeRegisterModal() { document.getElementById('registerModal').classList.remove('show'); }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: formData.get('username'),
+                        password: formData.get('password')
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showAlert('Başarılı', 'Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showAlert('Giriş Başarısız', data.message || 'Kullanıcı adı veya şifre hatalı', 'error');
+                }
+            } catch (error) {
+                showAlert('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const password = formData.get('password');
+            const passwordConfirm = formData.get('password_confirm');
+            
+            if (password !== passwordConfirm) {
+                showAlert('Hata', 'Şifreler eşleşmiyor!', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: formData.get('username'),
+                        email: formData.get('email'),
+                        password: password
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showAlert('Başarılı', 'Kayıt başarılı! Giriş yapabilirsiniz.', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showAlert('Kayıt Başarısız', data.message || 'Kayıt sırasında bir hata oluştu', 'error');
+                }
+            } catch (error) {
+                showAlert('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+            }
+        }
+
+        // ─── Yardımcı fonksiyonlar ────────────────────────────────────────────
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function getDifficultyText(d) {
+            return { easy: 'Kolay', medium: 'Orta', hard: 'Zor', expert: 'Uzman' }[d] || d;
+        }
+
+        function getDifficultyIcon(d) {
+            return { easy: 'seedling', medium: 'chart-line', hard: 'skull', expert: 'crown' }[d] || 'flag';
+        }
+
+        function getMachineIcon(d) {
+            return { easy: '🌐', medium: '⚙️', hard: '🔒', expert: '💀' }[d] || '🖥️';
+        }
+
+        function isNewMachine(createdAt) {
+            return Math.floor((new Date() - new Date(createdAt)) / 86400000) <= 7;
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('tr-TR', {
+                year: 'numeric', month: '2-digit', day: '2-digit'
+            });
+        }
+
+        function formatNumber(num) {
+            return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num;
+        }
+
+        // ─── Debounced arama ──────────────────────────────────────────────────
+        let searchTimeout;
+        document.getElementById('searchFilter')?.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(applyFilters, 500);
+        });
+
+        // ─── Modal dışına tıklanınca kapat ────────────────────────────────────
+        window.addEventListener('click', function (event) {
+            const loginModal    = document.getElementById('loginModal');
+            const registerModal = document.getElementById('registerModal');
+            const startModal    = document.getElementById('startModal');
+
+            if (event.target === loginModal)    closeLoginModal();
+            if (event.target === registerModal) closeRegisterModal();
+            if (event.target === startModal)    closeModal();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+{{define "content"}}
+<div class="backup-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h2><i class="fas fa-database"></i> Yedekleme</h2>
+            <p>Veritabanı yedeklemelerini oluşturun, yönetin ve geri yükleyin</p>
+        </div>
+        <div class="header-right">
+            <button class="btn-primary" onclick="createBackup()">
+                <i class="fas fa-plus"></i> Yeni Yedekleme
+            </button>
+            <button class="btn-secondary" onclick="uploadBackup()">
+                <i class="fas fa-upload"></i> Yükle
+            </button>
+        </div>
+    </div>
+
+    <!-- Yedekleme İstatistikleri -->
+    <div class="backup-stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-database"></i></div>
+            <div class="stat-content">
+                <div class="stat-value">{{.BackupCount}}</div>
+                <div class="stat-label">Toplam Yedek</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-hdd"></i></div>
+            <div class="stat-content">
+                <div class="stat-value">{{.TotalSize | formatSize}}</div>
+                <div class="stat-label">Toplam Boyut</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-content">
+                <div class="stat-value">
+                    {{if .HasLastBackup}}
+                        {{.LastBackup.CreatedAt | formatDate}}
+                    {{else}}
+                        Henüz yok
+                    {{end}}
+                </div>
+                <div class="stat-label">Son Yedekleme</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yedekleme Listesi -->
+    <div class="backup-list">
+        <h3 class="section-title"><i class="fas fa-list"></i> Yedekleme Listesi</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Dosya Adı</th>
+                        <th>Boyut</th>
+                        <th>Oluşturulma Tarihi</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="backupTableBody">
+                    <tr><td colspan="5" class="text-center">Yükleniyor...</td><tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Yükleme Modalı -->
+<div id="uploadModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-upload"></i> Yedek Dosyası Yükle</h3>
+            <button class="modal-close" onclick="closeUploadModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label>Yedek Dosyası (.sql veya .sql.gz)</label>
+                    <input type="file" id="backupFile" accept=".sql,.sql.gz" required>
+                </div>
+                <div class="form-group">
+                    <label>Dosya Boyutu Limiti: 10 MB</label>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeUploadModal()">İptal</button>
+            <button class="btn-primary" onclick="uploadBackupFile()">Yükle</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .backup-page { display: flex; flex-direction: column; gap: 2rem; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .header-left h2 { font-family: 'Share Tech Mono', monospace; color: #00ff9d; margin-bottom: 0.3rem; }
+    .header-left p { color: #6a7a8a; font-size: 0.9rem; }
+    .btn-primary { padding: 0.8rem 1.5rem; background: linear-gradient(45deg, #00ff9d, #00b86e); border: none; border-radius: 8px; color: #0a0f0f; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: 0.3s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0, 255, 157, 0.4); }
+    .btn-secondary { padding: 0.8rem 1.5rem; background: transparent; border: 1px solid #2a3a4a; border-radius: 8px; color: #b0b0b0; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: 0.3s; }
+    .btn-secondary:hover { border-color: #00ff9d; color: #00ff9d; }
+    .backup-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+    .stat-card { background: rgba(0, 0, 0, 0.2); border: 1px solid #2a3a4a; border-radius: 15px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem; transition: 0.3s; }
+    .stat-card:hover { border-color: #00ff9d; transform: translateY(-3px); }
+    .stat-icon { width: 60px; height: 60px; background: rgba(0, 255, 157, 0.1); border: 1px solid #00ff9d; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #00ff9d; }
+    .stat-content { flex: 1; }
+    .stat-value { font-family: 'Share Tech Mono', monospace; font-size: 1.5rem; color: #00ff9d; line-height: 1.2; }
+    .stat-label { color: #b0b0b0; font-size: 0.9rem; }
+    .backup-list { background: rgba(0, 0, 0, 0.2); border: 1px solid #2a3a4a; border-radius: 15px; padding: 1.5rem; }
+    .section-title { font-family: 'Share Tech Mono', monospace; color: #00ff9d; margin-bottom: 1.5rem; font-size: 1.2rem; }
+    .section-title i { margin-right: 0.5rem; }
+    .table-container { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: rgba(0, 255, 157, 0.1); padding: 1rem; text-align: left; color: #00ff9d; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; border-bottom: 1px solid #2a3a4a; }
+    .data-table td { padding: 1rem; border-bottom: 1px solid #2a3a4a; }
+    .data-table tr:hover { background: rgba(0, 255, 157, 0.05); }
+    .btn-icon { width: 36px; height: 36px; background: transparent; border: 1px solid #2a3a4a; border-radius: 8px; color: #b0b0b0; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; margin: 0 0.2rem; }
+    .btn-icon:hover { border-color: #00ff9d; color: #00ff9d; }
+    .btn-icon.btn-danger:hover { border-color: #ff5f56; color: #ff5f56; }
+    .btn-icon.btn-warning:hover { border-color: #ffbd2e; color: #ffbd2e; }
+    .text-center { text-align: center; color: #6a7a8a; padding: 2rem; }
+    .size { font-family: 'Share Tech Mono', monospace; color: #ffd700; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); overflow: auto; }
+    .modal-content { background: #1a1f2f; margin: 10% auto; border: 1px solid #00ff9d; border-radius: 15px; width: 90%; max-width: 500px; }
+    .modal-header { padding: 1.5rem; border-bottom: 1px solid #2a3a4a; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { color: #00ff9d; }
+    .modal-close { background: transparent; border: none; color: #6a7a8a; font-size: 1.5rem; cursor: pointer; }
+    .modal-close:hover { color: #ff5f56; }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { padding: 1.5rem; border-top: 1px solid #2a3a4a; display: flex; justify-content: flex-end; gap: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; color: #b0b0b0; }
+    .form-group input { width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.3); border: 1px solid #2a3a4a; border-radius: 5px; color: #e0e0e0; }
+    @media (max-width: 768px) { .backup-stats-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+    function formatSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function loadBackups() {
+        fetch('/admin/api/backup/list')
+            .then(res => res.json())
+            .then(backups => {
+                const tbody = document.getElementById('backupTableBody');
+                if (!backups || backups.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center">Henüz yedekleme yok</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                backups.forEach(backup => {
+                    html += `
+                        <tr>
+                            <td>#${backup.id}</td>
+                            <td>${backup.filename}</td>
+                            <td class="size">${formatSize(backup.size)}</td>
+                            <td>${new Date(backup.created_at).toLocaleString('tr-TR')}</td>
+                            <td class="actions">
+                                <button class="btn-icon" onclick="downloadBackup(${backup.id})" title="İndir"><i class="fas fa-download"></i></button>
+                                <button class="btn-icon btn-warning" onclick="restoreBackup(${backup.id})" title="Geri Yükle"><i class="fas fa-undo-alt"></i></button>
+                                <button class="btn-icon btn-danger" onclick="deleteBackup(${backup.id})" title="Sil"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            })
+            .catch(err => {
+                console.error('Yedekler yüklenemedi:', err);
+                document.getElementById('backupTableBody').innerHTML = '<tr><td colspan="5" class="text-center">Yedekler yüklenemedi</td></tr>';
+            });
+    }
+
+    function createBackup() {
+        if (!confirm('Yeni bir yedekleme oluşturmak istediğinize emin misiniz?')) return;
+        
+        showNotification('Yedekleme başlatılıyor...', 'info');
+        
+        fetch('/admin/api/backup/create', { method: 'POST' })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    loadBackups();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            })
+            .catch(err => showNotification('Hata oluştu: ' + err.message, 'error'));
+    }
+
+    function downloadBackup(id) {
+        window.location.href = `/admin/api/backup/${id}/download`;
+    }
+
+    function restoreBackup(id) {
+        if (!confirm('Bu yedekten geri yüklemek istediğinize emin misiniz? Mevcut veriler silinecek!')) return;
+        
+        showNotification('Geri yükleme başlatılıyor...', 'info');
+        
+        fetch(`/admin/api/backup/${id}/restore`, { method: 'POST' })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            })
+            .catch(err => showNotification('Hata oluştu: ' + err.message, 'error'));
+    }
+
+    function deleteBackup(id) {
+        if (!confirm('Bu yedeği silmek istediğinize emin misiniz?')) return;
+        
+        fetch(`/admin/api/backup/${id}/delete`, { method: 'DELETE' })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    loadBackups();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            })
+            .catch(err => showNotification('Hata oluştu: ' + err.message, 'error'));
+    }
+
+    function uploadBackup() {
+        document.getElementById('uploadModal').style.display = 'block';
+    }
+
+    function closeUploadModal() {
+        document.getElementById('uploadModal').style.display = 'none';
+        document.getElementById('uploadForm').reset();
+    }
+
+    function uploadBackupFile() {
+        const fileInput = document.getElementById('backupFile');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            showNotification('Lütfen bir dosya seçin', 'error');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('backup_file', file);
+        
+        showNotification('Dosya yükleniyor...', 'info');
+        
+        fetch('/admin/api/backup/upload', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    closeUploadModal();
+                    loadBackups();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            })
+            .catch(err => showNotification('Hata oluştu: ' + err.message, 'error'));
+    }
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${message}`;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadBackups);
+</script>
+
+<style>
+    .notification { position: fixed; top: 20px; right: 20px; padding: 1rem 2rem; border-radius: 8px; z-index: 9999; animation: slideIn 0.3s; }
+    .notification.success { background: linear-gradient(45deg, #00ff9d, #00b86e); color: #0a0f0f; }
+    .notification.error { background: linear-gradient(45deg, #ff5f56, #ff3333); color: white; }
+    .notification.info { background: linear-gradient(45deg, #00b8ff, #0099cc); color: white; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+</style>
+{{end}}

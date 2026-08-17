@@ -1,0 +1,648 @@
+{{define "content"}}
+<div class="user-form-page">
+    <!-- Header -->
+    <div class="form-header">
+        <div>
+            <h2><i class="fas {{if .User.ID}}fa-edit{{else}}fa-user-plus{{end}}"></i>
+                {{if .User.ID}}Kullanıcı Düzenle{{else}}Yeni Kullanıcı Ekle{{end}}</h2>
+            <p>{{if .User.ID}}Kullanıcı bilgilerini güncelleyin{{else}}Platforma yeni bir kullanıcı ekleyin{{end}}</p>
+        </div>
+        <a href="/admin/users" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </a>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" action="{{if .IsEdit}}/admin/api/users/{{.UserID}}{{else}}/admin/api/users/create{{end}}" 
+          enctype="multipart/form-data" class="user-form" id="userForm">
+
+        <div class="form-grid">
+            <!-- Sol Kolon - Kullanıcı Bilgileri -->
+            <div class="form-left">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user-circle"></i> Kullanıcı Bilgileri
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Kullanıcı Adı <span class="required">*</span></label>
+                        <input type="text" name="username" value="{{.User.Username}}" required 
+                               placeholder="johndoe" {{if .IsEdit}}readonly{{end}}>
+                        {{if .IsEdit}}<small>Kullanıcı adı değiştirilemez</small>{{end}}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email <span class="required">*</span></label>
+                        <input type="email" name="email" value="{{.User.Email}}" required
+                               placeholder="john@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ad Soyad</label>
+                        <input type="text" name="fullname" value="{{.User.FullName}}" placeholder="John Doe">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Şifre {{if not .IsEdit}}<span class="required">*</span>{{end}}</label>
+                            <input type="password" name="password" {{if not .IsEdit}}required{{end}}
+                                   placeholder="••••••••">
+                            {{if .IsEdit}}
+                            <small>Boş bırakırsanız değişmez</small>
+                            {{end}}
+                        </div>
+
+                        <div class="form-group half">
+                            <label>Şifre Tekrar</label>
+                            <input type="password" name="confirm_password" placeholder="••••••••">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-address-card"></i> Profil Bilgileri
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Profil Resmi</label>
+                        <div class="avatar-upload">
+                            {{if .User.Avatar}}
+                            <img src="{{.User.Avatar}}" alt="Avatar" class="avatar-preview">
+                            {{else}}
+                            <div class="avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {{end}}
+                            <input type="file" name="avatar" accept="image/*" id="avatarInput">
+                            <button type="button" class="btn-upload"
+                                    onclick="document.getElementById('avatarInput').click()">
+                                <i class="fas fa-camera"></i> Resim Seç
+                            </button>
+                            <small>Maksimum 5MB, JPEG/PNG/GIF/WEBP</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ülke</label>
+                        <select name="country">
+                            <option value="">Seçiniz</option>
+                            {{range .Countries}}
+                            <option value="{{.}}" {{if eq $.User.Country .}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Web Sitesi</label>
+                        <input type="url" name="website" value="{{.User.Website}}" placeholder="https://example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Biyografi</label>
+                        <textarea name="bio" rows="3" placeholder="Kendinizden bahsedin...">{{.User.Bio}}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Kolon - Hesap Ayarları -->
+            <div class="form-right">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-shield-alt"></i> Hesap Durumu
+                    </h3>
+
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <span>Hesap Aktif</span>
+                            <label class="switch">
+                                <input type="checkbox" name="is_active" value="true" {{if .User.IsActive}}checked{{end}}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-item">
+                            <span>VIP Üye</span>
+                            <label class="switch">
+                                <input type="checkbox" name="is_vip" value="true" {{if .User.IsVIP}}checked{{end}}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-item">
+                            <span>Email Doğrulanmış</span>
+                            <label class="switch">
+                                <input type="checkbox" name="email_verified" value="true" {{if .User.EmailVerified}}checked{{end}}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-item">
+                            <span>Bülten Aboneliği</span>
+                            <label class="switch">
+                                <input type="checkbox" name="newsletter" value="true" {{if .User.Newsletter}}checked{{end}}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                {{if .IsEdit}}
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-line"></i> İstatistikler
+                    </h3>
+
+                    <div class="stats-list">
+                        <div class="stat-item">
+                            <span class="stat-label">Puan</span>
+                            <span class="stat-value">{{.User.Points}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Sıralama</span>
+                            <span class="stat-value">#{{.User.Rank}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Son Giriş</span>
+                            <span class="stat-value">
+                                {{if .User.LastLogin.Valid}}
+                                    {{.User.LastLogin.Time.Format "02.01.2006 15:04"}}
+                                {{else}}
+                                    Hiç giriş yapmamış
+                                {{end}}
+                            </span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Kayıt Tarihi</span>
+                            <span class="stat-value">{{.User.CreatedAt.Format "02.01.2006"}}</span>
+                        </div>
+                        {{if .User.VIPExpiryDate.Valid}}
+                        <div class="stat-item">
+                            <span class="stat-label">VIP Bitiş</span>
+                            <span class="stat-value">{{.User.VIPExpiryDate.Time.Format "02.01.2006"}}</span>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-exclamation-triangle"></i> Tehlikeli Bölge
+                    </h3>
+
+                    <div class="danger-zone">
+                        <p>Bu işlemler geri alınamaz!</p>
+                        <button type="button" class="btn-danger" onclick="resetPassword({{.User.ID}})">
+                            <i class="fas fa-key"></i> Şifre Sıfırla
+                        </button>
+                        <button type="button" class="btn-danger" onclick="toggleUserStatus({{.User.ID}})">
+                            <i class="fas {{if .User.IsActive}}fa-ban{{else}}fa-check-circle{{end}}"></i>
+                            {{if .User.IsActive}}Hesabı Dondur{{else}}Hesabı Aktifleştir{{end}}
+                        </button>
+                        <button type="button" class="btn-danger" onclick="toggleVIP({{.User.ID}})">
+                            <i class="fas {{if .User.IsVIP}}fa-star-o{{else}}fa-star{{end}}"></i>
+                            {{if .User.IsVIP}}VIP'i Kaldır{{else}}VIP Yap{{end}}
+                        </button>
+                        <button type="button" class="btn-danger" onclick="deleteUser({{.User.ID}})">
+                            <i class="fas fa-trash"></i> Kullanıcıyı Sil
+                        </button>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Form Butonları -->
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="history.back()">
+                İptal
+            </button>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i>
+                {{if .IsEdit}}Değişiklikleri Kaydet{{else}}Kullanıcı Oluştur{{end}}
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .user-form-page {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-header h2 {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        margin-bottom: 0.3rem;
+    }
+
+    .btn-secondary {
+        padding: 0.8rem 1.5rem;
+        background: transparent;
+        border: 1px solid #2a3a4a;
+        border-radius: 8px;
+        color: #b0b0b0;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .btn-secondary:hover {
+        border-color: #00ff9d;
+        color: #00ff9d;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    .form-section {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .section-title i {
+        margin-right: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #b0b0b0;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #2a3a4a;
+        border-radius: 5px;
+        color: #e0e0e0;
+        font-size: 0.9rem;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #00ff9d;
+    }
+
+    .form-group small {
+        display: block;
+        color: #6a7a8a;
+        font-size: 0.7rem;
+        margin-top: 0.3rem;
+    }
+
+    .form-group input[readonly] {
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .half {
+        flex: 1;
+    }
+
+    .required {
+        color: #ff5f56;
+    }
+
+    .avatar-upload {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .avatar-preview {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 3px solid #00ff9d;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: #1a1f2f;
+        border: 2px dashed #2a3a4a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #2a3a4a;
+    }
+
+    #avatarInput {
+        display: none;
+    }
+
+    .btn-upload {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: 1px solid #00ff9d;
+        border-radius: 5px;
+        color: #00ff9d;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-upload:hover {
+        background: #00ff9d;
+        color: #0a0f0f;
+    }
+
+    .toggle-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .toggle-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #2a3a4a;
+        transition: .3s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #00ff9d;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .stats-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #2a3a4a;
+    }
+
+    .stat-label {
+        color: #b0b0b0;
+    }
+
+    .stat-value {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+    }
+
+    .danger-zone {
+        border: 1px solid #ff5f56;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .danger-zone p {
+        color: #ff5f56;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-danger {
+        width: 100%;
+        padding: 0.8rem;
+        background: transparent;
+        border: 1px solid #ff5f56;
+        border-radius: 5px;
+        color: #ff5f56;
+        cursor: pointer;
+        margin-bottom: 0.5rem;
+        transition: 0.3s;
+        font-size: 0.9rem;
+    }
+
+    .btn-danger:hover {
+        background: #ff5f56;
+        color: #fff;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-primary {
+        padding: 1rem 2rem;
+        background: linear-gradient(45deg, #00ff9d, #00b86e);
+        border: none;
+        border-radius: 8px;
+        color: #0a0f0f;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
+    }
+
+    @media (max-width: 1024px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    // Şifre kontrolü
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+        const password = document.querySelector('input[name="password"]').value;
+        const confirm = document.querySelector('input[name="confirm_password"]').value;
+        
+        if (password !== confirm) {
+            e.preventDefault();
+            alert('Şifreler eşleşmiyor!');
+        }
+    });
+
+    // Avatar önizleme
+    document.getElementById('avatarInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Dosya boyutunu kontrol et (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Dosya boyutu 5MB\'dan büyük olamaz!');
+                this.value = '';
+                return;
+            }
+            
+            // Dosya tipini kontrol et
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                alert('Sadece JPEG, PNG, GIF ve WEBP dosyaları yüklenebilir!');
+                this.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.querySelector('.avatar-preview, .avatar-placeholder');
+                if (preview) {
+                    if (preview.classList.contains('avatar-placeholder')) {
+                        // Placeholder'ı image'e çevir
+                        const img = document.createElement('img');
+                        img.className = 'avatar-preview';
+                        img.src = e.target.result;
+                        preview.parentNode.replaceChild(img, preview);
+                    } else {
+                        preview.src = e.target.result;
+                    }
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Şifre sıfırlama
+    function resetPassword(id) {
+        if (confirm('Kullanıcının şifresini sıfırlamak istediğinize emin misiniz?')) {
+            fetch(`/admin/api/users/${id}/reset-password`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Yeni şifre: ${data.password}\nBu şifreyi kullanıcıya iletin.`);
+                    } else {
+                        alert('Şifre sıfırlanamadı: ' + data.message);
+                    }
+                })
+                .catch(error => alert('Bir hata oluştu: ' + error));
+        }
+    }
+
+    // Kullanıcı durumunu değiştir
+    function toggleUserStatus(id) {
+        const isActive = {{.User.IsActive}};
+        const action = isActive ? 'dondurmak' : 'aktifleştirmek';
+        if (confirm(`Kullanıcı hesabını ${action} istediğinize emin misiniz?`)) {
+            fetch(`/admin/api/users/${id}/toggle-status`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('İşlem başarısız: ' + data.message);
+                    }
+                })
+                .catch(error => alert('Bir hata oluştu: ' + error));
+        }
+    }
+
+    // VIP durumunu değiştir
+    function toggleVIP(id) {
+        const isVIP = {{.User.IsVIP}};
+        const action = isVIP ? 'VIP\'i kaldırmak' : 'VIP yapmak';
+        if (confirm(`Kullanıcıyı ${action} istediğinize emin misiniz?`)) {
+            fetch(`/admin/api/users/${id}/toggle-vip`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('İşlem başarısız: ' + data.message);
+                    }
+                })
+                .catch(error => alert('Bir hata oluştu: ' + error));
+        }
+    }
+
+    // Kullanıcı sil
+    function deleteUser(id) {
+        if (confirm('Bu kullanıcıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
+            fetch(`/admin/api/users/${id}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/admin/users';
+                    } else {
+                        alert('Kullanıcı silinemedi: ' + data.message);
+                    }
+                })
+                .catch(error => alert('Bir hata oluştu: ' + error));
+        }
+    }
+</script>
+
+{{end}}

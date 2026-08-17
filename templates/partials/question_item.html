@@ -1,0 +1,38 @@
+{{define "question_item"}}
+<div class="question-item {{ if .Solved }}solved{{ end }}"
+     data-question-id="{{ .ID }}"
+     onclick="selectQuestion({{ .ID }}, '{{ .Title }}')">
+    <div class="question-header">
+        <span class="question-title">
+            Soru {{ .QuestionOrder }}: {{ .Title }}
+        </span>
+        <span class="question-status {{ if .Solved }}status-solved{{ else }}status-unsolved{{ end }}">
+            {{ if .Solved }}
+                <i class="fas fa-check"></i>
+            {{ else }}
+                <i class="fas fa-question"></i>
+            {{ end }}
+        </span>
+    </div>
+    <div class="question-points">
+        <i class="fas fa-star"></i> {{ .PointsReward }} puan
+    </div>
+    {{ if .Description }}
+    <div style="font-size:0.8rem; color:#6a7a8a; margin-bottom:0.4rem;">
+        {{ .Description }}
+    </div>
+    {{ end }}
+    {{ if and .Hint (not .HintUsed) }}
+    <div class="question-hint" onclick="event.stopPropagation(); showHint({{ .ID }}, {{ .HintCost }})">
+        <i class="fas fa-lightbulb"></i>
+        İpucu Göster
+        <span class="hint-cost">{{ .HintCost }} puan</span>
+    </div>
+    {{ else if .HintUsed }}
+    <div class="question-hint" onclick="event.stopPropagation(); showHintContent({{ .ID }})">
+        <i class="fas fa-lightbulb" style="color:#00ff9d;"></i>
+        İpucu Kullanıldı
+    </div>
+    {{ end }}
+</div>
+{{end}}

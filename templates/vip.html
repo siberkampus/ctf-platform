@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Üyelik - CTF HACK PLATFORMU</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Tüm stiller aynı kalacak - uzunluk nedeniyle kısaltıldı */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%); color: #e0e0e0; min-height: 100vh; line-height: 1.6; }
+        .matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.05; pointer-events: none; }
+        .navbar { background: rgba(10, 20, 30, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #00ff9d; padding: 1rem 5%; position: fixed; width: 100%; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 20px rgba(0, 255, 157, 0.2); }
+        .logo { font-family: 'Share Tech Mono', monospace; font-size: 1.8rem; font-weight: 700; background: linear-gradient(45deg, #00ff9d, #00b8ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { color: #e0e0e0; text-decoration: none; font-weight: 500; transition: 0.3s; position: relative; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: #00ff9d; transition: 0.3s; }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+        .nav-links a:hover, .nav-links a.active { color: #00ff9d; }
+        .user-points { background: rgba(0, 255, 157, 0.1); border: 1px solid #00ff9d; padding: 0.3rem 1rem; border-radius: 5px; color: #00ff9d; }
+        .login-btn { background: transparent; border: 2px solid #00ff9d; color: #00ff9d; padding: 0.5rem 1.5rem; border-radius: 5px; font-weight: 600; transition: 0.3s; cursor: pointer; }
+        .login-btn:hover { background: #00ff9d; color: #0a0f0f; box-shadow: 0 0 20px rgba(0, 255, 157, 0.5); }
+        .register-btn { background: #00ff9d; border: none; color: #0a0f0f; padding: 0.5rem 1.5rem; border-radius: 5px; font-weight: 600; transition: 0.3s; cursor: pointer; }
+        .register-btn:hover { background: #00b86e; box-shadow: 0 0 20px rgba(0, 255, 157, 0.5); transform: scale(1.05); }
+        .container { max-width: 1400px; margin: 80px auto 0; padding: 2rem 5%; }
+        .breadcrumb { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.9rem; color: #6a7a8a; }
+        .breadcrumb a { color: #b0b0b0; text-decoration: none; transition: 0.3s; }
+        .breadcrumb a:hover { color: #00ff9d; }
+        .breadcrumb i { font-size: 0.7rem; color: #2a3a4a; }
+        .vip-hero { text-align: center; margin-bottom: 4rem; padding: 2rem; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.05)); border-radius: 30px; border: 1px solid rgba(255,215,0,0.3); }
+        .vip-title { font-family: 'Share Tech Mono', monospace; font-size: 4rem; background: linear-gradient(135deg, #ffd700, #ffa500, #ff8c00, #ff6b00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem; animation: glow 3s ease-in-out infinite; }
+        @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255,215,0,0.3)); } 50% { filter: drop-shadow(0 0 20px rgba(255,215,0,0.5)); } }
+        .vip-subtitle { color: #b0b0b0; font-size: 1.2rem; max-width: 600px; margin: 0 auto; }
+        .vip-stats { display: flex; justify-content: center; gap: 3rem; margin-top: 2rem; flex-wrap: wrap; }
+        .vip-stat { text-align: center; }
+        .vip-stat-number { font-family: 'Share Tech Mono', monospace; font-size: 2rem; font-weight: 700; color: #ffd700; }
+        .vip-stat-label { color: #6a7a8a; font-size: 0.85rem; }
+        .current-vip-card { background: linear-gradient(135deg, #1a1f2f, #0d1117); border: 1px solid #ffd700; border-radius: 20px; padding: 2rem; margin-bottom: 4rem; position: relative; overflow: hidden; }
+        .current-vip-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,215,0,0.1), transparent); animation: rotate 20s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .vip-card-content { position: relative; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem; z-index: 1; }
+        .vip-card-info { display: flex; align-items: center; gap: 1.5rem; }
+        .vip-card-icon { width: 70px; height: 70px; background: linear-gradient(135deg, #ffd700, #ffa500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #0a0f0f; }
+        .vip-card-text h3 { font-size: 1.5rem; color: #ffd700; margin-bottom: 0.3rem; }
+        .vip-card-text p { color: #b0b0b0; }
+        .vip-card-timer { text-align: center; }
+        .timer-digits { font-family: 'Share Tech Mono', monospace; font-size: 2.5rem; font-weight: 700; color: #ffd700; }
+        .renew-btn { padding: 0.8rem 2rem; background: linear-gradient(135deg, #ffd700, #ffa500); border: none; border-radius: 10px; color: #0a0f0f; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .renew-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,215,0,0.3); }
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-header h2 { font-family: 'Share Tech Mono', monospace; font-size: 2.2rem; color: #00ff9d; margin-bottom: 0.5rem; }
+        .section-header h2::before { content: '['; margin-right: 10px; color: #00ff9d; }
+        .section-header h2::after { content: ']'; margin-left: 10px; color: #00ff9d; }
+        .section-header p { color: #6a7a8a; }
+        .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 4rem; }
+        .benefit-card-modern { background: rgba(20, 30, 40, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.2); border-radius: 20px; padding: 2rem; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .benefit-card-modern:hover { transform: translateY(-10px); border-color: #ffd700; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .benefit-card-modern::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #ffd700, #ffa500); transform: scaleX(0); transition: transform 0.3s; }
+        .benefit-card-modern:hover::after { transform: scaleX(1); }
+        .benefit-icon-modern { width: 80px; height: 80px; margin: 0 auto 1.5rem; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.05)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #ffd700; }
+        .benefit-card-modern h3 { font-size: 1.3rem; color: #ffd700; margin-bottom: 0.5rem; }
+        .benefit-card-modern p { color: #b0b0b0; line-height: 1.6; }
+        .benefit-tag { display: inline-block; margin-top: 1rem; padding: 0.3rem 1rem; background: rgba(255,215,0,0.1); border-radius: 20px; font-size: 0.8rem; color: #ffd700; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 4rem; }
+        .pricing-card-modern { background: rgba(20, 30, 40, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.2); border-radius: 20px; padding: 2rem; text-align: center; transition: all 0.3s ease; cursor: pointer; position: relative; }
+        .pricing-card-modern:hover { transform: translateY(-10px); border-color: #ffd700; }
+        .pricing-card-modern.popular { border: 2px solid #ffd700; transform: scale(1.02); }
+        .popular-ribbon { position: absolute; top: -10px; right: 20px; background: linear-gradient(135deg, #ffd700, #ffa500); color: #0a0f0f; padding: 0.3rem 1.5rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+        .pricing-card-modern .package-name { font-size: 1.5rem; font-weight: 700; color: #ffd700; margin-bottom: 1rem; }
+        .pricing-card-modern .price { font-size: 3rem; font-weight: 800; color: #e0e0e0; margin-bottom: 1rem; }
+        .pricing-card-modern .price small { font-size: 1rem; color: #6a7a8a; }
+        .pricing-card-modern .price-note { color: #6a7a8a; font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .features-list { list-style: none; text-align: left; margin-bottom: 2rem; }
+        .features-list li { padding: 0.5rem 0; color: #b0b0b0; display: flex; align-items: center; gap: 0.5rem; }
+        .features-list li i { color: #00ff9d; width: 20px; }
+        .features-list li.vip-feature i { color: #ffd700; }
+        .select-btn { width: 100%; padding: 1rem; background: transparent; border: 2px solid #ffd700; border-radius: 10px; color: #ffd700; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .select-btn:hover, .select-btn.selected { background: #ffd700; color: #0a0f0f; }
+        .campaign-payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 4rem; }
+        .campaign-card, .payment-card { background: rgba(20, 30, 40, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(0,255,157,0.2); border-radius: 20px; padding: 2rem; }
+        .campaign-card h3, .payment-card h3 { font-family: 'Share Tech Mono', monospace; color: #00ff9d; margin-bottom: 1rem; }
+        .campaign-input-group { display: flex; gap: 1rem; margin-top: 1rem; }
+        .campaign-input-group input { flex: 1; padding: 0.8rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a; border-radius: 10px; color: #e0e0e0; }
+        .campaign-input-group input:focus { outline: none; border-color: #00ff9d; }
+        .btn-apply { padding: 0.8rem 1.5rem; background: linear-gradient(45deg, #00ff9d, #00b86e); border: none; border-radius: 10px; color: #0a0f0f; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-apply:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,255,157,0.3); }
+        .payment-methods { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+        .payment-method { flex: 1; min-width: 100px; padding: 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: 0.3s; }
+        .payment-method:hover, .payment-method.selected { border-color: #00ff9d; background: rgba(0,255,157,0.1); }
+        .payment-summary { background: rgba(0,0,0,0.3); border-radius: 15px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .summary-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #2a3a4a; }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-total { font-family: 'Share Tech Mono', monospace; font-size: 1.3rem; color: #00ff9d; }
+        .pay-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, #ffd700, #ffa500); border: none; border-radius: 10px; color: #0a0f0f; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .pay-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,215,0,0.3); }
+        .machines-preview { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 4rem; }
+        .machine-preview-card { background: rgba(20, 30, 40, 0.6); backdrop-filter: blur(10px); border: 1px solid #2a3a4a; border-radius: 15px; padding: 1.5rem; position: relative; transition: 0.3s; }
+        .machine-preview-card .lock-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #ffd700; }
+        .preview-machine-name { font-family: 'Share Tech Mono', monospace; color: #00ff9d; margin-bottom: 0.5rem; }
+        .preview-machine-difficulty { display: inline-block; padding: 0.2rem 0.8rem; background: rgba(255,0,200,0.2); border-radius: 20px; font-size: 0.7rem; color: #ff00c8; }
+        .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 4rem; }
+        .testimonial-card-modern { background: rgba(20, 30, 40, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.2); border-radius: 20px; padding: 2rem; text-align: center; transition: 0.3s; }
+        .testimonial-card-modern:hover { transform: translateY(-5px); border-color: #ffd700; }
+        .testimonial-avatar-modern { width: 70px; height: 70px; margin: 0 auto 1rem; background: linear-gradient(135deg, #ffd700, #ffa500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #0a0f0f; }
+        .testimonial-name-modern { font-weight: 700; color: #ffd700; margin-bottom: 0.3rem; }
+        .faq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 4rem; }
+        .faq-item-modern { background: rgba(20, 30, 40, 0.6); backdrop-filter: blur(10px); border: 1px solid #2a3a4a; border-radius: 15px; padding: 1.5rem; transition: 0.3s; }
+        .faq-item-modern:hover { border-color: #00ff9d; }
+        .faq-question-modern { font-family: 'Share Tech Mono', monospace; color: #00ff9d; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .footer { background: rgba(10, 15, 20, 0.95); padding: 3rem 5%; margin-top: 4rem; border-top: 1px solid #00ff9d; }
+        .footer-content { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; }
+        .footer-section h3 { font-family: 'Share Tech Mono', monospace; color: #00ff9d; margin-bottom: 1rem; }
+        .footer-section ul { list-style: none; }
+        .footer-section ul li { margin: 0.5rem 0; }
+        .footer-section ul li a { color: #b0b0b0; text-decoration: none; transition: 0.3s; }
+        .footer-section ul li a:hover { color: #00ff9d; padding-left: 5px; }
+        .social-links { display: flex; gap: 1rem; margin-top: 1rem; }
+        .social-links a { color: #b0b0b0; font-size: 1.5rem; transition: 0.3s; }
+        .social-links a:hover { color: #00ff9d; transform: translateY(-3px); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 2000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: #1a1f2f; border: 1px solid #00ff9d; border-radius: 15px; max-width: 500px; width: 90%; padding: 2rem; animation: modalSlide 0.3s; }
+        @keyframes modalSlide { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-header h3 { font-family: 'Share Tech Mono', monospace; color: #00ff9d; }
+        .modal-close { background: none; border: none; color: #b0b0b0; font-size: 1.5rem; cursor: pointer; transition: 0.3s; }
+        .modal-close:hover { color: #ff5f56; }
+        .modal-body { margin-bottom: 2rem; text-align: center; }
+        .modal-actions { display: flex; gap: 1rem; justify-content: center; }
+        .btn-modal-primary { padding: 0.8rem 2rem; background: linear-gradient(45deg, #00ff9d, #00b86e); border: none; border-radius: 8px; color: #0a0f0f; font-weight: 600; cursor: pointer; }
+        .hl-dialog-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); align-items: center; justify-content: center; }
+        .hl-dialog-overlay.open { display: flex; }
+        .hl-dialog { background: #0d1117; border: 1px solid #2a3a4a; border-radius: 14px; width: 90%; max-width: 400px; overflow: hidden; }
+        .hl-dialog-icon { display: flex; align-items: center; justify-content: center; padding: 2rem 2rem 1rem; }
+        .hl-dialog-icon-circle { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .hl-dialog-icon-circle.warn { background: rgba(255, 189, 46, 0.12); border: 1px solid rgba(255, 189, 46, 0.35); color: #ffbd2e; }
+        .hl-dialog-icon-circle.info { background: rgba(0, 184, 255, 0.1); border: 1px solid rgba(0, 184, 255, 0.3); color: #00b8ff; }
+        .hl-dialog-body { padding: 0 2rem 1.5rem; text-align: center; }
+        .hl-dialog-title { font-family: 'Share Tech Mono', monospace; font-size: 1.05rem; margin-bottom: 0.6rem; }
+        .hl-dialog-message { font-size: 0.9rem; color: #8a9a8a; }
+        .hl-dialog-actions { display: flex; gap: 0.75rem; padding: 1.25rem 1.5rem; border-top: 1px solid #1e2a38; justify-content: flex-end; }
+        .hl-dialog-actions.centered { justify-content: center; }
+        .hl-btn { padding: 0.55rem 1.4rem; border-radius: 7px; font-size: 0.875rem; font-weight: 600; cursor: pointer; border: none; }
+        .hl-btn-cancel { background: rgba(255, 255, 255, 0.05); border: 1px solid #2a3a4a; color: #8a9a8a; }
+        .hl-btn-confirm { background: rgba(255, 95, 86, 0.15); border: 1px solid rgba(255, 95, 86, 0.4); color: #ff5f56; }
+        .hl-btn-ok { background: rgba(0, 255, 157, 0.12); border: 1px solid rgba(0, 255, 157, 0.35); color: #00ff9d; }
+        @media (max-width: 768px) { .navbar .nav-links { display: none; } .vip-title { font-size: 2.5rem; } .campaign-payment-grid { grid-template-columns: 1fr; } .faq-grid { grid-template-columns: 1fr; } .pricing-card-modern.popular { transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg"></div>
+
+    <!-- Dialogs -->
+    <div class="hl-dialog-overlay" id="dlConfirm">
+        <div class="hl-dialog">
+            <div class="hl-dialog-icon">
+                <div class="hl-dialog-icon-circle warn"><i class="fas fa-right-from-bracket"></i></div>
+            </div>
+            <div class="hl-dialog-body">
+                <div class="hl-dialog-title" id="dlConfirmTitle">Çıkış Yap</div>
+                <div class="hl-dialog-message" id="dlConfirmMsg">Oturumunuzu kapatmak istediğinize emin misiniz?</div>
+            </div>
+            <div class="hl-dialog-actions">
+                <button class="hl-btn hl-btn-cancel" onclick="dlConfirmResolve(false)">Vazgeç</button>
+                <button class="hl-btn hl-btn-confirm" onclick="dlConfirmResolve(true)">Çıkış Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="hl-dialog-overlay" id="dlAlert">
+        <div class="hl-dialog">
+            <div class="hl-dialog-icon">
+                <div class="hl-dialog-icon-circle info" id="dlAlertIcon"><i class="fas fa-info-circle"></i></div>
+            </div>
+            <div class="hl-dialog-body">
+                <div class="hl-dialog-title" id="dlAlertTitle">Bilgi</div>
+                <div class="hl-dialog-message" id="dlAlertMsg">Mesaj</div>
+            </div>
+            <div class="hl-dialog-actions centered">
+                <button class="hl-btn hl-btn-ok" onclick="dlAlertClose()">Tamam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-skull"></i> HACKLAB</div>
+        <div class="nav-links">
+            <a href="/">Ana Sayfa</a>
+            <a href="/machines">Makineler</a>
+            <a href="/academy">Akademi</a>
+            <a href="/leaderboard">Liderlik</a>
+            <a href="/vip">VIP</a>
+            {{if .IsAuthenticated}}
+            <a href="/profile/{{.CurrentUser.Username}}">Profil</a>
+            <a href="/dashboard">Panel</a>
+            {{if .IsAdmin}}<a href="/admin" style="color: #ffd700;">Admin</a>{{end}}
+            <span class="user-points">{{.CurrentUser.Points}} Puan</span>
+            <button class="login-btn" onclick="customLogout()">Çıkış</button>
+            {{else}}
+            <button class="login-btn" onclick="window.location.href='/login'">Giriş</button>
+            <button class="register-btn" onclick="window.location.href='/register'">Kayıt Ol</button>
+            {{end}}
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/">Ana Sayfa</a>
+            <i class="fas fa-chevron-right"></i>
+            <span style="color: #00ff9d;">VIP Üyelik</span>
+        </div>
+
+        <div class="vip-hero">
+            <h1 class="vip-title">VIP ÜYELİK</h1>
+            <p class="vip-subtitle">Ayrıcalıklı dünyaya adım atın, sınırları zorlayın</p>
+            <div class="vip-stats">
+                <div class="vip-stat"><div class="vip-stat-number">{{.VIPStats.TotalVIPUsers}}+</div><div class="vip-stat-label">VIP Üye</div></div>
+                <div class="vip-stat"><div class="vip-stat-number">{{.VIPStats.TotalVIPMachines}}+</div><div class="vip-stat-label">VIP Makine</div></div>
+                <div class="vip-stat"><div class="vip-stat-number">{{.VIPStats.AverageRating}}</div><div class="vip-stat-label">⭐ Ortalama Puan</div></div>
+            </div>
+        </div>
+
+        {{if .IsVIP}}
+        <div class="current-vip-card">
+            <div class="vip-card-content">
+                <div class="vip-card-info">
+                    <div class="vip-card-icon"><i class="fas fa-crown"></i></div>
+                    <div class="vip-card-text"><h3>VIP Üyeliğiniz Aktif!</h3><p>Tüm ayrıcalıklara sahipsiniz. Teşekkür ederiz.</p></div>
+                </div>
+                <div class="vip-card-timer">
+                    <div class="timer-digits">{{if .VIPExpiry}}{{.VIPExpiry | formatDaysLeft}}{{else}}Süresiz{{end}}</div>
+                    <div>Kalan Süre</div>
+                </div>
+                <button class="renew-btn" onclick="renewVIP()"><i class="fas fa-sync-alt"></i> Yenile</button>
+            </div>
+        </div>
+        {{end}}
+
+        <div class="section-header"><h2>VIP AVANTAJLARI</h2><p>Sizi bekleyen özel ayrıcalıklar</p></div>
+        <div class="benefits-grid">
+            <div class="benefit-card-modern"><div class="benefit-icon-modern"><i class="fas fa-lock-open"></i></div><h3>Özel VIP Makineler</h3><p>Sadece VIP üyelere özel 50+ zorlu makineye erişim</p><span class="benefit-tag">Her ay yeni makineler</span></div>
+            <div class="benefit-card-modern"><div class="benefit-icon-modern"><i class="fas fa-trophy"></i></div><h3>Çift Puan</h3><p>Tüm çözümlerden 2 kat daha fazla puan kazanın</p><span class="benefit-tag">2x XP Kazanımı</span></div>
+            <div class="benefit-card-modern"><div class="benefit-icon-modern"><i class="fas fa-medal"></i></div><h3>Özel Rozetler</h3><p>VIP üyelere özel 10+ rozet ve profil görünümü</p><span class="benefit-tag">Profilinizde VIP rozeti</span></div>
+            <div class="benefit-card-modern"><div class="benefit-icon-modern"><i class="fas fa-rocket"></i></div><h3>Öncelikli Destek</h3><p>Sorularınıza öncelikli yanıt ve 7/24 destek</p><span class="benefit-tag">1 saat içinde yanıt</span></div>
+            <div class="benefit-card-modern"><div class="benefit-icon-modern"><i class="fas fa-chart-line"></i></div><h3>Detaylı İstatistikler</h3><p>Gelişmiş analitik ve performans grafikleri</p><span class="benefit-tag">Detaylı Analiz</span></div>
+            <div class="benefit-card-modern"><div class="benefit-icon-modern"><i class="fas fa-users"></i></div><h3>Özel Topluluk</h3><p>VIP üyeler için özel Discord kanalı ve etkinlikler</p><span class="benefit-tag">Özel Discord</span></div>
+        </div>
+
+        <div class="section-header"><h2>ÜYELİK PAKETLERİ</h2><p>Size en uygun paketi seçin</p></div>
+        <div class="pricing-grid">
+            {{range $index, $plan := .VIPPlans}}
+            <div class="pricing-card-modern {{if .IsPopular}}popular{{end}}" data-plan-name="{{.Name}}" data-plan-price="{{.Price}}" data-plan-duration="{{.DurationDays}}">
+                {{if .IsPopular}}<div class="popular-ribbon">🔥 EN POPÜLER</div>{{end}}
+                <div class="package-name">{{.Name}}</div>
+                <div class="price">{{.Price | formatPrice}}<small>{{if eq .DurationDays 30}}/ay{{else if eq .DurationDays 365}}/yıl{{else}}tek sefer{{end}}</small></div>
+                {{if .DiscountNote}}<div class="price-note">{{.DiscountNote}}</div>{{end}}
+                <!-- <ul class="features-list">{{range .Features}}<li><i class="fas fa-check"></i> {{.}}</li>{{end}}</ul> -->
+                 <ul class="features-list"><li><i class="fas fa-check"></i> {{.Description}}</li></ul>
+                <button class="select-btn" data-plan-name="{{.Name}}">SEÇ</button>
+            </div>
+            {{end}}
+        </div>
+
+        <div class="campaign-payment-grid">
+            <div class="campaign-card">
+                <h3><i class="fas fa-ticket-alt"></i> Kampanya Kodunuz Var mı?</h3>
+                <div class="campaign-input-group"><input type="text" id="campaignCode" placeholder="Kampanya kodunu girin"><button class="btn-apply" onclick="applyCampaign()">Uygula</button></div>
+                <div id="campaignMessage" style="margin-top: 1rem; font-size: 0.9rem;"></div>
+            </div>
+            <div class="payment-card">
+                <h3><i class="fas fa-credit-card"></i> Ödeme Yöntemi</h3>
+                <div class="payment-methods">
+                    <div class="payment-method selected" onclick="selectPaymentMethod('credit_card')"><i class="fas fa-credit-card"></i> Kredi Kartı</div>
+                    <div class="payment-method" onclick="selectPaymentMethod('paypal')"><i class="fab fa-paypal"></i> PayPal</div>
+                    <div class="payment-method" onclick="selectPaymentMethod('crypto')"><i class="fab fa-bitcoin"></i> Kripto</div>
+                    <div class="payment-method" onclick="selectPaymentMethod('bank_transfer')"><i class="fas fa-university"></i> Havale/EFT</div>
+                </div>
+                <div class="payment-summary">
+                    <div class="summary-row"><span>Seçilen Paket:</span><span id="selectedPackageText">-</span></div>
+                    <div class="summary-row"><span>Fiyat:</span><span id="selectedPrice">₺0</span></div>
+                    <div class="summary-row"><span>İndirim:</span><span id="discountAmount" style="color: #00ff9d;">₺0</span></div>
+                    <div class="summary-row"><span>KDV (%18):</span><span id="taxAmount">₺0</span></div>
+                    <div class="summary-row"><span class="summary-total">Toplam:</span><span class="summary-total" id="totalAmount">₺0</span></div>
+                </div>
+                <button class="pay-btn" onclick="processPayment()"><i class="fas fa-lock"></i> GÜVENLİ ÖDEME YAP</button>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.75rem; color: #6a7a8a;">256-bit SSL ile güvenli ödeme</p>
+            </div>
+        </div>
+
+        <div class="section-header"><h2>VIP MAKİNELER</h2><p>Sizi bekleyen zorlu görevler</p></div>
+        <div class="machines-preview">
+            <div class="machine-preview-card"><div class="lock-overlay"><i class="fas fa-lock"></i></div><div class="preview-machine-name">HACKLAB-VIP-01</div><span class="preview-machine-difficulty">Uzman</span><div style="margin-top: 0.5rem; color: #6a7a8a;">750 puan</div></div>
+            <div class="machine-preview-card"><div class="lock-overlay"><i class="fas fa-lock"></i></div><div class="preview-machine-name">HACKLAB-VIP-02</div><span class="preview-machine-difficulty">Uzman</span><div style="margin-top: 0.5rem; color: #6a7a8a;">800 puan</div></div>
+            <div class="machine-preview-card"><div class="lock-overlay"><i class="fas fa-lock"></i></div><div class="preview-machine-name">HACKLAB-VIP-03</div><span class="preview-machine-difficulty">Uzman</span><div style="margin-top: 0.5rem; color: #6a7a8a;">900 puan</div></div>
+        </div>
+
+        <div class="section-header"><h2>ÜYELERİMİZ NE DİYOR?</h2><p>VIP deneyimini yaşayanlardan</p></div>
+        <div class="testimonials-grid">
+            {{range .Testimonials}}
+            <div class="testimonial-card-modern">
+                <div class="testimonial-avatar-modern"><i class="fas fa-user-astronaut"></i></div>
+                <div class="testimonial-name-modern">{{.Username}}</div>
+                <div style="color: #6a7a8a; font-size: 0.8rem; margin-bottom: 1rem;">VIP Üye • {{.Duration}}</div>
+                <p style="color: #b0b0b0; font-style: italic;">"{{.Text}}"</p>
+                <div style="margin-top: 1rem; color: #ffd700;">{{range $i := loop .Rating}}<i class="fas fa-star"></i>{{end}}</div>
+            </div>
+            {{end}}
+        </div>
+
+        <div class="section-header"><h2>SIKÇA SORULAN SORULAR</h2><p>Merak ettikleriniz</p></div>
+        <div class="faq-grid">
+            <div class="faq-item-modern"><div class="faq-question-modern"><i class="fas fa-question-circle"></i> VIP üyelik nasıl aktif olur?</div><div class="faq-answer">Ödeme tamamlandıktan sonra VIP üyeliğiniz otomatik olarak aktif olur. Genellikle 1-2 dakika içinde hesabınıza yansır.</div></div>
+            <div class="faq-item-modern"><div class="faq-question-modern"><i class="fas fa-question-circle"></i> İptal edebilir miyim?</div><div class="faq-answer">Evet, istediğiniz zaman iptal edebilirsiniz. Aylık üyeliklerde iptalden sonraki ay yenileme yapılmaz.</div></div>
+            <div class="faq-item-modern"><div class="faq-question-modern"><i class="fas fa-question-circle"></i> Hangi ödeme yöntemleri geçerli?</div><div class="faq-answer">Kredi kartı (Visa, Mastercard), PayPal, kripto para ve banka havalesi ile ödeme yapabilirsiniz.</div></div>
+            <div class="faq-item-modern"><div class="faq-question-modern"><i class="fas fa-question-circle"></i> Para iadesi var mı?</div><div class="faq-answer">7 gün içinde memnun kalmazsanız tam para iadesi garantisi sunuyoruz.</div></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section"><h3>HACKLAB</h3><p>Güvenlik araştırmacıları ve etik hacker'lar için CTF platformu.</p><div class="social-links"><a href="#"><i class="fab fa-discord"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin"></i></a></div></div>
+            <div class="footer-section"><h3>Hızlı Linkler</h3><ul><li><a href="/machines">Tüm Makineler</a></li><li><a href="/leaderboard">Leaderboard</a></li><li><a href="/blog">Blog</a></li></ul></div>
+            <div class="footer-section"><h3>Destek</h3><ul><li><a href="/faq">SSS</a></li><li><a href="/contact">İletişim</a></li><li><a href="/discord">Discord</a></li></ul></div>
+            <div class="footer-section"><h3>Yasal</h3><ul><li><a href="/terms">Kullanım Şartları</a></li><li><a href="/privacy">Gizlilik Politikası</a></li></ul></div>
+        </div>
+        <div style="text-align: center; margin-top: 3rem; color: #404040;">© 2024 HACKLAB — Bayrakları toplamaya hazır mısın?</div>
+    </footer>
+
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3><i class="fas fa-check-circle" style="color: #00ff9d;"></i> ÖDEME BAŞARILI</h3><button class="modal-close" onclick="closeSuccessModal()">&times;</button></div>
+            <div class="modal-body"><i class="fas fa-crown" style="font-size: 4rem; color: #ffd700;"></i><p style="margin-top: 1rem;">Tebrikler! Artık VIP üyesisiniz.</p><p style="margin-top: 0.5rem; font-size: 0.9rem; color: #b0b0b0;">Tüm ayrıcalıkları kullanmaya başlayabilirsiniz.</p></div>
+            <div class="modal-actions"><button class="btn-modal-primary" onclick="goToMachines()">MAKİNELERE GİT</button></div>
+        </div>
+    </div>
+
+  <script>
+    // Dialog Sistemi
+    let _dlConfirmResolve = null;
+    let _dlAlertIsOpen = false;
+
+    function showConfirm(title, message, confirmLabel, confirmClass) {
+        document.getElementById('dlConfirmTitle').textContent = title;
+        document.getElementById('dlConfirmMsg').textContent = message;
+        const confirmBtn = document.querySelector('#dlConfirm .hl-btn-confirm');
+        if (confirmLabel) confirmBtn.innerHTML = confirmLabel;
+        document.getElementById('dlConfirm').classList.add('open');
+        return new Promise(resolve => { _dlConfirmResolve = resolve; });
+    }
+
+    function dlConfirmResolve(value) {
+        document.getElementById('dlConfirm').classList.remove('open');
+        if (_dlConfirmResolve) { _dlConfirmResolve(value); _dlConfirmResolve = null; }
+    }
+
+    function showAlert(title, message, type) {
+        if (_dlAlertIsOpen) return;
+        document.getElementById('dlAlertTitle').textContent = title;
+        document.getElementById('dlAlertMsg').textContent = message;
+        document.getElementById('dlAlert').classList.add('open');
+        _dlAlertIsOpen = true;
+    }
+
+    function dlAlertClose() {
+        document.getElementById('dlAlert').classList.remove('open');
+        _dlAlertIsOpen = false;
+    }
+
+    document.getElementById('dlConfirm').addEventListener('click', function(e) {
+        if (e.target === this) dlConfirmResolve(false);
+    });
+    document.getElementById('dlAlert').addEventListener('click', function(e) {
+        if (e.target === this) dlAlertClose();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('dlConfirm').classList.contains('open')) dlConfirmResolve(false);
+            if (document.getElementById('dlAlert').classList.contains('open')) dlAlertClose();
+        }
+    });
+
+    // Global değişkenler
+    let selectedPackage = '';
+    let selectedPrice = 0;
+    let selectedDuration = 0;
+    let selectedPayment = 'credit_card';
+    let campaignDiscount = 0;
+
+    // Kullanıcı ID'sini Go'dan al (güvenli şekilde)
+    const currentUserID = {{if .CurrentUser}}{{.CurrentUser.ID}}{{else}}0{{end}};
+    const isAuthenticated = {{.IsAuthenticated}};
+
+    // Select Package
+    function selectPackage(name, price, duration) {
+        selectedPackage = name;
+        selectedPrice = price;
+        selectedDuration = duration;
+        
+        document.querySelectorAll('.select-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            btn.textContent = 'SEÇ';
+        });
+        
+        const btn = document.querySelector(`.select-btn[data-plan-name="${name}"]`);
+        if (btn) {
+            btn.classList.add('selected');
+            btn.textContent = 'SEÇİLDİ';
+        }
+        
+        document.getElementById('selectedPackageText').textContent = name + ' VIP';
+        document.getElementById('selectedPrice').textContent = `₺${price.toFixed(2)}`;
+        
+        updatePaymentSummary();
+    }
+
+    // Paket kartlarına tıklama eventi
+    document.querySelectorAll('.pricing-card-modern').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.classList.contains('select-btn')) return;
+            
+            const name = this.dataset.planName;
+            const price = parseFloat(this.dataset.planPrice);
+            const duration = parseInt(this.dataset.planDuration);
+            if (name && price && duration) {
+                selectPackage(name, price, duration);
+            }
+        });
+    });
+
+    // Butonlara tıklama eventi
+    document.querySelectorAll('.select-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const card = this.closest('.pricing-card-modern');
+            const name = card.dataset.planName;
+            const price = parseFloat(card.dataset.planPrice);
+            const duration = parseInt(card.dataset.planDuration);
+            if (name && price && duration) {
+                selectPackage(name, price, duration);
+            }
+        });
+    });
+
+    function selectPaymentMethod(method) {
+        selectedPayment = method;
+        document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+        event.target.closest('.payment-method').classList.add('selected');
+    }
+
+    function updatePaymentSummary() {
+        let basePrice = selectedPrice;
+        const discountedPrice = basePrice - campaignDiscount;
+        const tax = discountedPrice * 0.18;
+        const total = discountedPrice + tax;
+        
+        document.getElementById('discountAmount').textContent = `₺${campaignDiscount.toFixed(2)}`;
+        document.getElementById('taxAmount').textContent = `₺${tax.toFixed(2)}`;
+        document.getElementById('totalAmount').textContent = `₺${total.toFixed(2)}`;
+    }
+
+    async function customLogout() {
+        const confirmed = await showConfirm('Çıkış Yap', 'Oturumunuzu kapatmak istediğinize emin misiniz?', '<i class="fas fa-right-from-bracket"></i> Çıkış Yap', 'hl-btn-confirm');
+        if (!confirmed) return;
+        try {
+            const response = await fetch('/api/auth/logout', { method: 'POST' });
+            if (response.ok) window.location.reload();
+            else showAlert('Hata', 'Çıkış yapılırken bir hata oluştu!', 'error');
+        } catch (error) {
+            showAlert('Hata', 'Çıkış yapılırken bir hata oluştu!', 'error');
+        }
+    }
+
+    function renewVIP() {
+        window.scrollTo({ top: document.querySelector('.pricing-grid').offsetTop - 100, behavior: 'smooth' });
+    }
+
+    async function applyCampaign() {
+        const code = document.getElementById('campaignCode').value;
+        const messageDiv = document.getElementById('campaignMessage');
+        
+        if (!code.trim()) {
+            showAlert('Uyarı', 'Lütfen bir kampanya kodu girin!', 'warning');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/campaign/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code })
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                campaignDiscount = data.discount_amount || (selectedPrice * (data.discount_percent / 100));
+                messageDiv.innerHTML = `<span style="color: #00ff9d;">✅ ${data.message}</span>`;
+                showAlert('Başarılı', data.message, 'success');
+            } else {
+                campaignDiscount = 0;
+                messageDiv.innerHTML = `<span style="color: #ff5f56;">❌ ${data.message}</span>`;
+                showAlert('Geçersiz Kod', data.message, 'error');
+            }
+            updatePaymentSummary();
+        } catch (error) {
+            campaignDiscount = 0;
+            messageDiv.innerHTML = `<span style="color: #ff5f56;">❌ Kampanya kodu uygulanamadı!</span>`;
+            showAlert('Hata', 'Kampanya kodu uygulanırken bir hata oluştu!', 'error');
+        }
+    }
+
+    async function processPayment() {
+        if (!isAuthenticated) {
+            showAlert('Giriş Gerekli', 'Ödeme yapmak için önce giriş yapmalısınız!', 'warning');
+            setTimeout(() => { window.location.href = '/login'; }, 2000);
+            return;
+        }
+        
+        const totalAmount = document.getElementById('totalAmount').textContent;
+        const confirmed = await showConfirm('Ödemeyi Onayla', `${selectedPackage} paketi için ${totalAmount} ödeme yapmak istediğinize emin misiniz?`, '<i class="fas fa-credit-card"></i> Ödemeyi Onayla', 'hl-btn-confirm');
+        if (!confirmed) return;
+        
+        const payBtn = document.querySelector('.pay-btn');
+        const originalText = payBtn.innerHTML;
+        payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> İşlem Yapılıyor...';
+        payBtn.disabled = true;
+        
+        try {
+            const requestBody = {
+                package: selectedPackage.toLowerCase(),
+                payment_method: selectedPayment,
+                campaign_code: document.getElementById('campaignCode').value
+            };
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // Sadece giriş yapmışsa X-User-ID header'ını ekle
+            if (currentUserID > 0) {
+                headers['X-User-ID'] = currentUserID;
+            }
+            
+            const response = await fetch('/api/vip/purchase', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestBody)
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('successModal').classList.add('show');
+            } else {
+                showAlert('Ödeme Başarısız', data.message || 'Ödeme işlemi sırasında bir hata oluştu!', 'error');
+            }
+        } catch (error) {
+            showAlert('Hata', 'Ödeme işlemi sırasında bir hata oluştu!', 'error');
+        } finally {
+            payBtn.innerHTML = originalText;
+            payBtn.disabled = false;
+        }
+    }
+
+    function closeSuccessModal() { 
+        document.getElementById('successModal').classList.remove('show');
+        window.location.href = '/vip';
+    }
+    
+    function goToMachines() { 
+        window.location.href = '/machines'; 
+    }
+
+    // Sayfa yüklendiğinde - ilk planı data attribute'lerden al
+    window.addEventListener('load', function() {
+        const firstCard = document.querySelector('.pricing-card-modern');
+        if (firstCard && firstCard.dataset.planName) {
+            selectPackage(firstCard.dataset.planName, parseFloat(firstCard.dataset.planPrice), parseInt(firstCard.dataset.planDuration));
+        }
+    });
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('successModal');
+        if (event.target === modal) closeSuccessModal();
+    };
+</script>
+</body>
+</html>

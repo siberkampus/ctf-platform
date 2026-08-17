@@ -1,0 +1,1345 @@
+{{define "content"}}
+<div class="questions-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h2><i class="fas fa-question-circle"></i> Soru Yönetimi</h2>
+            <p>Tüm makine sorularını görüntüleyin, düzenleyin ve yönetin</p>
+        </div>
+        <div class="header-right">
+            <button class="btn-primary" onclick="showAddQuestionModal()">
+                <i class="fas fa-plus"></i> Yeni Soru Ekle
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtreler -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label>Makine:</label>
+            <select id="machineFilter" class="filter-select" onchange="filterQuestions()">
+                <option value="all">Tüm Makineler</option>
+                {{range .Machines}}
+                <option value="{{.ID}}">{{.Name}}</option>
+                {{end}}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Durum:</label>
+            <select id="statusFilter" class="filter-select" onchange="filterQuestions()">
+                <option value="all">Tümü</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Pasif</option>
+            </select>
+        </div>
+
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Soru ara..." class="search-input"
+                onkeyup="filterQuestions()">
+        </div>
+
+        <button class="btn-filter" onclick="resetFilters()">
+            <i class="fas fa-undo"></i> Sıfırla
+        </button>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-question"></i></div>
+            <div class="stat-content">
+                <div class="stat-value" id="totalQuestions">0</div>
+                <div class="stat-label">Toplam Soru</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-content">
+                <div class="stat-value" id="activeQuestions">0</div>
+                <div class="stat-label">Aktif Soru</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-content">
+                <div class="stat-value" id="inactiveQuestions">0</div>
+                <div class="stat-label">Pasif Soru</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-flag"></i></div>
+            <div class="stat-content">
+                <div class="stat-value" id="totalSubmissions">0</div>
+                <div class="stat-label">Toplam Çözüm</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sorular Tablosu -->
+    <div class="table-container">
+        <table class="data-table" id="questionsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Makine</th>
+                    <th>Sıra</th>
+                    <th>Soru Başlığı</th>
+                    <th>Puan</th>
+                    <th>Çözüm Sayısı</th>
+                    <th>Başarı Oranı</th>
+                    <th>İpucu</th>
+                    <th>İpucu Maliyeti</th>
+                    <th>Durum</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody id="questionsTableBody">
+                <tr>
+                    <td colspan="11" class="text-center">Yükleniyor...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sayfalama -->
+    <div class="pagination" id="pagination"></div>
+
+    <!-- Yeni Soru Modalı -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Yeni Soru Ekle</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="questionForm">
+                    <input type="hidden" id="questionId" name="questionId">
+
+                    <div class="form-group">
+                        <label>Makine <span class="required">*</span></label>
+                        <select id="machineId" name="machineId" required>
+                            <option value="">Makine Seçin</option>
+                            {{range .Machines}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Soru Başlığı <span class="required">*</span></label>
+                        <input type="text" id="title" name="title" required
+                            placeholder="Örn: Web Vulnerability, SQL Injection">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Soru Açıklaması</label>
+                        <textarea id="description" name="description" rows="3"
+                            placeholder="Soru açıklaması..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Puan <span class="required">*</span></label>
+                            <input type="number" id="pointsReward" name="pointsReward" value="100" min="0" required>
+                        </div>
+                        <div class="form-group half">
+                            <label>Sıra Numarası</label>
+                            <input type="number" id="questionOrder" name="questionOrder" value="1" min="1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Flag <span class="required">*</span></label>
+                        <div class="flag-input-group">
+                            <input type="text" id="flag" name="flag" placeholder="FLAG{...}" required>
+                            <button type="button" class="btn-generate" onclick="generateFlag()">
+                                <i class="fas fa-random"></i>
+                            </button>
+                        </div>
+                        <small class="form-hint">Flag büyük/küçük harf duyarlıdır</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>İpucu</label>
+                            <input type="text" id="hint" name="hint" placeholder="İpucu (opsiyonel)">
+                        </div>
+                        <div class="form-group half">
+                            <label>İpucu Maliyeti</label>
+                            <input type="number" id="hintCost" name="hintCost" value="0" min="0">
+                        </div>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <span>Soru Aktif</span>
+                            <label class="switch">
+                                <input type="checkbox" id="isActive" name="isActive" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal()">İptal</button>
+                <button type="button" class="btn-primary" onclick="saveQuestion()">
+                    <i class="fas fa-save"></i> Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Soru Detay Modalı -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Soru Detayı</h3>
+                <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Soru ID</div>
+                        <div class="detail-value" id="detailId">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Makine</div>
+                        <div class="detail-value" id="detailMachine">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Sıra</div>
+                        <div class="detail-value" id="detailOrder">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Başlık</div>
+                        <div class="detail-value" id="detailTitle">-</div>
+                    </div>
+                    <div class="detail-item full-width">
+                        <div class="detail-label">Açıklama</div>
+                        <div class="detail-value" id="detailDescription">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Puan</div>
+                        <div class="detail-value" id="detailPoints">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Flag Hash</div>
+                        <div class="detail-value">
+                            <code id="detailFlagHash">-</code>
+                            <button class="btn-icon" onclick="copyFlagHash()" title="Kopyala">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">İpucu</div>
+                        <div class="detail-value" id="detailHint">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">İpucu Maliyeti</div>
+                        <div class="detail-value" id="detailHintCost">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Durum</div>
+                        <div class="detail-value" id="detailStatus">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Çözüm Sayısı</div>
+                        <div class="detail-value" id="detailSubmissions">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Başarı Oranı</div>
+                        <div class="detail-value" id="detailSuccessRate">-</div>
+                    </div>
+                </div>
+
+                <div class="submissions-list">
+                    <h4>Son Çözümler</h4>
+                    <table class="mini-table">
+                        <thead>
+                            <tr>
+                                <th>Kullanıcı</th>
+                                <th>Durum</th>
+                                <th>Tarih</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailSubmissions">
+                            <tr>
+                                <td colspan="3">Henüz çözüm yok</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .questions-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-left h2 {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        margin-bottom: 0.3rem;
+    }
+
+    .header-left p {
+        color: #6a7a8a;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        padding: 0.8rem 1.5rem;
+        background: linear-gradient(45deg, #00ff9d, #00b86e);
+        border: none;
+        border-radius: 8px;
+        color: #0a0f0f;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 255, 157, 0.4);
+    }
+
+    .filters-bar {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .filter-group label {
+        font-size: 0.8rem;
+        color: #6a7a8a;
+    }
+
+    .filter-select {
+        padding: 0.5rem 2rem 0.5rem 0.5rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #2a3a4a;
+        border-radius: 5px;
+        color: #e0e0e0;
+        min-width: 150px;
+    }
+
+    .search-box {
+        flex: 1;
+        position: relative;
+        min-width: 250px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6a7a8a;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #2a3a4a;
+        border-radius: 5px;
+        color: #e0e0e0;
+    }
+
+    .btn-filter {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: 1px solid #00ff9d;
+        border-radius: 5px;
+        color: #00ff9d;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-filter:hover {
+        background: rgba(0, 255, 157, 0.1);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 10px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(0, 255, 157, 0.1);
+        border: 1px solid #00ff9d;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #00ff9d;
+    }
+
+    .stat-value {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 1.5rem;
+        color: #00ff9d;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6a7a8a;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 10px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table th {
+        background: rgba(0, 255, 157, 0.1);
+        padding: 1rem;
+        text-align: left;
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        font-size: 0.8rem;
+        border-bottom: 1px solid #2a3a4a;
+    }
+
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #2a3a4a;
+    }
+
+    .data-table tr:hover {
+        background: rgba(0, 255, 157, 0.05);
+    }
+
+    .badge {
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .badge-active {
+        background: rgba(0, 255, 157, 0.2);
+        color: #00ff9d;
+        border: 1px solid #00ff9d;
+    }
+
+    .badge-inactive {
+        background: rgba(255, 95, 86, 0.2);
+        color: #ff5f56;
+        border: 1px solid #ff5f56;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.3rem;
+    }
+
+    .btn-icon {
+        padding: 0.3rem 0.5rem;
+        background: transparent;
+        border: 1px solid #2a3a4a;
+        border-radius: 3px;
+        color: #b0b0b0;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-icon:hover {
+        border-color: #00ff9d;
+        color: #00ff9d;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.3rem;
+    }
+
+    .page-btn {
+        width: 35px;
+        height: 35px;
+        background: transparent;
+        border: 1px solid #2a3a4a;
+        border-radius: 5px;
+        color: #b0b0b0;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+        border-color: #00ff9d;
+        color: #00ff9d;
+    }
+
+    .page-btn.active {
+        background: #00ff9d;
+        border-color: #00ff9d;
+        color: #0a0f0f;
+    }
+
+    .page-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        overflow: auto;
+    }
+
+    .modal-content {
+        background: #1a1f2f;
+        margin: 5% auto;
+        border: 1px solid #00ff9d;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 600px;
+        animation: modalSlideIn 0.3s;
+    }
+
+    .modal-content.modal-lg {
+        max-width: 800px;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #2a3a4a;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        color: #00ff9d;
+        font-family: 'Share Tech Mono', monospace;
+    }
+
+    .modal-close {
+        background: transparent;
+        border: none;
+        color: #6a7a8a;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .modal-close:hover {
+        color: #ff5f56;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem;
+        border-top: 1px solid #2a3a4a;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .half {
+        flex: 1;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #b0b0b0;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.8rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #2a3a4a;
+        border-radius: 5px;
+        color: #e0e0e0;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #00ff9d;
+    }
+
+    .required {
+        color: #ff5f56;
+    }
+
+    .form-hint {
+        font-size: 0.7rem;
+        color: #6a7a8a;
+        margin-top: 0.3rem;
+        display: block;
+    }
+
+    .flag-input-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-generate {
+        padding: 0.8rem;
+        background: transparent;
+        border: 1px solid #00ff9d;
+        border-radius: 5px;
+        color: #00ff9d;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-generate:hover {
+        background: rgba(0, 255, 157, 0.1);
+    }
+
+    .toggle-group {
+        margin-top: 1rem;
+    }
+
+    .toggle-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #2a3a4a;
+        transition: .3s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+    }
+
+    input:checked+.slider {
+        background-color: #00ff9d;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(26px);
+    }
+
+    .btn-secondary {
+        padding: 0.8rem 1.5rem;
+        background: transparent;
+        border: 1px solid #2a3a4a;
+        border-radius: 8px;
+        color: #b0b0b0;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-secondary:hover {
+        border-color: #00ff9d;
+        color: #00ff9d;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-item.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .detail-label {
+        font-size: 0.8rem;
+        color: #6a7a8a;
+        margin-bottom: 0.3rem;
+    }
+
+    .detail-value {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        word-break: break-word;
+    }
+
+    .submissions-list {
+        border-top: 1px solid #2a3a4a;
+        padding-top: 1.5rem;
+    }
+
+    .submissions-list h4 {
+        color: #00ff9d;
+        margin-bottom: 1rem;
+    }
+
+    .mini-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .mini-table th {
+        text-align: left;
+        padding: 0.5rem;
+        background: rgba(0, 255, 157, 0.1);
+        color: #b0b0b0;
+        font-size: 0.8rem;
+    }
+
+    .mini-table td {
+        padding: 0.5rem;
+        border-bottom: 1px solid #2a3a4a;
+    }
+
+    .text-center {
+        text-align: center;
+        color: #6a7a8a;
+        padding: 2rem;
+    }
+</style>
+
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let allQuestions = []; // Tüm soruları saklamak için
+
+    // Sayfa yüklendiğinde
+    document.addEventListener('DOMContentLoaded', function () {
+        loadQuestions();
+    });
+
+    // Soruları yükle
+    async function loadQuestions() {
+        const machineId = document.getElementById('machineFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        const search = document.getElementById('searchInput').value;
+
+        try {
+            // API'den soruları çek
+            let url = '/admin/api/questions';
+            const params = new URLSearchParams();
+            
+            if (machineId && machineId !== 'all') {
+                params.append('machine_id', machineId);
+            }
+            
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+            
+            console.log('API isteği:', url);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // API direkt dizi döndürüyor
+            const questions = await response.json();
+            console.log('Gelen sorular:', questions);
+            
+            // Tüm soruları sakla
+            allQuestions = questions;
+            
+            // Filtreleme uygula (status ve search client-side)
+            let filteredQuestions = [...questions];
+            
+            // Status filtresi
+            if (status && status !== 'all') {
+                const isActive = status === 'active';
+                filteredQuestions = filteredQuestions.filter(q => q.is_active === isActive);
+            }
+            
+            // Search filtresi
+            if (search && search.trim() !== '') {
+                const searchLower = search.toLowerCase();
+                filteredQuestions = filteredQuestions.filter(q => 
+                    q.title.toLowerCase().includes(searchLower) || 
+                    (q.description && q.description.toLowerCase().includes(searchLower))
+                );
+            }
+            
+            // İstatistikleri hesapla
+            const stats = {
+                total: filteredQuestions.length,
+                active: filteredQuestions.filter(q => q.is_active).length,
+                inactive: filteredQuestions.filter(q => !q.is_active).length,
+                submissions: filteredQuestions.reduce((sum, q) => sum + (q.submission_count || 0), 0)
+            };
+            
+            // Sayfalama
+            const pageSize = 10;
+            const startIndex = (currentPage - 1) * pageSize;
+            const paginatedQuestions = filteredQuestions.slice(startIndex, startIndex + pageSize);
+            
+            // Sayfalama bilgileri
+            const pagination = {
+                current_page: currentPage,
+                total_pages: Math.ceil(filteredQuestions.length / pageSize),
+                total_items: filteredQuestions.length,
+                per_page: pageSize
+            };
+            
+            renderQuestions(paginatedQuestions);
+            updateStats(stats);
+            renderPagination(pagination);
+            
+        } catch (error) {
+            console.error('Sorular yüklenemedi:', error);
+            document.getElementById('questionsTableBody').innerHTML = 
+                '<tr><td colspan="11" class="text-center">Sorular yüklenemedi: ' + error.message + '</td></tr>';
+        }
+    }
+
+    // Soruları tabloda göster
+    function renderQuestions(questions) {
+        const tbody = document.getElementById('questionsTableBody');
+
+        if (!questions || questions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center">Soru bulunamadı</td></tr>';
+            return;
+        }
+
+        let html = '';
+        questions.forEach(q => {
+            // Başarı oranını hesapla
+            let successRate = '0%';
+            if (q.submission_count > 0 && q.accepted_count > 0) {
+                successRate = ((q.accepted_count / q.submission_count) * 100).toFixed(1) + '%';
+            } else if (q.success_rate) {
+                successRate = q.success_rate.toFixed(1) + '%';
+            }
+            
+            html += `
+                <tr>
+                    <td>#${q.id}</td>
+                    <td>${q.machine_name || 'Bilinmiyor'}</td>
+                    <td>${q.question_order || '-'}</td>
+                    <td>${q.title}</td>
+                    <td>${q.points_reward}</td>
+                    <td>${q.submission_count || 0}</td>
+                    <td>${successRate}</td>
+                    <td>${q.hint || '-'}</td>
+                    <td>${q.hint_cost || 0}</td>
+                    <td>
+                        <span class="badge ${q.is_active ? 'badge-active' : 'badge-inactive'}">
+                            ${q.is_active ? 'Aktif' : 'Pasif'}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        <button class="btn-icon" onclick="viewQuestion(${q.id})" title="Görüntüle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-icon" onclick="editQuestion(${q.id})" title="Düzenle">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon" onclick="toggleQuestionStatus(${q.id}, ${q.is_active})" 
+                                title="${q.is_active ? 'Pasif Yap' : 'Aktif Yap'}">
+                            <i class="fas ${q.is_active ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                        </button>
+                        <button class="btn-icon" onclick="deleteQuestion(${q.id})" title="Sil">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    // İstatistikleri güncelle
+    function updateStats(stats) {
+        document.getElementById('totalQuestions').textContent = stats?.total || 0;
+        document.getElementById('activeQuestions').textContent = stats?.active || 0;
+        document.getElementById('inactiveQuestions').textContent = stats?.inactive || 0;
+        document.getElementById('totalSubmissions').textContent = stats?.submissions || 0;
+    }
+
+    // Sayfalama
+    function renderPagination(pagination) {
+        if (!pagination) return;
+
+        currentPage = pagination.current_page;
+        totalPages = pagination.total_pages;
+
+        let html = '';
+
+        // Önceki buton
+        html += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-left"></i>
+        </button>`;
+
+        // Sayfa numaraları
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                    onclick="changePage(${i})">${i}</button>`;
+            } else if (i === currentPage - 3 || i === currentPage + 3) {
+                html += `<button class="page-btn" disabled>...</button>`;
+            }
+        }
+
+        // Sonraki buton
+        html += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+            <i class="fas fa-chevron-right"></i>
+        </button>`;
+
+        document.getElementById('pagination').innerHTML = html;
+    }
+
+    // Sayfa değiştir
+    function changePage(page) {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        
+        // Mevcut filtreleri kullanarak sayfalamayı güncelle
+        const status = document.getElementById('statusFilter').value;
+        const search = document.getElementById('searchInput').value;
+        
+        // Filtrele
+        let filteredQuestions = [...allQuestions];
+        
+        if (status && status !== 'all') {
+            const isActive = status === 'active';
+            filteredQuestions = filteredQuestions.filter(q => q.is_active === isActive);
+        }
+        
+        if (search && search.trim() !== '') {
+            const searchLower = search.toLowerCase();
+            filteredQuestions = filteredQuestions.filter(q => 
+                q.title.toLowerCase().includes(searchLower) || 
+                (q.description && q.description.toLowerCase().includes(searchLower))
+            );
+        }
+        
+        // Sayfalama
+        const pageSize = 10;
+        const startIndex = (currentPage - 1) * pageSize;
+        const paginatedQuestions = filteredQuestions.slice(startIndex, startIndex + pageSize);
+        
+        renderQuestions(paginatedQuestions);
+    }
+
+    // Filtrele
+    function filterQuestions() {
+        currentPage = 1;
+        loadQuestions(); // Tekrar yükle
+    }
+
+    // Filtreleri sıfırla
+    function resetFilters() {
+        document.getElementById('machineFilter').value = 'all';
+        document.getElementById('statusFilter').value = 'all';
+        document.getElementById('searchInput').value = '';
+        currentPage = 1;
+        loadQuestions(); // Tüm soruları yeniden yükle
+    }
+
+    // Modal işlemleri
+    function showAddQuestionModal() {
+        document.getElementById('modalTitle').textContent = 'Yeni Soru Ekle';
+        document.getElementById('questionForm').reset();
+        document.getElementById('questionId').value = '';
+        document.getElementById('questionModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('questionModal').style.display = 'none';
+    }
+
+    // Soru kaydet
+    async function saveQuestion() {
+        const form = document.getElementById('questionForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Machine ID'yi kontrol et ve ekle
+        const machineId = document.getElementById('machineId').value;
+        if (!machineId || machineId === "") {
+            alert('Lütfen bir makine seçin!');
+            return;
+        }
+
+        // Verileri düzenle
+        data.machine_id = parseInt(machineId);
+        data.is_active = document.getElementById('isActive').checked;
+        data.points_reward = parseInt(data.pointsReward) || 0;
+        data.hint_cost = parseInt(data.hintCost) || 0;
+        data.question_order = parseInt(data.questionOrder) || 0;
+        
+        // Gereksiz alanları temizle
+        delete data.pointsReward;
+        delete data.hintCost;
+        delete data.questionOrder;
+
+        console.log('Gönderilecek veri:', data);
+
+        const questionId = document.getElementById('questionId').value;
+        const url = questionId ? `/admin/api/questions/${questionId}` : '/admin/api/questions';
+        const method = questionId ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            console.log('Sunucu yanıtı:', result);
+
+            if (result.success) {
+                closeModal();
+                loadQuestions(); // Soruları yeniden yükle
+                showSuccess('Soru başarıyla kaydedildi!');
+            } else {
+                alert(result.message || 'Bir hata oluştu!');
+            }
+        } catch (error) {
+            console.error('Soru kaydedilemedi:', error);
+            alert('Soru kaydedilemedi: ' + error.message);
+        }
+    }
+
+    // Soru düzenle
+    async function editQuestion(id) {
+        try {
+            console.log('Düzenlenecek soru ID:', id);
+            const response = await fetch(`/admin/api/questions/${id}`);
+            if (!response.ok) {
+                throw new Error('Soru bulunamadı');
+            }
+            const question = await response.json();
+
+            document.getElementById('modalTitle').textContent = 'Soru Düzenle';
+            document.getElementById('questionId').value = question.id;
+            document.getElementById('machineId').value = question.machine_id;
+            document.getElementById('title').value = question.title;
+            document.getElementById('description').value = question.description || '';
+            document.getElementById('pointsReward').value = question.points_reward;
+            document.getElementById('questionOrder').value = question.question_order || 1;
+            document.getElementById('flag').value = ''; // Flag boş, yeni girilsin
+            document.getElementById('hint').value = question.hint || '';
+            document.getElementById('hintCost').value = question.hint_cost || 0;
+            document.getElementById('isActive').checked = question.is_active;
+
+            document.getElementById('questionModal').style.display = 'block';
+        } catch (error) {
+            console.error('Soru yüklenemedi:', error);
+            alert('Soru yüklenemedi: ' + error.message);
+        }
+    }
+
+    // Soru görüntüle
+    async function viewQuestion(id) {
+        try {
+            // Önce tüm sorulardan bulmaya çalış
+            let question = allQuestions.find(q => q.id === id);
+            
+            // Bulamazsa API'den çek
+            if (!question) {
+                const response = await fetch(`/admin/api/questions/${id}`);
+                if (!response.ok) {
+                    throw new Error('Soru bulunamadı');
+                }
+                question = await response.json();
+            }
+
+            document.getElementById('detailId').textContent = '#' + question.id;
+            document.getElementById('detailMachine').textContent = question.machine_name || 'Bilinmiyor';
+            document.getElementById('detailOrder').textContent = question.question_order || '-';
+            document.getElementById('detailTitle').textContent = question.title;
+            document.getElementById('detailDescription').textContent = question.description || '-';
+            document.getElementById('detailPoints').textContent = question.points_reward;
+            document.getElementById('detailFlagHash').textContent = question.flag_hash || 'Gizli';
+            document.getElementById('detailHint').textContent = question.hint || '-';
+            document.getElementById('detailHintCost').textContent = question.hint_cost || 0;
+            document.getElementById('detailStatus').innerHTML = question.is_active ?
+                '<span class="badge badge-active">Aktif</span>' :
+                '<span class="badge badge-inactive">Pasif</span>';
+            document.getElementById('detailSubmissions').textContent = question.submission_count || 0;
+            
+            // Başarı oranını hesapla
+            let successRate = '0%';
+            if (question.submission_count > 0 && question.accepted_count > 0) {
+                successRate = ((question.accepted_count / question.submission_count) * 100).toFixed(1) + '%';
+            } else if (question.success_rate) {
+                successRate = question.success_rate.toFixed(1) + '%';
+            }
+            document.getElementById('detailSuccessRate').textContent = successRate;
+
+            // Son çözümleri göster (varsa)
+            const submissionsTbody = document.getElementById('detailSubmissions');
+            if (question.recent_submissions && question.recent_submissions.length > 0) {
+                let html = '';
+                question.recent_submissions.forEach(s => {
+                    html += `
+                        <tr>
+                            <td>${s.username}</td>
+                            <td>
+                                <span class="badge ${s.status === 'accepted' ? 'badge-active' : 'badge-inactive'}">
+                                    ${s.status === 'accepted' ? 'Başarılı' : 'Başarısız'}
+                                </span>
+                            </td>
+                            <td>${new Date(s.submitted_at).toLocaleString('tr-TR')}</td>
+                        </tr>
+                    `;
+                });
+                submissionsTbody.innerHTML = html;
+            } else {
+                submissionsTbody.innerHTML = '<tr><td colspan="3">Henüz çözüm yok</td></tr>';
+            }
+
+            document.getElementById('detailModal').style.display = 'block';
+        } catch (error) {
+            console.error('Soru detayı yüklenemedi:', error);
+            alert('Soru detayı yüklenemedi: ' + error.message);
+        }
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detailModal').style.display = 'none';
+    }
+
+    // Soru durumunu değiştir
+    async function toggleQuestionStatus(id, currentStatus) {
+        if (confirm(`Soruyu ${currentStatus ? 'pasif' : 'aktif'} yapmak istediğinize emin misiniz?`)) {
+            try {
+                const response = await fetch(`/admin/api/questions/${id}/toggle`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    loadQuestions(); // Soruları yeniden yükle
+                    showSuccess(`Soru ${currentStatus ? 'pasif' : 'aktif'} yapıldı!`);
+                } else {
+                    alert(result.message || 'Bir hata oluştu!');
+                }
+            } catch (error) {
+                console.error('Soru durumu değiştirilemedi:', error);
+                alert('Soru durumu değiştirilemedi!');
+            }
+        }
+    }
+
+    // Soru sil
+    async function deleteQuestion(id) {
+        if (confirm('Bu soruyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
+            try {
+                const response = await fetch(`/admin/api/questions/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    loadQuestions(); // Soruları yeniden yükle
+                    showSuccess('Soru silindi!');
+                } else {
+                    alert(result.message || 'Bir hata oluştu!');
+                }
+            } catch (error) {
+                console.error('Soru silinemedi:', error);
+                alert('Soru silinemedi!');
+            }
+        }
+    }
+
+    // Flag oluştur
+    function generateFlag() {
+        const prefix = 'FLAG{';
+        const suffix = '}';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_';
+        let result = '';
+        for (let i = 0; i < 16; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        document.getElementById('flag').value = prefix + result + suffix;
+    }
+
+    // Flag hash'ini kopyala
+    function copyFlagHash() {
+        const flagHash = document.getElementById('detailFlagHash').textContent;
+        navigator.clipboard.writeText(flagHash).then(() => {
+            showSuccess('Flag hash kopyalandı!');
+        }).catch(err => {
+            console.error('Kopyalama hatası:', err);
+            alert('Flag hash kopyalanamadı!');
+        });
+    }
+
+    // Başarı mesajı göster
+    function showSuccess(message) {
+        // Var olan success mesajını kaldır
+        const existing = document.querySelector('.success-message');
+        if (existing) existing.remove();
+        
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message show';
+        successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        successDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #00ff9d;
+            color: #0a0f0f;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 157, 0.3);
+        `;
+        document.body.appendChild(successDiv);
+        setTimeout(() => {
+            successDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => successDiv.remove(), 300);
+        }, 3000);
+    }
+
+    // Modal dışına tıklanınca kapat
+    window.onclick = function (event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+
+    // Machine filter değiştiğinde
+    document.getElementById('machineFilter').addEventListener('change', function() {
+        currentPage = 1;
+        loadQuestions();
+    });
+</script>
+
+<!-- Animasyonlar için CSS ekleyin -->
+<style>
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+</style>
+{{end}}

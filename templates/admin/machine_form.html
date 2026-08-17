@@ -1,0 +1,828 @@
+{{define "content"}}
+<div class="machine-form-page">
+    <!-- Header -->
+    <div class="form-header">
+        <div>
+            <h2><i class="fas {{if .Machine.ID}}fa-edit{{else}}fa-plus-circle{{end}}"></i>
+                {{if .Machine.ID}}Makine Düzenle{{else}}Yeni Makine Ekle{{end}}</h2>
+            <p>{{if .Machine.ID}}Makine bilgilerini güncelleyin{{else}}Platforma yeni bir makine ekleyin{{end}}</p>
+        </div>
+        <a href="/admin/machines" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </a>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" action="{{if .Machine.ID}}/admin/api/machines/{{.Machine.ID}}{{else}}/admin/api/machines{{end}}"
+        enctype="multipart/form-data" class="machine-form">
+
+        <div class="form-grid">
+            <!-- Sol Kolon -->
+            <div class="form-left">
+                <!-- Temel Bilgiler -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i> Temel Bilgiler
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Makine Adı <span class="required">*</span></label>
+                        <input type="text" name="name" value="{{.Machine.Name}}" required
+                            placeholder="Örn: BlueSky, DarkNet, Metasploitable3">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Açıklama</label>
+                        <textarea name="description" rows="4"
+                            placeholder="Makine hakkında açıklama...">{{.Machine.Description}}</textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Zorluk <span class="required">*</span></label>
+                            <select name="difficulty" required>
+                                <option value="">Seçiniz</option>
+                                {{range .Difficulties}}
+                                <option value="{{.}}" {{if eq $.Machine.Difficulty .}}selected{{end}}>
+                                    {{if eq . "easy"}}Kolay
+                                    {{else if eq . "medium"}}Orta
+                                    {{else if eq . "hard"}}Zor
+                                    {{else if eq . "expert"}}Uzman
+                                    {{else}}{{.}}{{end}}
+                                </option>
+                                {{end}}
+                            </select>
+                        </div>
+
+                        <div class="form-group half">
+                            <label>Puan</label>
+                            <input type="number" name="points_reward" value="{{.Machine.PointsReward}}" min="0"
+                                step="50">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Görsel ve Docker -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-image"></i> Görsel & Docker
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Makine Görseli</label>
+                        <div class="image-upload" onclick="document.getElementById('imageInput').click()">
+                            {{if .Machine.ImageURL}}
+                            <img src="{{.Machine.ImageURL}}" alt="Preview" class="image-preview">
+                            {{else}}
+                            <div class="image-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Görsel yüklemek için tıklayın</p>
+                                <small>PNG, JPG, GIF - Max 2MB</small>
+                            </div>
+                            {{end}}
+                            <input type="file" name="image" accept="image/*" id="imageInput" style="display: none;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Docker Image</label>
+                        <input type="text" name="docker_image" value="{{.Machine.DockerImage}}"
+                            placeholder="Örn: ubuntu:20.04, metasploitframework/metasploit:latest">
+                        <small>Docker Hub'dan veya özel registry'den image adı</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Kolon -->
+            <div class="form-right">
+                <!-- Yazar ve Durum -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-cog"></i> Ayarlar
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Yazar / Oluşturan</label>
+                        <input type="text" name="creator" value="{{.Machine.CreatorName}}" readonly
+                            placeholder="Sistem tarafından atanacak">
+                        <small>Makine otomatik olarak size atanacak</small>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <span>Makine Aktif mi?</span>
+                            <label class="switch">
+                                <input type="checkbox" name="is_active" value="true" {{if .Machine.IsActive}}checked{{end}}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-item">
+                            <span>Sadece VIP Kullanıcılar</span>
+                            <label class="switch">
+                                <input type="checkbox" name="is_vip_only" value="true" {{if .Machine.IsVIPOnly}}checked{{end}}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- İstatistikler (Sadece düzenleme modunda) -->
+                {{if .Machine.ID}}
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-bar"></i> İstatistikler
+                    </h3>
+
+                    <div class="stats-mini">
+                        <div class="stat-mini-item">
+                            <span class="stat-mini-value">{{.Machine.SolverCount}}</span>
+                            <span class="stat-mini-label">Çözen Kişi</span>
+                        </div>
+                        <div class="stat-mini-item">
+                            <span class="stat-mini-value">{{.Machine.TotalQuestions}}</span>
+                            <span class="stat-mini-label">Toplam Soru</span>
+                        </div>
+                        <div class="stat-mini-item">
+                            <span class="stat-mini-value">{{.Machine.SolveCount}}</span>
+                            <span class="stat-mini-label">Çözülme Sayısı</span>
+                        </div>
+                    </div>
+
+                    {{if gt .Machine.TotalQuestions 0}}
+                    {{$solvePercentage := printf "%.1f" (div (mul .Machine.SolverCount 100) .Machine.TotalQuestions)}}
+                    <div class="progress-stat">
+                        <span>Çözülme Oranı</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" data-width="{{$solvePercentage}}"></div>
+                        </div>
+                        <span class="progress-value">{{$solvePercentage}}%</span>
+                    </div>
+                    {{end}}
+
+                    <div class="meta-info">
+                        {{$createdAt := .Machine.CreatedAt.Format "02.01.2006 15:04"}}
+                        <p><i class="fas fa-calendar"></i> Oluşturma: {{$createdAt}}</p>
+                        {{if .Machine.UpdatedAt.Valid}}
+                        {{$updatedAt := .Machine.UpdatedAt.Time.Format "02.01.2006 15:04"}}
+                        <p><i class="fas fa-clock"></i> Güncelleme: {{$updatedAt}}</p>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Sorular Bölümü -->
+        <div class="form-section questions-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-question-circle"></i> Makine Soruları
+                </h3>
+                <button type="button" class="btn-add-question" onclick="addQuestion()">
+                    <i class="fas fa-plus"></i> Yeni Soru Ekle
+                </button>
+            </div>
+
+            <div id="questions-container">
+                {{if .Machine.Questions}}
+                {{range $index, $question := .Machine.Questions}}
+                <div class="question-card" id="question-{{$question.ID}}">
+                    <div class="question-header">
+                        <span class="question-title">Soru {{add $index 1}}</span>
+                        <button type="button" class="btn-remove-question" onclick="removeQuestion('{{$question.ID}}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="question-body">
+                        <input type="hidden" name="question_id[]" value="{{$question.ID}}">
+
+                        <div class="form-group">
+                            <label>Soru Başlığı <span class="required">*</span></label>
+                            <input type="text" name="question_title[]" value="{{$question.Title}}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Soru Açıklaması</label>
+                            <textarea name="question_description[]" rows="2">{{$question.Description}}</textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label>Puan <span class="required">*</span></label>
+                                <input type="number" name="question_points[]" value="{{$question.PointsReward}}" min="0" required>
+                            </div>
+                            <div class="form-group half">
+                                <label>Flag</label>
+                                <input type="text" name="question_flag[]" value="" placeholder="Yeni flag girin">
+                                <small>Mevcut flag korunacak, değiştirmek için doldurun</small>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label>İpucu</label>
+                                <input type="text" name="question_hint[]" value="{{$question.Hint}}">
+                            </div>
+                            <div class="form-group half">
+                                <label>İpucu Maliyeti</label>
+                                <input type="number" name="question_hint_cost[]" value="{{$question.HintCost}}" min="0">
+                            </div>
+                        </div>
+
+                        <div class="toggle-item">
+                            <span>Soru Aktif</span>
+                            <label class="switch small">
+                                <input type="hidden" name="question_active_{{$question.ID}}" value="false">
+                                <input type="checkbox" name="question_active_{{$question.ID}}" value="true" {{if $question.IsActive}}checked{{end}}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+                {{else}}
+                <div class="empty-questions" id="emptyQuestions">
+                    <i class="fas fa-question-circle"></i>
+                    <p>Henüz soru eklenmemiş. Yeni soru eklemek için butona tıklayın.</p>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Form Butonları -->
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="history.back()">
+                İptal
+            </button>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i>
+                {{if .Machine.ID}}Değişiklikleri Kaydet{{else}}Makineyi Oluştur{{end}}
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .machine-form-page {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-header h2 {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        margin-bottom: 0.3rem;
+    }
+
+    .form-header p {
+        color: #6a7a8a;
+    }
+
+    .btn-secondary {
+        padding: 0.8rem 1.5rem;
+        background: transparent;
+        border: 1px solid #2a3a4a;
+        border-radius: 8px;
+        color: #b0b0b0;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .btn-secondary:hover {
+        border-color: #00ff9d;
+        color: #00ff9d;
+    }
+
+    .machine-form {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    .form-section {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #2a3a4a;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .section-title i {
+        margin-right: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #b0b0b0;
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #2a3a4a;
+        border-radius: 5px;
+        color: #e0e0e0;
+        font-size: 0.9rem;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #00ff9d;
+    }
+
+    .form-group small {
+        display: block;
+        color: #6a7a8a;
+        font-size: 0.7rem;
+        margin-top: 0.3rem;
+    }
+
+    .form-group input[readonly] {
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .half {
+        flex: 1;
+    }
+
+    .required {
+        color: #ff5f56;
+    }
+
+    .image-upload {
+        border: 2px dashed #2a3a4a;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .image-upload:hover {
+        border-color: #00ff9d;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 5px;
+        object-fit: contain;
+    }
+
+    .image-placeholder {
+        color: #6a7a8a;
+    }
+
+    .image-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .image-placeholder p {
+        margin-bottom: 0.5rem;
+    }
+
+    .toggle-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .toggle-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+    .switch.small {
+        width: 40px;
+        height: 20px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #2a3a4a;
+        transition: .3s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+    }
+
+    .switch.small .slider:before {
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+    }
+
+    input:checked + .slider {
+        background-color: #00ff9d;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .switch.small input:checked + .slider:before {
+        transform: translateX(20px);
+    }
+
+    .stats-mini {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-mini-item {
+        text-align: center;
+    }
+
+    .stat-mini-value {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 1.3rem;
+        color: #00ff9d;
+        display: block;
+    }
+
+    .stat-mini-label {
+        font-size: 0.7rem;
+        color: #6a7a8a;
+    }
+
+    .progress-stat {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .progress-bar {
+        flex: 1;
+        height: 6px;
+        background: #2a3a4a;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #00ff9d, #00b86e);
+        border-radius: 3px;
+        transition: width 0.3s;
+    }
+
+    .progress-value {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ff9d;
+        min-width: 45px;
+    }
+
+    .meta-info {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #2a3a4a;
+        font-size: 0.8rem;
+        color: #6a7a8a;
+    }
+
+    .meta-info p {
+        margin-bottom: 0.3rem;
+    }
+
+    .meta-info i {
+        margin-right: 0.5rem;
+        width: 16px;
+    }
+
+    .questions-section {
+        margin-top: 1rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-add-question {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: 1px solid #00ff9d;
+        border-radius: 5px;
+        color: #00ff9d;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 0.9rem;
+    }
+
+    .btn-add-question:hover {
+        background: rgba(0, 255, 157, 0.1);
+    }
+
+    .btn-add-question i {
+        margin-right: 0.5rem;
+    }
+
+    .question-card {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #2a3a4a;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .question-header {
+        background: rgba(0, 255, 157, 0.1);
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #2a3a4a;
+    }
+
+    .question-title {
+        font-weight: 600;
+        color: #00ff9d;
+    }
+
+    .btn-remove-question {
+        width: 30px;
+        height: 30px;
+        background: transparent;
+        border: 1px solid #ff5f56;
+        border-radius: 5px;
+        color: #ff5f56;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-remove-question:hover {
+        background: #ff5f56;
+        color: #fff;
+    }
+
+    .question-body {
+        padding: 1.5rem;
+    }
+
+    .empty-questions {
+        text-align: center;
+        padding: 3rem;
+        color: #6a7a8a;
+        border: 2px dashed #2a3a4a;
+        border-radius: 8px;
+    }
+
+    .empty-questions i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-primary {
+        padding: 1rem 2rem;
+        background: linear-gradient(45deg, #00ff9d, #00b86e);
+        border: none;
+        border-radius: 8px;
+        color: #0a0f0f;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
+    }
+
+    @media (max-width: 1024px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    var questionCount = {{len .Machine.Questions}};
+
+    // progress-fill width'lerini data-width attribute'undan uygula
+    document.querySelectorAll('.progress-fill').forEach(function(el) {
+        el.style.width = (el.dataset.width || '0') + '%';
+    });
+
+    function addQuestion() {
+        questionCount++;
+        var container = document.getElementById('questions-container');
+        var emptyDiv = document.getElementById('emptyQuestions');
+        if (emptyDiv) emptyDiv.style.display = 'none';
+
+        var html = '<div class="question-card" id="question-new-' + questionCount + '">' +
+            '<div class="question-header">' +
+                '<span class="question-title">Yeni Soru ' + questionCount + '</span>' +
+                '<button type="button" class="btn-remove-question" onclick="removeQuestion(\'new-' + questionCount + '\')">' +
+                    '<i class="fas fa-times"></i>' +
+                '</button>' +
+            '</div>' +
+            '<div class="question-body">' +
+                '<input type="hidden" name="question_id[]" value="new">' +
+                '<div class="form-group">' +
+                    '<label>Soru Başlığı <span class="required">*</span></label>' +
+                    '<input type="text" name="question_title[]" required placeholder="Örn: Web Shell Upload">' +
+                '</div>' +
+                '<div class="form-group">' +
+                    '<label>Soru Açıklaması</label>' +
+                    '<textarea name="question_description[]" rows="2" placeholder="Sorunun detaylı açıklaması..."></textarea>' +
+                '</div>' +
+                '<div class="form-row">' +
+                    '<div class="form-group half">' +
+                        '<label>Puan <span class="required">*</span></label>' +
+                        '<input type="number" name="question_points[]" value="100" min="0" required>' +
+                    '</div>' +
+                    '<div class="form-group half">' +
+                        '<label>Flag <span class="required">*</span></label>' +
+                        '<input type="text" name="question_flag[]" placeholder="flag{...}" required>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="form-row">' +
+                    '<div class="form-group half">' +
+                        '<label>İpucu</label>' +
+                        '<input type="text" name="question_hint[]" placeholder="İpucu metni...">' +
+                    '</div>' +
+                    '<div class="form-group half">' +
+                        '<label>İpucu Maliyeti</label>' +
+                        '<input type="number" name="question_hint_cost[]" value="10" min="0">' +
+                    '</div>' +
+                '</div>' +
+                '<div class="toggle-item">' +
+                    '<span>Soru Aktif</span>' +
+                    '<label class="switch small">' +
+                        '<input type="hidden" name="question_active_new_' + questionCount + '" value="false">' +
+                        '<input type="checkbox" name="question_active_new_' + questionCount + '" value="true" checked>' +
+                        '<span class="slider"></span>' +
+                    '</label>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    function removeQuestion(id) {
+        if (!confirm('Bu soruyu silmek istediğinize emin misiniz?')) return;
+
+        if (String(id).indexOf('new') === 0) {
+            var el = document.getElementById('question-' + id);
+            if (el) el.remove();
+            var container = document.getElementById('questions-container');
+            if (container.children.length === 0) {
+                var empty = document.getElementById('emptyQuestions');
+                if (empty) empty.style.display = 'block';
+            }
+        } else {
+            if (!confirm('Bu soru kalıcı olarak silinecek. Devam etmek istiyor musunuz?')) return;
+            fetch('/admin/api/questions/' + id, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    var el = document.getElementById('question-' + id);
+                    if (el) el.remove();
+                    var container = document.getElementById('questions-container');
+                    if (container.children.length === 0) {
+                        var empty = document.getElementById('emptyQuestions');
+                        if (empty) empty.style.display = 'block';
+                    }
+                } else {
+                    alert('Soru silinemedi: ' + data.message);
+                }
+            })
+            .catch(function(err) {
+                alert('Bir hata oluştu: ' + err);
+            });
+        }
+    }
+
+    // Görsel önizleme
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Dosya boyutu 2MB\'dan büyük olamaz!');
+            this.value = '';
+            return;
+        }
+
+        var validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (validTypes.indexOf(file.type) === -1) {
+            alert('Sadece JPEG, PNG, GIF ve WEBP dosyaları yüklenebilir!');
+            this.value = '';
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var uploadDiv = document.querySelector('.image-upload');
+            var existing = uploadDiv.querySelector('.image-preview, .image-placeholder');
+            if (existing) existing.remove();
+
+            var img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'image-preview';
+            img.alt = 'Preview';
+            uploadDiv.insertBefore(img, uploadDiv.querySelector('#imageInput'));
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Form gönderim kontrolü
+    document.querySelector('.machine-form').addEventListener('submit', function(e) {
+        var questions = document.querySelectorAll('[name="question_title[]"]');
+        if (questions.length === 0) {
+            if (!confirm('Hiç soru eklemediniz. Devam etmek istiyor musunuz?')) {
+                e.preventDefault();
+            }
+        }
+    });
+</script>
+{{end}}

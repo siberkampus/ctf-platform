@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTF HACK PLATFORMU | Bayrak Avı</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .matrix-bg::before {
+            content: "01001110 01100101 01110100 01110111 01101111 01110010 01101011 00100000 01010011 01100101 01100011 01110101 01110010 01101001 01110100 01111001";
+            position: absolute;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            animation: matrix 20s linear infinite;
+        }
+
+        @keyframes matrix {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .navbar {
+            background: rgba(10, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00ff9d;
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00ff9d;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover { color: #00ff9d; }
+
+        .login-btn {
+            background: transparent;
+            border: 2px solid #00ff9d;
+            color: #00ff9d;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background: #00ff9d;
+            color: #0a0f0f;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+        }
+
+        .register-btn {
+            background: #00ff9d;
+            border: none;
+            color: #0a0f0f;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .register-btn:hover {
+            background: #00b86e;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+            transform: scale(1.05);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 80px auto 0;
+            padding: 2rem 5%;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero-content h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff, #ff00c8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            margin-bottom: 2rem;
+        }
+
+        .hero-stats { display: flex; gap: 2rem; }
+
+        .stat-item { text-align: center; }
+
+        .stat-number {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            color: #00ff9d;
+            font-weight: 700;
+        }
+
+        .stat-label { color: #808080; font-size: 0.9rem; }
+
+        .hero-image { position: relative; }
+
+        .terminal-window {
+            background: #0a0f0f;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 255, 157, 0.2);
+            border: 1px solid #00ff9d;
+        }
+
+        .terminal-header {
+            background: #1a1f2f;
+            padding: 0.8rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: #00ff9d;
+        }
+
+        .terminal-body p { margin: 0.5rem 0; }
+
+        .terminal-cursor { animation: blink 1s infinite; }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .section-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            margin: 3rem 0 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::before { content: '['; color: #00ff9d; margin-right: 10px; }
+        .section-title::after { content: ']'; color: #00ff9d; margin-left: 10px; }
+
+        .machine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .machine-card {
+            background: rgba(20, 30, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .machine-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff9d;
+            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.2);
+        }
+
+        .machine-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 157, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .machine-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .machine-name {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.3rem;
+            color: #00ff9d;
+        }
+
+        .machine-difficulty {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .difficulty-easy { background: #00b86e; color: #0a0f0f; }
+        .difficulty-medium { background: #ffbd2e; color: #0a0f0f; }
+        .difficulty-hard { background: #ff5f56; color: #fff; }
+        .difficulty-expert { background: #ff0055; color: #fff; }
+
+        .machine-info { margin: 1rem 0; color: #b0b0b0; font-size: 0.9rem; }
+
+        .machine-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 1rem 0;
+            padding: 0.5rem 0;
+            border-top: 1px solid #2a3a4a;
+            border-bottom: 1px solid #2a3a4a;
+        }
+
+        .machine-stat { text-align: center; }
+
+        .stat-value {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            font-size: 1.2rem;
+        }
+
+        .machine-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: transparent;
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .machine-btn:hover { background: #00ff9d; color: #0a0f0f; }
+
+        .vip-badge {
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            color: #0a0f0f;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .solved-badge {
+            background: rgba(0, 255, 157, 0.2);
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .leaderboard {
+            background: rgba(20, 30, 40, 0.8);
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 3rem 0;
+            border: 1px solid #2a3a4a;
+        }
+
+        .leaderboard-table { width: 100%; border-collapse: collapse; }
+
+        .leaderboard-table th {
+            text-align: left;
+            padding: 1rem;
+            color: #00ff9d;
+            border-bottom: 2px solid #00ff9d;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .leaderboard-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #2a3a4a;
+        }
+
+        .leaderboard-table tr:hover { background: rgba(0, 255, 157, 0.1); }
+
+        .rank-1 { color: #ffd700; font-weight: bold; }
+        .rank-2 { color: #c0c0c0; font-weight: bold; }
+        .rank-3 { color: #cd7f32; font-weight: bold; }
+
+        .footer {
+            background: rgba(10, 15, 20, 0.95);
+            padding: 3rem 5%;
+            margin-top: 4rem;
+            border-top: 1px solid #00ff9d;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul { list-style: none; }
+        .footer-section ul li { margin: 0.5rem 0; }
+
+        .footer-section ul li a {
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .footer-section ul li a:hover { color: #00ff9d; padding-left: 5px; }
+
+        .social-links { display: flex; gap: 1rem; margin-top: 1rem; }
+
+        .social-links a { color: #b0b0b0; font-size: 1.5rem; transition: 0.3s; }
+        .social-links a:hover { color: #00ff9d; transform: translateY(-3px); }
+
+        .loading-spinner { text-align: center; padding: 2rem; color: #00ff9d; }
+        .loading-spinner i { margin-right: 0.5rem; }
+        .error-message { text-align: center; padding: 2rem; color: #ff5f56; }
+
+        @media (max-width: 768px) {
+            .hero { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .hero-content h1 { font-size: 2rem; }
+            .hero-stats { flex-direction: column; gap: 1rem; }
+        }
+
+        /* =============================================
+           ÖZEL DIALOG SİSTEMİ
+           ============================================= */
+        .hl-dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            animation: dlOverlayIn 0.15s ease;
+        }
+
+        .hl-dialog-overlay.open {
+            display: flex;
+        }
+
+        @keyframes dlOverlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .hl-dialog {
+            background: #0d1117;
+            border: 1px solid #2a3a4a;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 157, 0.08);
+            animation: dlIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        @keyframes dlIn {
+            from { opacity: 0; transform: scale(0.88) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .hl-dialog-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 2rem 1rem;
+        }
+
+        .hl-dialog-icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .hl-dialog-icon-circle.warn {
+            background: rgba(255, 189, 46, 0.12);
+            border: 1px solid rgba(255, 189, 46, 0.35);
+            color: #ffbd2e;
+        }
+
+        .hl-dialog-icon-circle.info {
+            background: rgba(0, 184, 255, 0.1);
+            border: 1px solid rgba(0, 184, 255, 0.3);
+            color: #00b8ff;
+        }
+
+        .hl-dialog-icon-circle.danger {
+            background: rgba(255, 95, 86, 0.1);
+            border: 1px solid rgba(255, 95, 86, 0.3);
+            color: #ff5f56;
+        }
+
+        .hl-dialog-body {
+            padding: 0 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .hl-dialog-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.05rem;
+            color: #e0e0e0;
+            margin-bottom: 0.6rem;
+        }
+
+        .hl-dialog-message {
+            font-size: 0.9rem;
+            color: #8a9a8a;
+            line-height: 1.6;
+        }
+
+        .hl-dialog-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #1e2a38;
+            justify-content: flex-end;
+        }
+
+        .hl-dialog-actions.centered {
+            justify-content: center;
+        }
+
+        .hl-btn {
+            padding: 0.55rem 1.4rem;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .hl-btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a3a4a;
+            color: #8a9a8a;
+        }
+
+        .hl-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: #e0e0e0;
+            border-color: #3a4a5a;
+        }
+
+        .hl-btn-confirm {
+            background: rgba(255, 95, 86, 0.15);
+            border: 1px solid rgba(255, 95, 86, 0.4);
+            color: #ff5f56;
+        }
+
+        .hl-btn-confirm:hover {
+            background: rgba(255, 95, 86, 0.28);
+            box-shadow: 0 0 14px rgba(255, 95, 86, 0.25);
+        }
+
+        .hl-btn-ok {
+            background: rgba(0, 255, 157, 0.12);
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            color: #00ff9d;
+        }
+
+        .hl-btn-ok:hover {
+            background: rgba(0, 255, 157, 0.22);
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.2);
+        }
+
+        .hl-btn-login {
+            background: #00ff9d;
+            border: none;
+            color: #0a0f0f;
+        }
+
+        .hl-btn-login:hover {
+            background: #00e88d;
+            box-shadow: 0 0 18px rgba(0, 255, 157, 0.4);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="matrix-bg"></div>
+
+    <!-- =============================================
+         ÖZEL DIALOG: ONAY (confirm)
+         ============================================= -->
+    <div class="hl-dialog-overlay" id="dlConfirm">
+        <div class="hl-dialog">
+            <div class="hl-dialog-icon">
+                <div class="hl-dialog-icon-circle warn">
+                    <i class="fas fa-right-from-bracket"></i>
+                </div>
+            </div>
+            <div class="hl-dialog-body">
+                <div class="hl-dialog-title" id="dlConfirmTitle">Çıkış Yap</div>
+                <div class="hl-dialog-message" id="dlConfirmMsg">Oturumunuzu kapatmak istediğinize emin misiniz?</div>
+            </div>
+            <div class="hl-dialog-actions">
+                <button class="hl-btn hl-btn-cancel" onclick="dlConfirmResolve(false)">
+                    <i class="fas fa-xmark"></i> Vazgeç
+                </button>
+                <button class="hl-btn hl-btn-confirm" onclick="dlConfirmResolve(true)">
+                    <i class="fas fa-right-from-bracket"></i> Çıkış Yap
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         ÖZEL DIALOG: BİLGİ (alert — giriş gerekli)
+         ============================================= -->
+    <div class="hl-dialog-overlay" id="dlAlert">
+        <div class="hl-dialog">
+            <div class="hl-dialog-icon">
+                <div class="hl-dialog-icon-circle info">
+                    <i class="fas fa-lock"></i>
+                </div>
+            </div>
+            <div class="hl-dialog-body">
+                <div class="hl-dialog-title">Giriş Gerekli</div>
+                <div class="hl-dialog-message">
+                    Bu makineyi başlatmak için hesabınıza giriş yapmanız gerekiyor.
+                </div>
+            </div>
+            <div class="hl-dialog-actions">
+                <button class="hl-btn hl-btn-cancel" onclick="dlAlertClose()">
+                    Şimdi Değil
+                </button>
+                <button class="hl-btn hl-btn-login" onclick="dlAlertLogin()">
+                    <i class="fas fa-terminal"></i> Giriş Yap
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-skull"></i> HACKLAB
+        </div>
+        <div class="nav-links">
+            <a href="/">Ana Sayfa</a>
+            <a href="/machines">Makineler</a>
+            <a href="/academy">Akademi</a>
+            <a href="/leaderboard">Liderlik</a>
+            <a href="/vip">VIP</a>
+            {{if .User}}
+            <a href="/profile/{{.User.Username}}">Profil</a>
+            <a href="/dashboard">Panel</a>
+            {{if and .User .IsAdmin}}
+            <a href="/admin" style="color: #ffd700;">Admin</a>
+            {{end}}
+            <span class="user-points">{{.User.Points}} Puan</span>
+            <button class="login-btn" onclick="logout()">Çıkış</button>
+            {{else}}
+            <button class="login-btn" onclick="window.location.href='/login'">Giriş</button>
+            <button class="register-btn" onclick="window.location.href='/register'">Kayıt Ol</button>
+            {{end}}
+        </div>
+    </nav>
+
+    <!-- Ana İçerik -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <h1>BAYRAK AVI<br>BAŞLIYOR</h1>
+                <p>Gerçek CTF deneyimi için hazır mısın? {{.Stats.TotalMachines}}+ makine, {{.Stats.TotalQuestions}}+
+                    bayrak ve sürekli büyüyen toplulukla hack becerilerini geliştir.</p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{.Stats.TotalMachines}}+</div>
+                        <div class="stat-label">Makine</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{.Stats.TotalQuestions}}+</div>
+                        <div class="stat-label">Bayrak</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{.Stats.TotalUsers}}+</div>
+                        <div class="stat-label">Hacker</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="terminal-dot dot-red"></div>
+                        <div class="terminal-dot dot-yellow"></div>
+                        <div class="terminal-dot dot-green"></div>
+                    </div>
+                    <div class="terminal-body">
+                        <p>root@hacklab:~# nmap -sV {{.RandomIP}}</p>
+                        <p>PORT STATE SERVICE</p>
+                        <p>22/tcp open ssh</p>
+                        <p>80/tcp open http</p>
+                        <p>443/tcp open https</p>
+                        <p>8080/tcp open http-proxy</p>
+                        <p>root@hacklab:~# <span class="terminal-cursor">_</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Makineler Bölümü -->
+        <h2 class="section-title">AKTİF MAKİNELER</h2>
+        <div class="machine-grid" id="machines">
+            {{range .Machines}}
+            <div class="machine-card">
+                <div class="machine-header">
+                    <span class="machine-name">{{.Name}}</span>
+                    <span class="machine-difficulty difficulty-{{.Difficulty}}">
+                        {{if eq .Difficulty "easy"}}Kolay
+                        {{else if eq .Difficulty "medium"}}Orta
+                        {{else if eq .Difficulty "hard"}}Zor
+                        {{else if eq .Difficulty "expert"}}Uzman
+                        {{else}}{{.Difficulty}}{{end}}
+                    </span>
+                </div>
+                <div class="machine-info">
+                    {{.Description}}
+                    {{if .IsVIPOnly}}
+                    <span class="vip-badge">VIP</span>
+                    {{end}}
+                    {{if $.User}}
+                    {{if index $.SolvedMachines .ID}}
+                    <span class="solved-badge"><i class="fas fa-check"></i> Çözüldü</span>
+                    {{end}}
+                    {{end}}
+                </div>
+                <div class="machine-stats">
+                    <div class="machine-stat">
+                        <div class="stat-value">{{.QuestionCount}}</div>
+                        <div>Soru</div>
+                    </div>
+                    <div class="machine-stat">
+                        <div class="stat-value">{{.PointsReward}}</div>
+                        <div>Puan</div>
+                    </div>
+                    <div class="machine-stat">
+                        <div class="stat-value">{{.SolveCount}}</div>
+                        <div>Çözüm</div>
+                    </div>
+                </div>
+                <button class="machine-btn" onclick="startMachine({{.ID}})">
+                    <i class="fas {{if $.User}}{{if index $.SolvedMachines .ID}}fa-redo{{else}}fa-terminal{{end}}{{else}}fa-terminal{{end}}"></i>
+                    {{if $.User}}
+                    {{if index $.SolvedMachines .ID}}Tekrar Çöz{{else}}Makineyi Başlat{{end}}
+                    {{else}}
+                    Makineyi Başlat
+                    {{end}}
+                </button>
+            </div>
+            {{else}}
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                Henüz aktif makine bulunmuyor.
+            </div>
+            {{end}}
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="leaderboard" id="leaderboard">
+            <h2 class="section-title">LİDERLİK TABLOSU</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Sıra</th>
+                        <th>Hacker</th>
+                        <th>Puan</th>
+                        <th>Çözüm</th>
+                        <th>VIP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $index, $user := .Leaderboard}}
+                    <tr>
+                        <td>
+                            {{if eq $index 0}}<span class="rank-1">🥇 1</span>
+                            {{else if eq $index 1}}<span class="rank-2">🥈 2</span>
+                            {{else if eq $index 2}}<span class="rank-3">🥉 3</span>
+                            {{else}}{{$index | add 1}}{{end}}
+                        </td>
+                        <td>
+                            <a href="/profile/{{$user.Username}}" style="color: inherit; text-decoration: none;">
+                                @{{$user.Username}}
+                            </a>
+                        </td>
+                        <td>{{$user.Points | formatNumber}}</td>
+                        <td>{{$user.SolvedCount}}</td>
+                        <td>
+                            {{if $user.IsVIP}}
+                            <i class="fas fa-crown" style="color: gold;"></i>
+                            {{else}}-{{end}}
+                        </td>
+                    </tr>
+                    {{else}}
+                    <tr>
+                        <td colspan="5" class="text-center">Henüz veri yok</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>HACKLAB</h3>
+                <p>Güvenlik araştırmacıları ve etik hacker'lar için CTF platformu.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Hızlı Linkler</h3>
+                <ul>
+                    <li><a href="/machines">Tüm Makineler</a></li>
+                    <li><a href="/leaderboard">Liderlik Tablosu</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Destek</h3>
+                <ul>
+                    <li><a href="/faq">SSS</a></li>
+                    <li><a href="/contact">İletişim</a></li>
+                    <li><a href="/discord">Discord</a></li>
+                    <li><a href="/docs">Dokümantasyon</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Yasal</h3>
+                <ul>
+                    <li><a href="/privacy">KVKK</a></li>
+                    <li><a href="/terms">Kullanım Şartları</a></li>
+                    <li><a href="/privacy-policy">Gizlilik Politikası</a></li>
+                </ul>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 3rem; color: #404040;">
+            © {{.CurrentYear}} HACKLAB - Bayrakları toplamaya hazır mısın?
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Giriş Yap</h3>
+                <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Kullanıcı Adı / E-posta</label>
+                        <input type="text" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Giriş Yap</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Kayıt Ol</h3>
+                <button class="modal-close" onclick="closeRegisterModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label>Kullanıcı Adı</label>
+                        <input type="text" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>E-posta</label>
+                        <input type="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre Tekrar</label>
+                        <input type="password" name="password_confirm" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Kayıt Ol</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background: #1a1f2f;
+            margin: 10% auto;
+            border: 1px solid #00ff9d;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-header {
+            padding: 1rem;
+            border-bottom: 1px solid #2a3a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 { color: #00ff9d; margin: 0; }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: #b0b0b0;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-close:hover { color: #ff5f56; }
+        .modal-body { padding: 1.5rem; }
+
+        .form-group { margin-bottom: 1rem; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 5px;
+            color: #e0e0e0;
+        }
+
+        .form-group input:focus { outline: none; border-color: #00ff9d; }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.5rem;
+            background: linear-gradient(45deg, #00ff9d, #00b86e);
+            border: none;
+            border-radius: 5px;
+            color: #0a0f0f;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 157, 0.4);
+        }
+
+        .user-points {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #00ff9d;
+            padding: 0.3rem 1rem;
+            border-radius: 5px;
+            color: #00ff9d;
+        }
+
+        .text-center { text-align: center; color: #b0b0b0; padding: 2rem; }
+    </style>
+
+    <script>
+        const isLoggedIn = {{if .User}}true{{else}}false{{end}};
+        const currentUser = {{if .User}}"{{.User.Username}}"{{else}}null{{end}};
+
+        /* =============================================
+           DIALOG SİSTEMİ
+           ============================================= */
+
+        // Confirm dialog — Promise tabanlı
+        let _dlConfirmResolve = null;
+
+        function showConfirm(title, message, confirmLabel, confirmClass) {
+            document.getElementById('dlConfirmTitle').textContent = title || 'Emin misiniz?';
+            document.getElementById('dlConfirmMsg').textContent   = message || '';
+
+            const confirmBtn = document.querySelector('#dlConfirm .hl-btn-confirm');
+            if (confirmLabel) confirmBtn.innerHTML = confirmLabel;
+            if (confirmClass) {
+                confirmBtn.className = 'hl-btn ' + confirmClass;
+            }
+
+            document.getElementById('dlConfirm').classList.add('open');
+
+            return new Promise(resolve => {
+                _dlConfirmResolve = resolve;
+            });
+        }
+
+        function dlConfirmResolve(value) {
+            document.getElementById('dlConfirm').classList.remove('open');
+            if (_dlConfirmResolve) { _dlConfirmResolve(value); _dlConfirmResolve = null; }
+        }
+
+        // Alert dialog — giriş gerekli
+        let _pendingMachineId = null;
+
+        function showLoginRequired(machineId) {
+            _pendingMachineId = machineId;
+            document.getElementById('dlAlert').classList.add('open');
+        }
+
+        function dlAlertClose() {
+            document.getElementById('dlAlert').classList.remove('open');
+            _pendingMachineId = null;
+        }
+
+        function dlAlertLogin() {
+            document.getElementById('dlAlert').classList.remove('open');
+            window.location.href = '/login';
+        }
+
+        // Overlay dışına tıklayınca kapat
+        document.getElementById('dlConfirm').addEventListener('click', function(e) {
+            if (e.target === this) dlConfirmResolve(false);
+        });
+        document.getElementById('dlAlert').addEventListener('click', function(e) {
+            if (e.target === this) dlAlertClose();
+        });
+
+        // ESC tuşu ile kapat
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('dlConfirm').classList.contains('open')) dlConfirmResolve(false);
+                if (document.getElementById('dlAlert').classList.contains('open')) dlAlertClose();
+            }
+        });
+
+        /* =============================================
+           UYGULAMA FONKSİYONLARI
+           ============================================= */
+
+        async function logout() {
+            const confirmed = await showConfirm(
+                'Çıkış Yap',
+                'Oturumunuzu kapatmak istediğinize emin misiniz?',
+                '<i class="fas fa-right-from-bracket"></i> Çıkış Yap',
+                'hl-btn-confirm'
+            );
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/api/auth/logout', { method: 'POST' });
+                if (response.ok) window.location.reload();
+            } catch (error) {
+                // hata durumu — sessizce geç veya buraya kendi hata dialogunu ekleyebilirsin
+            }
+        }
+
+        function startMachine(machineId) {
+            if (!isLoggedIn) {
+                showLoginRequired(machineId);
+                return;
+            }
+            window.location.href = `/machine/${machineId}`;
+        }
+
+        /* =============================================
+           UI YARDIMCILARI
+           ============================================= */
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            navbar.style.background = window.scrollY > 100
+                ? 'rgba(0, 0, 0, 0.95)'
+                : 'rgba(10, 20, 30, 0.95)';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --green: #00ff9d;
+            --blue: #00b8ff;
+            --red: #ff5f56;
+            --yellow: #ffbd2e;
+            --purple: #ff00c8;
+            --bg: #0a0f0f;
+            --bg2: #111820;
+            --border: #2a3a4a;
+            --text: #e0e0e0;
+            --muted: #6a7a8a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── DIALOG STYLES (KULLANICI DOSTU) ── */
+        .hl-dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            animation: dlOverlayIn 0.15s ease;
+        }
+        .hl-dialog-overlay.open { display: flex; }
+        @keyframes dlOverlayIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .hl-dialog {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 157, 0.08);
+            animation: dlIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+        @keyframes dlIn {
+            from { opacity: 0; transform: scale(0.88) translateY(12px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .hl-dialog-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 2rem 1rem;
+        }
+        .hl-dialog-icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .hl-dialog-icon-circle.warn {
+            background: rgba(255, 189, 46, 0.12);
+            border: 1px solid rgba(255, 189, 46, 0.35);
+            color: var(--yellow);
+        }
+        .hl-dialog-icon-circle.info {
+            background: rgba(0, 184, 255, 0.1);
+            border: 1px solid rgba(0, 184, 255, 0.3);
+            color: var(--blue);
+        }
+        .hl-dialog-icon-circle.success {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            color: var(--green);
+        }
+        .hl-dialog-icon-circle.danger {
+            background: rgba(255, 95, 86, 0.1);
+            border: 1px solid rgba(255, 95, 86, 0.3);
+            color: var(--red);
+        }
+        .hl-dialog-body {
+            padding: 0 2rem 1.5rem;
+            text-align: center;
+        }
+        .hl-dialog-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.05rem;
+            color: var(--text);
+            margin-bottom: 0.6rem;
+        }
+        .hl-dialog-message {
+            font-size: 0.9rem;
+            color: #8a9a8a;
+            line-height: 1.6;
+        }
+        .hl-dialog-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #1e2a38;
+            justify-content: flex-end;
+        }
+        .hl-dialog-actions.centered { justify-content: center; }
+        .hl-btn {
+            padding: 0.55rem 1.4rem;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .hl-btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: #8a9a8a;
+        }
+        .hl-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: var(--text);
+            border-color: #3a4a5a;
+        }
+        .hl-btn-confirm {
+            background: rgba(255, 95, 86, 0.15);
+            border: 1px solid rgba(255, 95, 86, 0.4);
+            color: var(--red);
+        }
+        .hl-btn-confirm:hover {
+            background: rgba(255, 95, 86, 0.28);
+            box-shadow: 0 0 14px rgba(255, 95, 86, 0.25);
+        }
+        .hl-btn-ok {
+            background: rgba(0, 255, 157, 0.12);
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            color: var(--green);
+        }
+        .hl-btn-ok:hover {
+            background: rgba(0, 255, 157, 0.22);
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.2);
+        }
+        .hl-btn-login {
+            background: var(--green);
+            border: none;
+            color: #0a0f0f;
+        }
+        .hl-btn-login:hover {
+            background: #00e88d;
+            box-shadow: 0 0 18px rgba(0, 255, 157, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background: rgba(10, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--green);
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--green), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { color: var(--text); text-decoration: none; font-weight: 500; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--green); }
+        .user-points {
+            background: rgba(0,255,157,0.1);
+            border: 1px solid var(--green);
+            padding: 0.4rem 1rem;
+            color: var(--green);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .login-btn {
+            background: transparent;
+            border: 2px solid var(--green);
+            color: var(--green);
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .login-btn:hover {
+            background: var(--green);
+            color: #0a0f0f;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+        }
+        .register-btn {
+            background: var(--green);
+            border: none;
+            color: #0a0f0f;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .register-btn:hover {
+            background: #00b86e;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* ── LAYOUT ── */
+        .page-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 2rem;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 90px 2rem 4rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+        .breadcrumb a { color: var(--muted); text-decoration: none; transition: 0.2s; }
+        .breadcrumb a:hover { color: var(--green); }
+        .breadcrumb i { font-size: 0.7rem; }
+
+        .lesson-header {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--green);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .lesson-category-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(0,255,157,0.1);
+            border: 1px solid rgba(0,255,157,0.3);
+            color: var(--green);
+            font-size: 0.8rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .lesson-category-tag:hover { background: rgba(0,255,157,0.2); }
+        .lesson-header h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+        .lesson-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            align-items: center;
+        }
+        .meta-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+        .meta-chip i { color: var(--green); }
+        .difficulty-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .difficulty-easy, .difficulty-beginner { background: rgba(0,255,157,0.15); color: var(--green); border: 1px solid rgba(0,255,157,0.3); }
+        .difficulty-intermediate, .difficulty-medium { background: rgba(255,189,46,0.15); color: var(--yellow); border: 1px solid rgba(255,189,46,0.3); }
+        .difficulty-advanced, .difficulty-hard { background: rgba(255,95,86,0.15); color: var(--red); border: 1px solid rgba(255,95,86,0.3); }
+        .difficulty-expert { background: rgba(255,0,200,0.15); color: var(--purple); border: 1px solid rgba(255,0,200,0.3); }
+
+        .completed-banner {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            background: rgba(0,255,157,0.08);
+            border: 1px solid rgba(0,255,157,0.4);
+            border-radius: 8px;
+            padding: 0.8rem 1.2rem;
+            color: var(--green);
+            font-weight: 600;
+            margin-top: 1.2rem;
+        }
+
+        .video-section {
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+        .video-section iframe { width: 100%; height: 100%; border: none; }
+
+        .content-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.15rem;
+            color: var(--green);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .lesson-content {
+            line-height: 1.8;
+            color: #c8c8c8;
+            font-size: 0.97rem;
+        }
+        .lesson-content code {
+            background: rgba(0,255,157,0.1);
+            color: var(--green);
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .lesson-content pre {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--green);
+            border-radius: 8px;
+            padding: 1.2rem;
+            overflow-x: auto;
+            margin: 1.2rem 0;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .quiz-question {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+        .quiz-question.solved { border-color: rgba(0,255,157,0.4); background: rgba(0,255,157,0.04); }
+        .quiz-question.locked { opacity: 0.7; filter: blur(2px); pointer-events: none; position: relative; }
+        .quiz-question.locked::after {
+            content: '🔒 Giriş Yapmalısınız';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: var(--yellow);
+            font-size: 0.85rem;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+        .question-text { font-weight: 600; color: #e0e0e0; font-size: 0.97rem; }
+        .question-points {
+            background: rgba(0,255,157,0.1);
+            border: 1px solid rgba(0,255,157,0.3);
+            color: var(--green);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+        }
+        .solved-tag { display: flex; align-items: center; gap: 0.3rem; color: var(--green); font-size: 0.8rem; }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.7rem;
+        }
+        .option-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.88rem;
+            text-align: left;
+        }
+        .option-btn:hover:not(:disabled) { border-color: var(--green); background: rgba(0,255,157,0.07); }
+        .option-btn:disabled { cursor: default; opacity: 0.7; }
+        .option-btn.correct { border-color: var(--green); background: rgba(0,255,157,0.12); color: var(--green); }
+        .option-btn.wrong { border-color: var(--red); background: rgba(255,95,86,0.1); color: var(--red); }
+        .option-label { font-family: 'Share Tech Mono', monospace; font-weight: 700; min-width: 20px; color: var(--green); }
+        .answer-feedback {
+            margin-top: 0.8rem;
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: none;
+        }
+        .answer-feedback.correct-fb { background: rgba(0,255,157,0.08); border: 1px solid rgba(0,255,157,0.3); color: var(--green); }
+        .answer-feedback.wrong-fb { background: rgba(255,95,86,0.08); border: 1px solid rgba(255,95,86,0.3); color: var(--red); }
+
+        .practical-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+        .practical-card.solved { border-color: rgba(0,255,157,0.4); background: rgba(0,255,157,0.04); }
+        .practical-card.locked { opacity: 0.7; filter: blur(2px); pointer-events: none; position: relative; }
+        .practical-card.locked::after {
+            content: '🔒 Giriş Yapmalısınız';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: var(--yellow);
+            font-size: 0.85rem;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .practical-title { font-family: 'Share Tech Mono', monospace; font-size: 1rem; color: var(--blue); }
+        .flag-input-row { display: flex; gap: 0.7rem; }
+        .flag-input {
+            flex: 1;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            color: var(--green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .flag-input:focus { border-color: var(--green); }
+        .flag-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .flag-btn {
+            background: rgba(0,255,157,0.1);
+            border: 1px solid var(--green);
+            color: var(--green);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .flag-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .flag-result { margin-top: 0.6rem; padding: 0.5rem 0.8rem; border-radius: 6px; display: none; }
+        .flag-result.ok { background: rgba(0,255,157,0.08); color: var(--green); border: 1px solid rgba(0,255,157,0.3); }
+        .flag-result.fail { background: rgba(255,95,86,0.08); color: var(--red); border: 1px solid rgba(255,95,86,0.3); }
+
+        .sidebar { position: sticky; top: 90px; height: fit-content; }
+        .sidebar-card {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.4rem;
+            margin-bottom: 1.2rem;
+        }
+        .sidebar-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--green);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .complete-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, rgba(0,255,157,0.15), rgba(0,184,255,0.1));
+            border: 1px solid var(--green);
+            border-radius: 10px;
+            color: var(--green);
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+        .complete-btn:hover:not(:disabled) { background: rgba(0,255,157,0.25); transform: translateY(-2px); }
+        .complete-btn.done { background: rgba(0,255,157,0.08); cursor: default; opacity: 0.7; }
+        .complete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.55rem 0;
+            border-bottom: 1px solid rgba(42,58,74,0.5);
+            font-size: 0.85rem;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .progress-ring-wrap { display: flex; align-items: center; gap: 1.2rem; margin-bottom: 1rem; }
+        .progress-ring { transform: rotate(-90deg); }
+        .progress-ring-bg { fill: none; stroke: var(--border); stroke-width: 5; }
+        .progress-ring-fill { fill: none; stroke: var(--green); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 163; stroke-dashoffset: 163; }
+
+        .login-overlay-card {
+            text-align: center;
+            padding: 2rem;
+        }
+        .login-overlay-card i {
+            font-size: 3rem;
+            color: var(--yellow);
+            margin-bottom: 1rem;
+        }
+        .login-overlay-card p {
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .page-wrapper { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+            .options-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .lesson-header h1 { font-size: 1.4rem; }
+            .flag-input-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- DIALOGS -->
+<div class="hl-dialog-overlay" id="dlConfirm">
+    <div class="hl-dialog">
+        <div class="hl-dialog-icon">
+            <div class="hl-dialog-icon-circle warn">
+                <i class="fas fa-right-from-bracket"></i>
+            </div>
+        </div>
+        <div class="hl-dialog-body">
+            <div class="hl-dialog-title">Çıkış Yap</div>
+            <div class="hl-dialog-message">Oturumunuzu kapatmak istediğinize emin misiniz?</div>
+        </div>
+        <div class="hl-dialog-actions">
+            <button class="hl-btn hl-btn-cancel" onclick="dlConfirmResolve(false)">Vazgeç</button>
+            <button class="hl-btn hl-btn-confirm" onclick="dlConfirmResolve(true)">Çıkış Yap</button>
+        </div>
+    </div>
+</div>
+
+<div class="hl-dialog-overlay" id="dlAlert">
+    <div class="hl-dialog">
+        <div class="hl-dialog-icon">
+            <div class="hl-dialog-icon-circle info">
+                <i class="fas fa-info-circle"></i>
+            </div>
+        </div>
+        <div class="hl-dialog-body">
+            <div class="hl-dialog-title" id="alertTitle">Bilgi</div>
+            <div class="hl-dialog-message" id="alertMessage"></div>
+        </div>
+        <div class="hl-dialog-actions centered">
+            <button class="hl-btn hl-btn-ok" onclick="dlAlertClose()">Tamam</button>
+        </div>
+    </div>
+</div>
+
+<div class="hl-dialog-overlay" id="dlLoginRequired">
+    <div class="hl-dialog">
+        <div class="hl-dialog-icon">
+            <div class="hl-dialog-icon-circle warn">
+                <i class="fas fa-lock"></i>
+            </div>
+        </div>
+        <div class="hl-dialog-body">
+            <div class="hl-dialog-title">Giriş Gerekli</div>
+            <div class="hl-dialog-message">
+                Bu soruyu çözmek için hesabınıza giriş yapmanız gerekiyor.<br><br>
+                Hemen giriş yaparak ilerlemenizi kaydedin ve puan kazanmaya başlayın!
+            </div>
+        </div>
+        <div class="hl-dialog-actions">
+            <button class="hl-btn hl-btn-cancel" onclick="dlLoginRequiredClose()">Vazgeç</button>
+            <button class="hl-btn hl-btn-login" onclick="window.location.href='/login'">
+                <i class="fas fa-sign-in-alt"></i> Giriş Yap
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/" class="logo"><i class="fas fa-skull"></i> HACKLAB</a>
+    <div class="nav-links">
+        <a href="/">Ana Sayfa</a>
+        <a href="/machines">Makineler</a>
+        <a href="/academy" class="active">Akademi</a>
+        <a href="/leaderboard">Liderlik</a>
+        <a href="/vip">VIP</a>
+        {{if .IsAuthenticated}}
+        <a href="/profile/{{.User.Username}}">Profil</a>
+        <a href="/dashboard">Panel</a>
+        {{if .IsAdmin}}
+        <a href="/admin" style="color: #ffd700;">Admin</a>
+        {{end}}
+        <span class="user-points">{{.User.Points}} Puan</span>
+        <button class="login-btn" onclick="logout()">Çıkış</button>
+        {{else}}
+        <button class="login-btn" onclick="window.location.href='/login'">Giriş</button>
+        <button class="register-btn" onclick="window.location.href='/register'">Kayıt Ol</button>
+        {{end}}
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="page-wrapper">
+    <main>
+        <div class="breadcrumb">
+            <a href="/academy"><i class="fas fa-graduation-cap"></i> Akademi</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="/academy#{{.CategorySlug}}">{{.CategoryName}}</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{{with .Lesson}}{{.Title}}{{end}}</span>
+        </div>
+
+        <div class="lesson-header">
+            <a href="/academy#{{.CategorySlug}}" class="lesson-category-tag">
+                <i class="fas fa-folder"></i> {{.CategoryName}}
+            </a>
+            <h1>{{with .Lesson}}{{.Title}}{{end}}</h1>
+            <div class="lesson-meta-row">
+                <span class="meta-chip"><i class="fas fa-clock"></i> {{with .Lesson}}{{.Duration}}{{end}} dk</span>
+                <span class="meta-chip"><i class="fas fa-star"></i> {{with .Lesson}}{{.PointsReward}}{{end}} puan</span>
+                <span class="meta-chip"><i class="fas fa-eye"></i> {{with .Lesson}}{{.ViewCount}}{{end}} görüntülenme</span>
+                <span class="difficulty-badge difficulty-{{with .Lesson}}{{difficultyClass .Difficulty}}{{end}}">
+                    <i class="fas fa-signal"></i> {{with .Lesson}}{{difficultyLabel .Difficulty}}{{end}}
+                </span>
+            </div>
+            {{if .IsCompleted}}
+            <div class="completed-banner">
+                <i class="fas fa-check-circle"></i> Bu dersi tamamladın — tebrikler!
+            </div>
+            {{end}}
+        </div>
+
+        {{with .Lesson}}{{if .VideoURL}}
+        <div class="video-section">
+            <iframe src="{{.VideoURL}}" allowfullscreen></iframe>
+        </div>
+        {{end}}{{end}}
+
+        <div class="content-card">
+            <div class="section-title"><i class="fas fa-book-open"></i> Ders İçeriği</div>
+            <div class="lesson-content">{{with .Lesson}}{{safeHTML .Content}}{{end}}</div>
+        </div>
+
+        {{if .SectionQuestions}}
+        <div class="content-card">
+            <div class="section-title"><i class="fas fa-question-circle"></i> Anlama Soruları</div>
+            {{if .IsAuthenticated}}
+                {{range $i, $q := .SectionQuestions}}
+                <div class="quiz-question {{if $q.Solved}}solved{{end}}" id="qq-{{$q.ID}}">
+                    <div class="question-header">
+                        <div class="question-text">{{add $i 1}}. {{$q.QuestionText}}</div>
+                        <div style="display:flex;gap:0.5rem;align-items:center;">
+                            <span class="question-points">+{{$q.PointsReward}} puan</span>
+                            {{if $q.Solved}}<span class="solved-tag"><i class="fas fa-check-circle"></i> Çözüldü</span>{{end}}
+                        </div>
+                    </div>
+                    {{if $q.Solved}}
+                    <div class="answer-feedback correct-fb" style="display:flex;">✓ Bu soruyu zaten doğru cevapladın.</div>
+                    {{else}}
+                    <div class="options-grid">
+                        <button class="option-btn" onclick="answerQuestion(this, {{$.LessonID}}, {{$q.ID}}, 'A', '{{$q.CorrectAnswer}}', true)"><span class="option-label">A</span> {{$q.OptionA}}</button>
+                        <button class="option-btn" onclick="answerQuestion(this, {{$.LessonID}}, {{$q.ID}}, 'B', '{{$q.CorrectAnswer}}', true)"><span class="option-label">B</span> {{$q.OptionB}}</button>
+                        {{if $q.OptionC}}<button class="option-btn" onclick="answerQuestion(this, {{$.LessonID}}, {{$q.ID}}, 'C', '{{$q.CorrectAnswer}}', true)"><span class="option-label">C</span> {{$q.OptionC}}</button>{{end}}
+                        {{if $q.OptionD}}<button class="option-btn" onclick="answerQuestion(this, {{$.LessonID}}, {{$q.ID}}, 'D', '{{$q.CorrectAnswer}}', true)"><span class="option-label">D</span> {{$q.OptionD}}</button>{{end}}
+                    </div>
+                    <div class="answer-feedback correct-fb" id="fb-correct-{{$q.ID}}">✓ Doğru cevap!</div>
+                    <div class="answer-feedback wrong-fb" id="fb-wrong-{{$q.ID}}">✗ Yanlış cevap, tekrar dene.</div>
+                    {{end}}
+                </div>
+                {{end}}
+            {{else}}
+                <div class="login-overlay-card">
+                    <i class="fas fa-lock"></i>
+                    <p>Soruları çözmek ve puan kazanmak için giriş yapmalısınız.</p>
+                    <button class="login-btn" onclick="window.location.href='/login'">Giriş Yap</button>
+                    <button class="register-btn" onclick="window.location.href='/register'" style="margin-left: 0.5rem;">Kayıt Ol</button>
+                </div>
+            {{end}}
+        </div>
+        {{end}}
+
+        {{if .PracticalQuestions}}
+        <div class="content-card">
+            <div class="section-title"><i class="fas fa-terminal"></i> Pratik Görevler</div>
+            {{if .IsAuthenticated}}
+                {{range .PracticalQuestions}}
+                <div class="practical-card {{if .Solved}}solved{{end}}" id="pq-{{.ID}}">
+                    <div class="practical-header" style="display:flex;justify-content:space-between;margin-bottom:0.8rem;">
+                        <div class="practical-title">{{.Title}}</div>
+                        <div class="practical-badges" style="display:flex;gap:0.5rem;">
+                            <span class="difficulty-badge difficulty-{{difficultyClass .Difficulty}}">{{difficultyLabel .Difficulty}}</span>
+                            <span class="question-points">+{{.PointsReward}} puan</span>
+                            {{if .Solved}}<span class="solved-tag"><i class="fas fa-check-circle"></i> Çözüldü</span>{{end}}
+                        </div>
+                    </div>
+                    <p class="practical-desc" style="color:#a0a8b0;margin-bottom:1rem;">{{.Description}}</p>
+                    {{if .DockerImage}}<div class="docker-chip"><i class="fab fa-docker"></i> {{.DockerImage}}</div>{{end}}
+                    {{if .Solved}}
+                    <div class="flag-result ok" style="display:flex;">✓ Bu görevi başarıyla tamamladın!</div>
+                    {{else}}
+                    <div class="flag-input-row">
+                        <input class="flag-input" type="text" placeholder="FLAG{...}" id="flag-{{.ID}}">
+                        <button class="flag-btn" onclick="submitFlag({{$.LessonID}}, {{.ID}}, true)"><i class="fas fa-paper-plane"></i> Gönder</button>
+                    </div>
+                    <div class="flag-result ok" id="flag-ok-{{.ID}}">✓ Doğru flag! Tebrikler 🎉</div>
+                    <div class="flag-result fail" id="flag-fail-{{.ID}}">✗ Yanlış flag, tekrar dene.</div>
+                    {{if .Hint}}<button class="hint-toggle" onclick="toggleHint({{.ID}})"><i class="fas fa-lightbulb"></i> İpucu göster</button>
+                    <div class="hint-box" id="hint-{{.ID}}" style="display:none;margin-top:0.6rem;padding:0.6rem;background:rgba(255,189,46,0.07);border:1px solid rgba(255,189,46,0.3);border-radius:6px;color:var(--yellow);"><i class="fas fa-lightbulb"></i> {{.Hint}}</div>{{end}}
+                    {{end}}
+                </div>
+                {{end}}
+            {{else}}
+                <div class="login-overlay-card">
+                    <i class="fas fa-lock"></i>
+                    <p>Pratik görevleri çözmek için giriş yapmalısınız.</p>
+                    <button class="login-btn" onclick="window.location.href='/login'">Giriş Yap</button>
+                    <button class="register-btn" onclick="window.location.href='/register'" style="margin-left: 0.5rem;">Kayıt Ol</button>
+                </div>
+            {{end}}
+        </div>
+        {{end}}
+    </main>
+
+    <aside class="sidebar">
+        {{if .IsAuthenticated}}
+        <div class="sidebar-card">
+            <div class="sidebar-title"><i class="fas fa-chart-line"></i> İlerleme</div>
+            <div class="progress-ring-wrap">
+                <svg class="progress-ring" width="60" height="60"><circle class="progress-ring-bg" cx="30" cy="30" r="26"/><circle class="progress-ring-fill" id="progressRing" cx="30" cy="30" r="26"/><text x="30" y="35" text-anchor="middle" fill="var(--green)" font-size="11px" id="progressPct">0%</text></svg>
+                <div><div>Anlama: <span id="sq-progress">0/{{len .SectionQuestions}}</span></div><div>Pratik: <span id="pq-progress">0/{{len .PracticalQuestions}}</span></div></div>
+            </div>
+        </div>
+        <div class="sidebar-card">
+            <button class="complete-btn {{if .IsCompleted}}done{{end}}" id="completeBtn" onclick="{{if and (not .IsCompleted) .IsAuthenticated}}markComplete({{.LessonID}}){{else if not .IsAuthenticated}}showLoginRequired(){{end}}">
+                {{if .IsCompleted}}
+                <i class="fas fa-check-circle"></i> Ders Tamamlandı
+                {{else if .IsAuthenticated}}
+                <i class="fas fa-flag-checkered"></i> Dersi Tamamla
+                {{else}}
+                <i class="fas fa-lock"></i> Dersi Tamamlamak İçin Giriş Yap
+                {{end}}
+            </button>
+        </div>
+        {{else}}
+        <div class="sidebar-card" style="text-align:center;">
+            <i class="fas fa-lock" style="font-size: 2rem; color: var(--yellow); margin-bottom: 1rem; display: block;"></i>
+            <p style="color:var(--muted);margin-bottom:0.8rem;">Giriş yaparak ilerlemeni kaydet, soruları çöz ve puan kazan!</p>
+            <button class="login-btn" onclick="window.location.href='/login'" style="width:100%;">Giriş Yap</button>
+            <button class="register-btn" onclick="window.location.href='/register'" style="width:100%; margin-top: 0.5rem;">Kayıt Ol</button>
+        </div>
+        {{end}}
+
+        <div class="sidebar-card">
+            <div class="sidebar-title"><i class="fas fa-info-circle"></i> Ders Bilgisi</div>
+            <div class="info-row"><span>Süre</span><span>{{with .Lesson}}{{.Duration}}{{end}} dk</span></div>
+            <div class="info-row"><span>Seviye</span><span>{{with .Lesson}}{{difficultyLabel .Difficulty}}{{end}}</span></div>
+            <div class="info-row"><span>Ders Puanı</span><span class="green">+{{with .Lesson}}{{.PointsReward}}{{end}}</span></div>
+        </div>
+    </aside>
+</div>
+
+<script>
+// Dialog değişkenleri
+let _dlConfirmResolve = null;
+
+function showConfirm(title, message, confirmLabel, confirmClass) {
+    const dialog = document.getElementById('dlConfirm');
+    const titleEl = document.querySelector('#dlConfirm .hl-dialog-title');
+    const msgEl = document.querySelector('#dlConfirm .hl-dialog-message');
+    const confirmBtn = document.querySelector('#dlConfirm .hl-btn-confirm');
+    if (titleEl) titleEl.textContent = title || 'Emin misiniz?';
+    if (msgEl) msgEl.textContent = message || '';
+    if (confirmLabel && confirmBtn) confirmBtn.innerHTML = confirmLabel;
+    if (confirmClass && confirmBtn) confirmBtn.className = 'hl-btn ' + confirmClass;
+    dialog.classList.add('open');
+    return new Promise(resolve => { _dlConfirmResolve = resolve; });
+}
+
+function dlConfirmResolve(value) {
+    document.getElementById('dlConfirm').classList.remove('open');
+    if (_dlConfirmResolve) { _dlConfirmResolve(value); _dlConfirmResolve = null; }
+}
+
+function showAlert(title, message) {
+    document.getElementById('alertTitle').textContent = title || 'Bilgi';
+    document.getElementById('alertMessage').textContent = message || '';
+    document.getElementById('dlAlert').classList.add('open');
+}
+
+function dlAlertClose() {
+    document.getElementById('dlAlert').classList.remove('open');
+}
+
+function showLoginRequired() {
+    document.getElementById('dlLoginRequired').classList.add('open');
+}
+
+function dlLoginRequiredClose() {
+    document.getElementById('dlLoginRequired').classList.remove('open');
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (document.getElementById('dlConfirm').classList.contains('open')) dlConfirmResolve(false);
+        if (document.getElementById('dlAlert').classList.contains('open')) dlAlertClose();
+        if (document.getElementById('dlLoginRequired').classList.contains('open')) dlLoginRequiredClose();
+    }
+});
+document.getElementById('dlConfirm').addEventListener('click', (e) => { if (e.target === this) dlConfirmResolve(false); });
+document.getElementById('dlAlert').addEventListener('click', (e) => { if (e.target === this) dlAlertClose(); });
+document.getElementById('dlLoginRequired').addEventListener('click', (e) => { if (e.target === this) dlLoginRequiredClose(); });
+
+// LOGOUT
+async function logout() {
+    const confirmed = await showConfirm('Çıkış Yap', 'Oturumunuzu kapatmak istediğinize emin misiniz?', '<i class="fas fa-right-from-bracket"></i> Çıkış Yap', 'hl-btn-confirm');
+    if (!confirmed) return;
+    try {
+        const response = await fetch('/api/auth/logout', { method: 'POST' });
+        if (response.ok) window.location.reload();
+        else window.location.href = '/';
+    } catch (error) { window.location.href = '/'; }
+}
+
+// İlerleme
+const totalSQ = {{len .SectionQuestions}};
+const totalPQ = {{len .PracticalQuestions}};
+let doneSQ = {{range .SectionQuestions}}{{if .Solved}}1+{{end}}{{end}}0;
+let donePQ = {{range .PracticalQuestions}}{{if .Solved}}1+{{end}}{{end}}0;
+
+function updateProgress() {
+    const total = totalSQ + totalPQ;
+    const done = doneSQ + donePQ;
+    const pct = total === 0 ? 0 : Math.round(done * 100 / total);
+    const ring = document.getElementById('progressRing');
+    if (ring) ring.style.strokeDashoffset = 163 - (163 * pct / 100);
+    const pctEl = document.getElementById('progressPct');
+    if (pctEl) pctEl.textContent = pct + '%';
+    const sqEl = document.getElementById('sq-progress');
+    if (sqEl) sqEl.textContent = doneSQ + ' / ' + totalSQ;
+    const pqEl = document.getElementById('pq-progress');
+    if (pqEl) pqEl.textContent = donePQ + ' / ' + totalPQ;
+}
+updateProgress();
+
+function answerQuestion(btn, lessonID, questionID, selected, correct, isAuth) {
+    if (!isAuth) { showLoginRequired(); return; }
+
+    const container = btn.closest('.quiz-question');
+    const btns = container.querySelectorAll('.option-btn');
+
+    if (selected === correct) {
+        // DOĞRU: tüm butonları kilitle, doğru şıkkı yeşil yap
+        btns.forEach(b => b.disabled = true);
+        btn.classList.add('correct');
+        document.getElementById('fb-correct-' + questionID).style.display = 'flex';
+        document.getElementById('fb-wrong-' + questionID).style.display = 'none';
+
+        fetch(`/api/academy/lesson/${lessonID}/question/${questionID}/answer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ answer: selected })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.correct) { doneSQ++; updateProgress(); }
+        })
+        .catch(() => {});
+
+    } else {
+        // YANLIŞ: sadece tıklanan şıkkı kırmızı yap, diğerleri açık kalsın
+        btn.classList.add('wrong');
+        btn.disabled = true; // sadece yanlış tıklananı kilitle
+        document.getElementById('fb-wrong-' + questionID).style.display = 'flex';
+        document.getElementById('fb-correct-' + questionID).style.display = 'none';
+
+        // Sunucuya yine gönder (kayıt için), ama UI'da doğruyu gösterme
+        fetch(`/api/academy/lesson/${lessonID}/question/${questionID}/answer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ answer: selected })
+        }).catch(() => {});
+    }
+}
+
+
+
+
+function submitFlag(lessonID, questionID, isAuth) {
+    if (!isAuth) {
+        showLoginRequired();
+        return;
+    }
+    
+    const input = document.getElementById('flag-' + questionID);
+    const flag = input.value.trim();
+    if (!flag) { showAlert('Uyarı', 'Lütfen flag girin.'); return; }
+    
+    fetch('/academy/submit-flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lesson_id: lessonID, question_id: questionID, flag: flag })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.correct) {
+            document.getElementById('flag-ok-' + questionID).style.display = 'flex';
+            document.getElementById('flag-fail-' + questionID).style.display = 'none';
+            input.disabled = true;
+            document.getElementById('pq-' + questionID).classList.add('solved');
+            donePQ++;
+            updateProgress();
+            showAlert('Başarılı!', 'Doğru flag! +' + (data.points || 0) + ' puan kazandınız.');
+        } else {
+            document.getElementById('flag-fail-' + questionID).style.display = 'flex';
+            showAlert('Yanlış Cevap', 'Flag yanlış, tekrar deneyin.');
+        }
+    })
+    .catch(() => showAlert('Hata', 'Sunucuya ulaşılamadı.'));
+}
+
+function toggleHint(qid) { 
+    const box = document.getElementById('hint-' + qid); 
+    box.style.display = box.style.display === 'block' ? 'none' : 'block'; 
+}
+function markComplete(lessonID) {
+    fetch(`/api/academy/lesson/${lessonID}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const btn = document.getElementById('completeBtn');
+            btn.classList.add('done');
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Ders Tamamlandı';
+            btn.onclick = null;
+            showAlert('Tebrikler!', data.message);
+            location.reload();
+        } else {
+            // Sunucudan gelen hata mesajını göster
+            showAlert('Tamamlanamadı', data.message || 'Tüm soruları çözmelisiniz.');
+        }
+    })
+    .catch(() => showAlert('Hata', 'Sunucuya ulaşılamadı.'));
+}
+
+</script>
+</body>
+</html>

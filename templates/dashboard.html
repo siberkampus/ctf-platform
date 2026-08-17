@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            background: rgba(10, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00ff9d;
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: 0;
+            width: 0; height: 2px;
+            background: #00ff9d;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after { width: 100%; }
+        .nav-links a:hover, .nav-links a.active { color: #00ff9d; }
+
+        .login-btn {
+            background: transparent;
+            border: 2px solid #00ff9d;
+            color: #00ff9d;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background: #00ff9d;
+            color: #0a0f0f;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+        }
+
+        .user-points {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #00ff9d;
+            padding: 0.3rem 1rem;
+            border-radius: 5px;
+            color: #00ff9d;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #ff5f56;
+            color: #ff5f56;
+        }
+
+        .logout-btn:hover { background: #ff5f56; color: #fff; }
+
+        /* ── Container ── */
+        .container {
+            max-width: 1400px;
+            margin: 80px auto 0;
+            padding: 2rem 5%;
+        }
+
+        /* ── Hoşgeldin Banner ── */
+        .welcome-banner {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-left: 4px solid #00ff9d;
+            border-radius: 10px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .welcome-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #00ff9d;
+            box-shadow: 0 0 20px rgba(0,255,157,0.3);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .welcome-text h2 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.4rem;
+            color: #00ff9d;
+            margin-bottom: 0.3rem;
+        }
+
+        .welcome-text p { color: #b0b0b0; font-size: 0.9rem; }
+
+        .welcome-badges { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+
+        .w-badge {
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .w-badge-vip { background: linear-gradient(45deg, #ffd700, #ffa500); color: #0a0f0f; }
+        .w-badge-rank { background: rgba(0,255,157,0.15); border: 1px solid #00ff9d; color: #00ff9d; }
+
+        /* ── Ana Grid ── */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Stat Kartları ── */
+        .stat-card {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: #00ff9d40;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,255,157,0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 60px; height: 60px;
+            border-radius: 0 10px 0 100%;
+            opacity: 0.08;
+        }
+
+        .stat-card.green::before  { background: #00ff9d; }
+        .stat-card.blue::before   { background: #00b8ff; }
+        .stat-card.yellow::before { background: #ffbd2e; }
+        .stat-card.red::before    { background: #ff5f56; }
+
+        .stat-icon {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card.green  .stat-icon { color: #00ff9d; }
+        .stat-card.blue   .stat-icon { color: #00b8ff; }
+        .stat-card.yellow .stat-icon { color: #ffbd2e; }
+        .stat-card.red    .stat-icon { color: #ff5f56; }
+
+        .stat-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-card.green  .stat-value { color: #00ff9d; }
+        .stat-card.blue   .stat-value { color: #00b8ff; }
+        .stat-card.yellow .stat-value { color: #ffbd2e; }
+        .stat-card.red    .stat-value { color: #ff5f56; }
+
+        .stat-label { color: #6a7a8a; font-size: 0.85rem; }
+
+        .stat-sub {
+            margin-top: 0.8rem;
+            font-size: 0.78rem;
+            color: #4a5a6a;
+        }
+
+        /* ── İçerik Grid ── */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Panel ── */
+        .panel {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid #2a3a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-link {
+            font-size: 0.8rem;
+            color: #6a7a8a;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .panel-link:hover { color: #00ff9d; }
+
+        .panel-body { padding: 1.5rem; }
+
+        /* ── Grafik ── */
+        .chart-wrap {
+            height: 240px;
+            position: relative;
+        }
+
+        /* ── Günlük İlerleme ── */
+        .daily-progress {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-title {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            font-size: 0.95rem;
+        }
+
+        .progress-count {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            color: #00ff9d;
+        }
+
+        .progress-bar-bg {
+            height: 10px;
+            background: #2a3a4a;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff9d, #00b8ff);
+            border-radius: 5px;
+            transition: width 0.8s ease;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #6a7a8a;
+        }
+
+        /* ── Devam Eden Makineler ── */
+        .machine-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #1a2a3a;
+        }
+
+        .machine-item:last-child { border-bottom: none; }
+
+        .machine-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+
+        .machine-name {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .machine-name:hover { text-decoration: underline; }
+
+        .diff-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .diff-easy   { background: rgba(0,255,157,0.15);  color: #00ff9d; }
+        .diff-medium { background: rgba(255,189,46,0.15); color: #ffbd2e; }
+        .diff-hard   { background: rgba(255,95,86,0.15);  color: #ff5f56; }
+        .diff-expert { background: rgba(180,0,255,0.15);  color: #b400ff; }
+
+        .machine-prog-bg {
+            height: 6px;
+            background: #2a3a4a;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.4rem;
+        }
+
+        .machine-prog-fill {
+            height: 100%;
+            background: #00ff9d;
+            border-radius: 3px;
+        }
+
+        .machine-prog-text {
+            font-size: 0.75rem;
+            color: #6a7a8a;
+        }
+
+        /* ── Aktivite Timeline ── */
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #1a2a3a;
+        }
+
+        .activity-item:last-child { border-bottom: none; }
+
+        .activity-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .icon-solve   { background: rgba(0,255,157,0.15);  color: #00ff9d;  border: 1px solid #00ff9d40;  }
+        .icon-badge   { background: rgba(255,189,46,0.15); color: #ffbd2e;  border: 1px solid #ffbd2e40; }
+        .icon-comment { background: rgba(0,184,255,0.15);  color: #00b8ff;  border: 1px solid #00b8ff40;  }
+        .icon-login   { background: rgba(180,0,255,0.15);  color: #b400ff;  border: 1px solid #b400ff40;  }
+        .icon-default { background: rgba(100,100,100,0.15);color: #6a7a8a;  border: 1px solid #2a3a4a;    }
+
+        .activity-content { flex: 1; min-width: 0; }
+
+        .activity-text {
+            font-size: 0.85rem;
+            color: #e0e0e0;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .activity-text strong { color: #00ff9d; }
+
+        .activity-time {
+            font-size: 0.72rem;
+            color: #4a5a6a;
+        }
+
+        /* ── Başarımlar ── */
+        .achievement-list { display: flex; flex-direction: column; gap: 0.8rem; }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid #2a3a4a;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .achievement-item:hover { border-color: #00ff9d30; }
+
+        .achievement-icon-wrap {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(0,255,157,0.1);
+            border: 2px solid #00ff9d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #00ff9d;
+            flex-shrink: 0;
+        }
+
+        .achievement-info { flex: 1; min-width: 0; }
+
+        .achievement-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .achievement-desc { font-size: 0.75rem; color: #6a7a8a; }
+
+        .achievement-points {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            color: #ffbd2e;
+            flex-shrink: 0;
+        }
+
+        /* ── Seri (Streak) ── */
+        .streak-widget {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .streak-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 3rem;
+            color: #ffbd2e;
+            line-height: 1;
+        }
+
+        .streak-label { color: #6a7a8a; font-size: 0.85rem; margin-top: 0.3rem; }
+
+        .streak-fire { font-size: 1.5rem; }
+
+        /* ── Hızlı Erişim ── */
+        .quick-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-link {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            text-decoration: none;
+            color: #b0b0b0;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-link i { font-size: 1.5rem; color: #00ff9d; }
+        .quick-link span { font-size: 0.8rem; }
+
+        .quick-link:hover {
+            border-color: #00ff9d;
+            color: #00ff9d;
+            transform: translateY(-2px);
+        }
+
+        /* ── Boş Durum ── */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #4a5a6a;
+        }
+
+        .empty-state i { font-size: 2.5rem; margin-bottom: 0.8rem; display: block; }
+        .empty-state p { font-size: 0.85rem; }
+
+        /* ── Footer ── */
+        .footer {
+            background: rgba(10, 15, 20, 0.95);
+            padding: 2rem 5%;
+            margin-top: 3rem;
+            border-top: 1px solid #00ff9d20;
+            text-align: center;
+            color: #4a5a6a;
+            font-size: 0.85rem;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1200px) {
+            .dashboard-grid { grid-template-columns: 1fr 1fr; }
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 1rem; }
+            .nav-links { display: none; }
+            .dashboard-grid { grid-template-columns: 1fr 1fr; }
+            .quick-links { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .welcome-banner { flex-direction: column; text-align: center; }
+        }
+
+        /* =============================================
+           ÖZEL DIALOG SİSTEMİ (index.html'den alındı)
+           ============================================= */
+        .hl-dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            animation: dlOverlayIn 0.15s ease;
+        }
+
+        .hl-dialog-overlay.open {
+            display: flex;
+        }
+
+        @keyframes dlOverlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .hl-dialog {
+            background: #0d1117;
+            border: 1px solid #2a3a4a;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 157, 0.08);
+            animation: dlIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        @keyframes dlIn {
+            from { opacity: 0; transform: scale(0.88) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .hl-dialog-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 2rem 1rem;
+        }
+
+        .hl-dialog-icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .hl-dialog-icon-circle.warn {
+            background: rgba(255, 189, 46, 0.12);
+            border: 1px solid rgba(255, 189, 46, 0.35);
+            color: #ffbd2e;
+        }
+
+        .hl-dialog-icon-circle.info {
+            background: rgba(0, 184, 255, 0.1);
+            border: 1px solid rgba(0, 184, 255, 0.3);
+            color: #00b8ff;
+        }
+
+        .hl-dialog-icon-circle.danger {
+            background: rgba(255, 95, 86, 0.1);
+            border: 1px solid rgba(255, 95, 86, 0.3);
+            color: #ff5f56;
+        }
+
+        .hl-dialog-body {
+            padding: 0 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .hl-dialog-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.05rem;
+            color: #e0e0e0;
+            margin-bottom: 0.6rem;
+        }
+
+        .hl-dialog-message {
+            font-size: 0.9rem;
+            color: #8a9a8a;
+            line-height: 1.6;
+        }
+
+        .hl-dialog-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #1e2a38;
+            justify-content: flex-end;
+        }
+
+        .hl-dialog-actions.centered {
+            justify-content: center;
+        }
+
+        .hl-btn {
+            padding: 0.55rem 1.4rem;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .hl-btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a3a4a;
+            color: #8a9a8a;
+        }
+
+        .hl-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: #e0e0e0;
+            border-color: #3a4a5a;
+        }
+
+        .hl-btn-confirm {
+            background: rgba(255, 95, 86, 0.15);
+            border: 1px solid rgba(255, 95, 86, 0.4);
+            color: #ff5f56;
+        }
+
+        .hl-btn-confirm:hover {
+            background: rgba(255, 95, 86, 0.28);
+            box-shadow: 0 0 14px rgba(255, 95, 86, 0.25);
+        }
+
+        .hl-btn-ok {
+            background: rgba(0, 255, 157, 0.12);
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            color: #00ff9d;
+        }
+
+        .hl-btn-ok:hover {
+            background: rgba(0, 255, 157, 0.22);
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<!-- =============================================
+     ÖZEL DIALOG: ONAY (confirm) — Çıkış
+     ============================================= -->
+<div class="hl-dialog-overlay" id="dlConfirm">
+    <div class="hl-dialog">
+        <div class="hl-dialog-icon">
+            <div class="hl-dialog-icon-circle warn">
+                <i class="fas fa-right-from-bracket"></i>
+            </div>
+        </div>
+        <div class="hl-dialog-body">
+            <div class="hl-dialog-title" id="dlConfirmTitle">Çıkış Yap</div>
+            <div class="hl-dialog-message" id="dlConfirmMsg">Oturumunuzu kapatmak istediğinize emin misiniz?</div>
+        </div>
+        <div class="hl-dialog-actions">
+            <button class="hl-btn hl-btn-cancel" onclick="dlConfirmResolve(false)">
+                <i class="fas fa-xmark"></i> Vazgeç
+            </button>
+            <button class="hl-btn hl-btn-confirm" onclick="dlConfirmResolve(true)">
+                <i class="fas fa-right-from-bracket"></i> Çıkış Yap
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Navbar ── -->
+<nav class="navbar">
+    <a href="/" class="logo"><i class="fas fa-skull"></i> HACKLAB</a>
+    <div class="nav-links">
+        <a href="/">Ana Sayfa</a>
+        <a href="/machines">Makineler</a>
+        <a href="/academy">Akademi</a>
+        <a href="/leaderboard">Liderlik</a>
+        <a href="/vip">VIP</a>
+
+        <a href="/profile/{{.User.Username}}">Profil</a>
+        <a href="/dashboard" class="active">Panel</a>
+        {{if .IsAdmin}}
+            <a href="/admin" style="color:#ffd700;"><i class="fas fa-shield-alt"></i> Admin</a>
+        {{end}}
+        <span class="user-points"> {{.User.Points}} Puan</span>
+        <button class="login-btn" onclick="logout()">Çıkış</button>
+    </div>
+</nav>
+
+<!-- ── Container ── -->
+<div class="container">
+
+    <!-- Hoşgeldin Banner -->
+    <div class="welcome-banner">
+        <img class="welcome-avatar"
+             src="{{if .User.Avatar}}{{.User.Avatar}}{{else}}/static/images/avatar.png{{end}}"
+             alt="{{.User.Username}}"
+             onerror="this.src='/static/images/avatar.png'">
+        <div class="welcome-text">
+            <h2>Hoşgeldin, @{{.User.Username}}! 👋</h2>
+            <p>
+                {{if .User.Bio}}
+                    {{.User.Bio}}
+                {{else}}
+                    Bugün hangi makineleri çözeceksin?
+                {{end}}
+            </p>
+            <div class="welcome-badges">
+                {{if .User.IsVIP}}
+                    <span class="w-badge w-badge-vip"><i class="fas fa-crown"></i> VIP</span>
+                {{end}}
+                <span class="w-badge w-badge-rank"><i class="fas fa-trophy"></i> #{{.Stats.Rank}} Sıralama</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Stat Kartları ── -->
+    <div class="dashboard-grid">
+        <div class="stat-card green">
+            <div class="stat-icon"><i class="fas fa-flag-checkered"></i></div>
+            <div class="stat-value">{{.Stats.TotalSolved}}</div>
+            <div class="stat-label">Çözülen Soru</div>
+            <div class="stat-sub">Toplam {{.Stats.TotalMachinesCount}} makineden</div>
+        </div>
+        <div class="stat-card blue">
+            <div class="stat-icon"><i class="fas fa-server"></i></div>
+            <div class="stat-value">{{.Stats.TotalMachines}}</div>
+            <div class="stat-label">Tamamlanan Makine</div>
+            {{if .Stats.VIPCount}}
+                <div class="stat-sub"><i class="fas fa-crown" style="color:#ffd700;"></i> {{.Stats.VIPCount}} VIP makine dahil</div>
+            {{end}}
+        </div>
+        <div class="stat-card yellow">
+            <div class="stat-icon"><i class="fas fa-star"></i></div>
+            <div class="stat-value">{{.Stats.TotalPoints}}</div>
+            <div class="stat-label">Toplam Puan</div>
+            <div class="stat-sub">Global sıralama: #{{.Stats.Rank}}</div>
+        </div>
+        <div class="stat-card red">
+            <div class="stat-icon"><i class="fas fa-fire"></i></div>
+            <div class="stat-value">{{.Stats.Streak}}</div>
+            <div class="stat-label">Günlük Seri</div>
+            <div class="stat-sub">Son 7 gün aktif</div>
+        </div>
+    </div>
+
+    <!-- ── Günlük İlerleme ── -->
+    {{$pct := percentage .Stats.DailyProgress .Stats.DailyGoal}}
+    <div class="daily-progress">
+        <div class="progress-header">
+            <span class="progress-title">
+                <i class="fas fa-bullseye"></i> Bugünkü Hedef
+            </span>
+            <span class="progress-count">{{.Stats.DailyProgress}} / {{.Stats.DailyGoal}} soru</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: {{if gt $pct 100}}100{{else}}{{$pct}}{{end}}%;"></div>
+        </div>
+        <div class="progress-labels">
+            <span>{{$pct}}% tamamlandı</span>
+            {{if ge .Stats.DailyProgress .Stats.DailyGoal}}
+                <span style="color:#00ff9d;"><i class="fas fa-check-circle"></i> Hedef tamamlandı!</span>
+            {{else}}
+                <span>{{sub .Stats.DailyGoal .Stats.DailyProgress}} soru kaldı</span>
+            {{end}}
+        </div>
+    </div>
+
+    <!-- ── Hızlı Erişim ── -->
+    <div class="quick-links">
+        <a href="/machines" class="quick-link">
+            <i class="fas fa-server"></i>
+            <span>Makineler</span>
+        </a>
+        <a href="/leaderboard" class="quick-link">
+            <i class="fas fa-trophy"></i>
+            <span>Liderlik</span>
+        </a>
+        <a href="/profile/{{.User.Username}}" class="quick-link">
+            <i class="fas fa-user"></i>
+            <span>Profilim</span>
+        </a>
+        <a href="/settings" class="quick-link">
+            <i class="fas fa-cog"></i>
+            <span>Ayarlar</span>
+        </a>
+    </div>
+
+    <!-- ── Ana İçerik ── -->
+    <div class="content-grid">
+
+        <!-- Sol: Grafik + Devam Eden Makineler -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+            <!-- Haftalık Aktivite Grafiği -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        <i class="fas fa-chart-bar"></i> Haftalık Aktivite
+                    </span>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-wrap">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Devam Eden Makineler -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        <i class="fas fa-spinner"></i> Devam Eden Makineler
+                    </span>
+                    <a href="/machines" class="panel-link">Tümünü gör →</a>
+                </div>
+                <div class="panel-body">
+                    {{if .InProgress}}
+                        {{range .InProgress}}
+                            {{$p := percentage .Solved .Total}}
+                            <div class="machine-item">
+                                <div class="machine-top">
+                                    <a href="/machine/{{.ID}}" class="machine-name">{{.Name}}</a>
+                                    <span class="diff-badge diff-{{.Difficulty}}">
+                                        {{if eq .Difficulty "easy"}}Kolay
+                                        {{else if eq .Difficulty "medium"}}Orta
+                                        {{else if eq .Difficulty "hard"}}Zor
+                                        {{else if eq .Difficulty "expert"}}Uzman
+                                        {{else}}{{.Difficulty}}{{end}}
+                                    </span>
+                                </div>
+                                <div class="machine-prog-bg">
+                                    <div class="machine-prog-fill" style="width: {{$p}}%;"></div>
+                                </div>
+                                <div class="machine-prog-text">
+                                    {{.Solved}}/{{.Total}} soru çözüldü (%{{$p}})
+                                </div>
+                            </div>
+                        {{end}}
+                    {{else}}
+                        <div class="empty-state">
+                            <i class="fas fa-server"></i>
+                            <p>Devam eden makinen yok.<br>
+                               <a href="Z" style="color:#00ff9d;">Yeni makine başla →</a>
+                            </p>
+                        </div>
+                    {{end}}
+                </div>
+            </div>
+
+            <!-- Son Aktiviteler -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        <i class="fas fa-history"></i> Son Aktiviteler
+                    </span>
+                </div>
+                <div class="panel-body">
+                    {{if .RecentActivity}}
+                        {{range .RecentActivity}}
+                            <div class="activity-item">
+                                <div class="activity-icon
+                                    {{if eq .ActionType "solve"}}icon-solve
+                                    {{else if eq .ActionType "badge"}}icon-badge
+                                    {{else if eq .ActionType "comment"}}icon-comment
+                                    {{else if eq .ActionType "login"}}icon-login
+                                    {{else}}icon-default{{end}}">
+                                    <i class="fas
+                                        {{if eq .ActionType "solve"}}fa-flag
+                                        {{else if eq .ActionType "badge"}}fa-medal
+                                        {{else if eq .ActionType "comment"}}fa-comment
+                                        {{else if eq .ActionType "login"}}fa-sign-in-alt
+                                        {{else}}fa-circle{{end}}">
+                                    </i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        {{if eq .ActionType "solve"}}
+                                            {{if .MachineName}}<strong>{{.MachineName}}</strong> — {{end}}
+                                            {{if .QuestionTitle}}"{{.QuestionTitle}}" çözüldü{{else}}Soru çözüldü{{end}}
+                                        {{else if eq .ActionType "badge"}}
+                                            Rozet kazanıldı
+                                        {{else if eq .ActionType "comment"}}
+                                            {{if .MachineName}}<strong>{{.MachineName}}</strong> hakkında{{end}} yorum yapıldı
+                                        {{else if eq .ActionType "login"}}
+                                            Platforma giriş yapıldı
+                                        {{else}}
+                                            {{.ActionType}}
+                                        {{end}}
+                                    </div>
+                                    <div class="activity-time">
+                                        <i class="fas fa-clock"></i> {{formatDateTime .CreatedAt}}
+                                    </div>
+                                </div>
+                            </div>
+                        {{end}}
+                    {{else}}
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <p>Henüz aktivite yok</p>
+                        </div>
+                    {{end}}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sağ: Streak + Başarımlar -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+            <!-- Streak Widget -->
+            <div class="streak-widget">
+                <div class="streak-fire">🔥</div>
+                <div class="streak-value">{{.Stats.Streak}}</div>
+                <div class="streak-label">Günlük Seri</div>
+            </div>
+
+            <!-- Son Başarımlar -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        <i class="fas fa-medal"></i> Son Başarımlar
+                    </span>
+                    <a href="/profile/{{.User.Username}}#badges" class="panel-link">Tümü →</a>
+                </div>
+                <div class="panel-body">
+                    {{if .Achievements}}
+                        <div class="achievement-list">
+                            {{range .Achievements}}
+                                <div class="achievement-item">
+                                    <div class="achievement-icon-wrap">
+                                        {{if .Achievement.Icon}}
+                                            <i class="fas {{.Achievement.Icon}}"></i>
+                                        {{else}}
+                                            <i class="fas fa-medal"></i>
+                                        {{end}}
+                                    </div>
+                                    <div class="achievement-info">
+                                        <div class="achievement-name">{{.Achievement.Name}}</div>
+                                        <div class="achievement-desc">{{.Achievement.Description}}</div>
+                                    </div>
+                                    {{if .Achievement.PointsReward}}
+                                        <div class="achievement-points">+{{.Achievement.PointsReward}}</div>
+                                    {{end}}
+                                </div>
+                            {{end}}
+                        </div>
+                    {{else}}
+                        <div class="empty-state">
+                            <i class="fas fa-medal"></i>
+                            <p>Henüz başarım kazanılmadı.<br>Makine çözerek rozet kazan!</p>
+                        </div>
+                    {{end}}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- /container -->
+
+<!-- ── Footer ── -->
+<footer class="footer">
+    <p>© 2024 HACKLAB — Tüm hakları saklıdır.</p>
+</footer>
+
+<script>
+    // ── Chart.js — veriler Go template'den ───────────────────────────────
+    const chartLabels = [{{range $i, $l := .ChartData.Labels}}{{if $i}},{{end}}"{{$l}}"{{end}}];
+    const chartValues = [{{range $i, $v := (index .ChartData.Datasets 0).Data}}{{if $i}},{{end}}{{$v}}{{end}}];
+
+    const ctx = document.getElementById('activityChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Çözülen Sorular',
+                data: chartValues,
+                backgroundColor: 'rgba(0, 255, 157, 0.2)',
+                borderColor: '#00ff9d',
+                borderWidth: 2,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#b0b0b0', stepSize: 1 },
+                    grid: { color: '#2a3a4a' }
+                },
+                x: {
+                    ticks: { color: '#b0b0b0' },
+                    grid: { display: false }
+                }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    /* =============================================
+       DIALOG SİSTEMİ
+       ============================================= */
+
+    // Confirm dialog — Promise tabanlı
+    let _dlConfirmResolve = null;
+
+    function showConfirm(title, message, confirmLabel, confirmClass) {
+        document.getElementById('dlConfirmTitle').textContent = title || 'Emin misiniz?';
+        document.getElementById('dlConfirmMsg').textContent   = message || '';
+
+        const confirmBtn = document.querySelector('#dlConfirm .hl-btn-confirm');
+        if (confirmLabel) confirmBtn.innerHTML = confirmLabel;
+        if (confirmClass) {
+            confirmBtn.className = 'hl-btn ' + confirmClass;
+        }
+
+        document.getElementById('dlConfirm').classList.add('open');
+
+        return new Promise(resolve => {
+            _dlConfirmResolve = resolve;
+        });
+    }
+
+    function dlConfirmResolve(value) {
+        document.getElementById('dlConfirm').classList.remove('open');
+        if (_dlConfirmResolve) { _dlConfirmResolve(value); _dlConfirmResolve = null; }
+    }
+
+    // Overlay dışına tıklayınca kapat
+    document.getElementById('dlConfirm').addEventListener('click', function(e) {
+        if (e.target === this) dlConfirmResolve(false);
+    });
+
+    // ESC tuşu ile kapat
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('dlConfirm').classList.contains('open')) dlConfirmResolve(false);
+        }
+    });
+
+    /* =============================================
+       LOGOUT — index.html ile aynı promise tabanlı dialog
+       ============================================= */
+    async function logout() {
+        const confirmed = await showConfirm(
+            'Çıkış Yap',
+            'Oturumunuzu kapatmak istediğinize emin misiniz?',
+            '<i class="fas fa-right-from-bracket"></i> Çıkış Yap',
+            'hl-btn-confirm'
+        );
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch('/api/auth/logout', { method: 'POST' });
+            if (response.ok) window.location.reload();
+        } catch (error) {
+            // sessizce geç
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .navbar {
+            background: rgba(10, 20, 30, 0.95);
+            border-bottom: 1px solid #00ff9d;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 5%;
+        }
+        .machine-header {
+            margin-bottom: 1.5rem;
+        }
+        .machine-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            color: #00ff9d;
+        }
+        .machine-meta {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+        .terminal-wrapper {
+            margin-top: 2rem;
+            background: #000;
+            border-radius: 10px;
+            border: 1px solid #00ff9d;
+            overflow: hidden;
+            box-shadow: 0 0 25px rgba(0, 255, 157, 0.25);
+        }
+        .terminal-header {
+            background: #111827;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #9ca3af;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+        }
+        .terminal-dots {
+            display: flex;
+            gap: 0.4rem;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+        }
+        .dot.red { background: #f87171; }
+        .dot.yellow { background: #facc15; }
+        .dot.green { background: #4ade80; }
+        .terminal-body {
+            padding: 1rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: #e5e7eb;
+            height: 480px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .terminal-input {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: #020617;
+            border-top: 1px solid #0f172a;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .prompt {
+            color: #22c55e;
+            margin-right: 0.5rem;
+        }
+        #command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #e5e7eb;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+        }
+        .info-box {
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            border: 1px dashed #334155;
+            background: rgba(15, 23, 42, 0.8);
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        .info-box strong { color: #e5e7eb; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">CTF HACK PLATFORMU</div>
+    </nav>
+
+    <main class="container">
+        <section class="machine-header">
+            <h1 class="machine-title">{{ .Machine.Name }} / Terminal</h1>
+            <p class="machine-meta">
+                Zorluk: {{ .Machine.Difficulty }} · Image: {{ .Machine.DockerImage }}
+            </p>
+        </section>
+
+        <section class="terminal-wrapper">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <span>interactive shell</span>
+                <span></span>
+            </div>
+            <div id="terminal-output" class="terminal-body">
+CTF terminaline hoş geldiniz.
+Makine oturumunuzu makine detay sayfasından başlattıktan sonra bu ekranı WebSocket terminali ile entegre edebilirsiniz.
+            </div>
+            <div class="terminal-input">
+                <span class="prompt">$</span>
+                <input id="command-input" type="text" placeholder="Komutları burada yazın (görsel amaçlı, backend entegrasyonu isteğe bağlıdır)" autocomplete="off" />
+            </div>
+        </section>
+
+        <section class="info-box">
+            <p>
+                <strong>Not:</strong> Bu terminal sayfası, WebSocket endpoint'i
+                <code>/api/ws/terminal/{sessionId}</code> ile entegre olacak şekilde tasarlanmıştır.
+                Oturum yönetimini ve gerçek zamanlı bağlantıyı backend tarafında tamamladıktan sonra,
+                JavaScript ile bu sayfadan bağlantı kurabilirsiniz.
+            </p>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const output = document.getElementById('terminal-output');
+            const input = document.getElementById('command-input');
+
+            if (!output || !input) return;
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    const cmd = input.value.trim();
+                    if (!cmd) return;
+                    output.textContent += "\\n$ " + cmd + "\\n# Bu yalnızca görsel bir terminaldir.";
+                    output.scrollTop = output.scrollHeight;
+                    input.value = '';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
+

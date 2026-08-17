@@ -1,0 +1,640 @@
+{{define "content"}}
+<div class="questions-admin">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <a href="/admin/academy" class="back-link"><i class="fas fa-arrow-left"></i> Derslere Dön</a>
+            <h2><i class="fas fa-question-circle"></i> Soru Yönetimi</h2>
+            <p class="subtitle"><span style="color:#00ff9d;">{{.LessonTitle}}</span> dersine ait sorular</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-pill" id="testCountPill"><span id="testCount">-</span> Test Sorusu</div>
+            <div class="stat-pill" id="practicalCountPill"><span id="practicalCount">-</span> Pratik Soru</div>
+        </div>
+    </div>
+
+    <!-- Sekmeler -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('test')">
+            <i class="fas fa-list-alt"></i> Test Soruları
+        </button>
+        <button class="tab-btn" onclick="showTab('practical')">
+            <i class="fas fa-terminal"></i> Pratik Sorular (Makine)
+        </button>
+    </div>
+
+    <!-- ============ TEST SORULARI ============ -->
+    <div id="testTab" class="tab-content active">
+        <div class="admin-card">
+            <div class="card-header">
+                <h3><i class="fas fa-list-alt"></i> Test Soruları</h3>
+                <button class="btn-primary" onclick="showTestQuestionModal()">
+                    <i class="fas fa-plus"></i> Yeni Test Sorusu
+                </button>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Soru</th>
+                            <th>Şıklar</th>
+                            <th>Doğru</th>
+                            <th>Puan</th>
+                            <th>Sıra</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testQuestionsTable">
+                        <tr><td colspan="8" class="text-center loading-row"><i class="fas fa-spinner fa-spin"></i> Yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ PRATİK SORULAR ============ -->
+    <div id="practicalTab" class="tab-content">
+        <div class="admin-card">
+            <div class="card-header">
+                <h3><i class="fas fa-server"></i> Pratik Sorular (Makine)</h3>
+                <button class="btn-primary" onclick="showPracticalModal()">
+                    <i class="fas fa-plus"></i> Yeni Pratik Soru
+                </button>
+            </div>
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                Pratik sorular bir Docker konteyneri başlatır. Kullanıcı makinenin içinde gezinerek flag'i bulur ve gönderir. Flag otomatik olarak hash'lenerek saklanır.
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Başlık</th>
+                            <th>Docker İmajı</th>
+                            <th>Zorluk</th>
+                            <th>Puan</th>
+                            <th>İpucu Puanı</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="practicalTable">
+                        <tr><td colspan="8" class="text-center loading-row"><i class="fas fa-spinner fa-spin"></i> Yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============ TEST SORU MODAL ============ -->
+<div id="testQuestionModal" class="modal">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3 id="testModalTitle"><i class="fas fa-plus-circle"></i> Yeni Test Sorusu</h3>
+            <button class="modal-close" onclick="closeTestQuestionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="testQuestionId">
+            <div class="form-group">
+                <label>Soru Metni <span class="required">*</span></label>
+                <textarea id="testQuestionText" class="form-control" rows="3" placeholder="Soruyu buraya yazın..."></textarea>
+            </div>
+            <div class="options-grid">
+                <div class="form-group">
+                    <label><span class="option-badge a">A</span> Şık <span class="required">*</span></label>
+                    <input type="text" id="testOptionA" class="form-control" placeholder="A şıkkı...">
+                </div>
+                <div class="form-group">
+                    <label><span class="option-badge b">B</span> Şık <span class="required">*</span></label>
+                    <input type="text" id="testOptionB" class="form-control" placeholder="B şıkkı...">
+                </div>
+                <div class="form-group">
+                    <label><span class="option-badge c">C</span> Şık</label>
+                    <input type="text" id="testOptionC" class="form-control" placeholder="C şıkkı (isteğe bağlı)...">
+                </div>
+                <div class="form-group">
+                    <label><span class="option-badge d">D</span> Şık</label>
+                    <input type="text" id="testOptionD" class="form-control" placeholder="D şıkkı (isteğe bağlı)...">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Doğru Cevap <span class="required">*</span></label>
+                    <select id="testCorrectAnswer" class="form-control">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                </div>
+                <div class="form-group half">
+                    <label>Puan Ödülü</label>
+                    <input type="number" id="testPointsReward" class="form-control" value="10">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Açıklama <span style="color:#6a7a8a;font-size:0.8rem;">(Doğru cevap sonrası gösterilir)</span></label>
+                <textarea id="testExplanation" class="form-control" rows="2" placeholder="Neden bu cevap doğru? Detaylı açıklama..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Sıra</label>
+                    <input type="number" id="testSortOrder" class="form-control" value="0">
+                </div>
+                <div class="form-group half">
+                    <label>Durum</label>
+                    <select id="testIsActive" class="form-control">
+                        <option value="true">Aktif</option>
+                        <option value="false">Pasif</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeTestQuestionModal()">İptal</button>
+            <button class="btn-primary" onclick="saveTestQuestion()"><i class="fas fa-save"></i> Kaydet</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ PRATİK SORU MODAL ============ -->
+<div id="practicalModal" class="modal">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3 id="practicalModalTitle"><i class="fas fa-terminal"></i> Yeni Pratik Soru</h3>
+            <button class="modal-close" onclick="closePracticalModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="practicalId">
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Başlık <span class="required">*</span></label>
+                    <input type="text" id="practicalTitle" class="form-control" placeholder="Örn: SQL Injection Lab">
+                </div>
+                <div class="form-group half">
+                    <label>Zorluk</label>
+                    <select id="practicalDifficulty" class="form-control">
+                        <option value="easy">Kolay</option>
+                        <option value="medium">Orta</option>
+                        <option value="hard">Zor</option>
+                        <option value="expert">Uzman</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Açıklama <span class="required">*</span></label>
+                <textarea id="practicalDescription" class="form-control" rows="3" placeholder="Kullanıcıya gösterilecek açıklama. Görev ne? Neyi aramalı?"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Docker İmajı</label>
+                    <input type="text" id="practicalDockerImage" class="form-control" placeholder="Örn: vulhub/nginx:latest">
+                </div>
+                <div class="form-group half">
+                    <label>Flag <span class="required">*</span> <span style="color:#6a7a8a;font-size:0.75rem;">(düzenlemede boş bırakılabilir)</span></label>
+                    <input type="text" id="practicalFlag" class="form-control" placeholder="FLAG{ornek_flag_buraya}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Puan Ödülü</label>
+                    <input type="number" id="practicalPointsReward" class="form-control" value="50">
+                </div>
+                <div class="form-group half">
+                    <label>İpucu Maliyeti (puan)</label>
+                    <input type="number" id="practicalHintCost" class="form-control" value="10">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>İpucu <span style="color:#6a7a8a;font-size:0.8rem;">(Kullanıcı puan harcayarak görebilir)</span></label>
+                <textarea id="practicalHint" class="form-control" rows="2" placeholder="Küçük bir ipucu..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Sıra</label>
+                    <input type="number" id="practicalSortOrder" class="form-control" value="0">
+                </div>
+                <div class="form-group half">
+                    <label>Durum</label>
+                    <select id="practicalIsActive" class="form-control">
+                        <option value="true">Aktif</option>
+                        <option value="false">Pasif</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closePracticalModal()">İptal</button>
+            <button class="btn-primary" onclick="savePracticalQuestion()"><i class="fas fa-save"></i> Kaydet</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .questions-admin { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* Header */
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #6a7a8a; font-size: 0.85rem; text-decoration: none; margin-bottom: 0.5rem; transition: 0.2s; }
+    .back-link:hover { color: #00ff9d; }
+    .header-left h2 { color: #00ff9d; font-size: 1.4rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #6a7a8a; font-size: 0.9rem; }
+    .header-stats { display: flex; gap: 0.75rem; align-items: center; margin-top: 1.5rem; }
+    .stat-pill { background: rgba(0,255,157,0.08); border: 1px solid rgba(0,255,157,0.2); color: #00ff9d; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; }
+    .stat-pill span { font-weight: 700; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid #2a3a4a; }
+    .tab-btn { padding: 0.8rem 1.5rem; background: none; border: none; color: #6a7a8a; cursor: pointer; font-size: 0.95rem; transition: 0.2s; display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .tab-btn:hover { color: #00ff9d; }
+    .tab-btn.active { color: #00ff9d; border-bottom-color: #00ff9d; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Card */
+    .admin-card { background: rgba(0,0,0,0.2); border: 1px solid #2a3a4a; border-radius: 15px; padding: 1.5rem; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+    .card-header h3 { color: #e0e0e0; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-header h3 i { color: #00ff9d; }
+
+    /* Info Box */
+    .info-box { background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.2); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; color: #a0d8ef; font-size: 0.85rem; display: flex; align-items: flex-start; gap: 0.6rem; line-height: 1.5; }
+    .info-box i { color: #00c8ff; margin-top: 0.1rem; flex-shrink: 0; }
+
+    /* Buttons */
+    .btn-primary { background: #00ff9d; color: #0a0f0f; border: none; padding: 0.55rem 1.1rem; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.4rem; transition: 0.2s; }
+    .btn-primary:hover { background: #00e88d; transform: translateY(-1px); }
+    .btn-secondary { background: transparent; border: 1px solid #2a3a4a; color: #b0b0b0; padding: 0.55rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+    .btn-secondary:hover { border-color: #00ff9d; color: #00ff9d; }
+    .btn-icon { background: none; border: 1px solid #2a3a4a; color: #b0b0b0; padding: 0.3rem 0.55rem; border-radius: 5px; cursor: pointer; margin: 0 0.1rem; transition: 0.2s; font-size: 0.8rem; }
+    .btn-icon:hover { border-color: #00ff9d; color: #00ff9d; }
+    .btn-icon.danger:hover { border-color: #ff5f56; color: #ff5f56; }
+
+    /* Table */
+    .table-container { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .data-table th { padding: 0.75rem 1rem; text-align: left; color: #00ff9d; font-family: 'Share Tech Mono', monospace; font-size: 0.78rem; letter-spacing: 0.05em; border-bottom: 1px solid #2a3a4a; white-space: nowrap; }
+    .data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(42,58,74,0.5); color: #c0c0c0; vertical-align: middle; }
+    .data-table tr:hover td { background: rgba(0,255,157,0.03); }
+    .text-center { text-align: center; }
+    .loading-row { color: #6a7a8a; padding: 2rem !important; }
+
+    /* Options Grid */
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; margin-bottom: 0.5rem; }
+    .option-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-right: 0.3rem; }
+    .option-badge.a { background: rgba(0,200,255,0.2); color: #00c8ff; }
+    .option-badge.b { background: rgba(0,255,157,0.2); color: #00ff9d; }
+    .option-badge.c { background: rgba(255,200,50,0.2); color: #ffc832; }
+    .option-badge.d { background: rgba(255,95,86,0.2); color: #ff5f56; }
+
+    /* Badges */
+    .badge { padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+    .badge-active { background: rgba(0,255,157,0.12); color: #00ff9d; border: 1px solid rgba(0,255,157,0.3); }
+    .badge-inactive { background: rgba(255,95,86,0.12); color: #ff5f56; border: 1px solid rgba(255,95,86,0.3); }
+    .badge-easy { background: rgba(0,200,100,0.12); color: #00c864; border: 1px solid rgba(0,200,100,0.3); }
+    .badge-medium { background: rgba(255,200,50,0.12); color: #ffc832; border: 1px solid rgba(255,200,50,0.3); }
+    .badge-hard { background: rgba(255,120,50,0.12); color: #ff7832; border: 1px solid rgba(255,120,50,0.3); }
+    .badge-expert { background: rgba(255,50,80,0.12); color: #ff3250; border: 1px solid rgba(255,50,80,0.3); }
+
+    /* Correct answer highlight */
+    .answer-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,255,157,0.15); color: #00ff9d; font-weight: 700; font-size: 0.85rem; border: 1px solid rgba(0,255,157,0.4); }
+
+    /* Modal */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); overflow: auto; backdrop-filter: blur(4px); }
+    .modal-content { background: #111827; margin: 4% auto; border: 1px solid #2a3a4a; border-radius: 16px; width: 90%; max-width: 600px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: modalIn 0.2s ease; }
+    .modal-content.modal-lg { max-width: 760px; }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #2a3a4a; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { color: #00ff9d; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .modal-close { background: none; border: none; color: #6a7a8a; font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0; transition: 0.2s; }
+    .modal-close:hover { color: #ff5f56; }
+    .modal-body { padding: 1.5rem; max-height: 65vh; overflow-y: auto; }
+    .modal-footer { padding: 1.25rem 1.5rem; border-top: 1px solid #2a3a4a; display: flex; justify-content: flex-end; gap: 0.75rem; }
+
+    /* Form */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.4rem; color: #a0a0a0; font-size: 0.85rem; }
+    .required { color: #ff5f56; }
+    .form-control { width: 100%; padding: 0.7rem 0.9rem; background: rgba(0,0,0,0.4); border: 1px solid #2a3a4a; border-radius: 6px; color: #e0e0e0; font-size: 0.9rem; box-sizing: border-box; transition: 0.2s; }
+    .form-control:focus { outline: none; border-color: #00ff9d; background: rgba(0,255,157,0.03); }
+    textarea.form-control { resize: vertical; }
+    .form-row { display: flex; gap: 1rem; }
+    .half { flex: 1; min-width: 0; }
+    @media (max-width: 600px) { .form-row { flex-direction: column; } .options-grid { grid-template-columns: 1fr; } }
+
+    /* Scrollbar */
+    .modal-body::-webkit-scrollbar { width: 5px; }
+    .modal-body::-webkit-scrollbar-track { background: transparent; }
+    .modal-body::-webkit-scrollbar-thumb { background: #2a3a4a; border-radius: 5px; }
+</style>
+
+<script>
+    const LESSON_ID = {{.LessonID}};
+    let testQuestions = [];
+    let practicalQuestions = [];
+
+    // ============ TAB ============
+    function showTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        if (tab === 'test') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('testTab').classList.add('active');
+            loadTestQuestions();
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('practicalTab').classList.add('active');
+            loadPracticalQuestions();
+        }
+    }
+
+    // ============ TEST SORULARI ============
+    function loadTestQuestions() {
+        fetch(`/admin/api/academy/lessons/${LESSON_ID}/questions`)
+            .then(r => r.json())
+            .then(data => {
+                testQuestions = data || [];
+                document.getElementById('testCount').textContent = testQuestions.length;
+                renderTestQuestions();
+            });
+    }
+
+    function renderTestQuestions() {
+        const tbody = document.getElementById('testQuestionsTable');
+        if (!testQuestions.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem;color:#6a7a8a;"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i>Henüz test sorusu eklenmemiş.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = testQuestions.map((q, i) => `
+            <tr>
+                <td style="color:#6a7a8a;">${i + 1}</td>
+                <td style="max-width:220px;">
+                    <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e0e0e0;" title="${escapeHtml(q.question_text)}">
+                        ${escapeHtml(q.question_text)}
+                    </div>
+                </td>
+                <td style="font-size:0.78rem;line-height:1.6;color:#a0a0a0;">
+                    <span class="option-badge a">A</span>${escapeHtml(q.option_a)}<br>
+                    <span class="option-badge b">B</span>${escapeHtml(q.option_b)}
+                    ${q.option_c ? `<br><span class="option-badge c">C</span>${escapeHtml(q.option_c)}` : ''}
+                    ${q.option_d ? `<br><span class="option-badge d">D</span>${escapeHtml(q.option_d)}` : ''}
+                </td>
+                <td><span class="answer-badge">${q.correct_answer}</span></td>
+                <td><span style="color:#00ff9d;font-weight:600;">${q.points_reward}</span></td>
+                <td style="color:#6a7a8a;">${q.sort_order}</td>
+                <td><span class="badge ${q.is_active ? 'badge-active' : 'badge-inactive'}">${q.is_active ? '✓ Aktif' : '✗ Pasif'}</span></td>
+                <td>
+                    <button class="btn-icon" onclick="editTestQuestion(${q.id})" title="Düzenle"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon danger" onclick="deleteTestQuestion(${q.id})" title="Sil"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function showTestQuestionModal() {
+        document.getElementById('testModalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Yeni Test Sorusu';
+        document.getElementById('testQuestionId').value = '';
+        ['testQuestionText','testOptionA','testOptionB','testOptionC','testOptionD','testExplanation'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('testCorrectAnswer').value = 'A';
+        document.getElementById('testPointsReward').value = '10';
+        document.getElementById('testSortOrder').value = '0';
+        document.getElementById('testIsActive').value = 'true';
+        document.getElementById('testQuestionModal').style.display = 'block';
+    }
+
+    function closeTestQuestionModal() {
+        document.getElementById('testQuestionModal').style.display = 'none';
+    }
+
+    function editTestQuestion(id) {
+        const q = testQuestions.find(x => x.id == id);
+        if (!q) return;
+        document.getElementById('testModalTitle').innerHTML = '<i class="fas fa-edit"></i> Test Sorusu Düzenle';
+        document.getElementById('testQuestionId').value = q.id;
+        document.getElementById('testQuestionText').value = q.question_text;
+        document.getElementById('testOptionA').value = q.option_a;
+        document.getElementById('testOptionB').value = q.option_b;
+        document.getElementById('testOptionC').value = q.option_c || '';
+        document.getElementById('testOptionD').value = q.option_d || '';
+        document.getElementById('testCorrectAnswer').value = q.correct_answer;
+        document.getElementById('testPointsReward').value = q.points_reward;
+        document.getElementById('testExplanation').value = q.explanation || '';
+        document.getElementById('testSortOrder').value = q.sort_order;
+        document.getElementById('testIsActive').value = String(q.is_active);
+        document.getElementById('testQuestionModal').style.display = 'block';
+    }
+
+    function saveTestQuestion() {
+        const id = document.getElementById('testQuestionId').value;
+        const questionText = document.getElementById('testQuestionText').value.trim();
+        const optionA = document.getElementById('testOptionA').value.trim();
+        const optionB = document.getElementById('testOptionB').value.trim();
+        if (!questionText || !optionA || !optionB) {
+            showToast('Soru metni ve en az A, B şıkları zorunludur!', 'error');
+            return;
+        }
+
+        const data = {
+            lesson_id: LESSON_ID,
+            question_text: questionText,
+            option_a: optionA,
+            option_b: optionB,
+            option_c: document.getElementById('testOptionC').value.trim(),
+            option_d: document.getElementById('testOptionD').value.trim(),
+            correct_answer: document.getElementById('testCorrectAnswer').value,
+            explanation: document.getElementById('testExplanation').value.trim(),
+            points_reward: parseInt(document.getElementById('testPointsReward').value) || 10,
+            sort_order: parseInt(document.getElementById('testSortOrder').value) || 0,
+            is_active: document.getElementById('testIsActive').value === 'true'
+        };
+
+        const url = id ? `/admin/api/academy/questions/${id}` : '/admin/api/academy/questions';
+        const method = id ? 'PUT' : 'POST';
+
+        fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) })
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    closeTestQuestionModal();
+                    loadTestQuestions();
+                } else {
+                    showToast(result.message || 'Bir hata oluştu', 'error');
+                }
+            }).catch(() => showToast('Bağlantı hatası', 'error'));
+    }
+
+    function deleteTestQuestion(id) {
+        const q = testQuestions.find(x => x.id == id);
+        if (!confirm(`"${q?.question_text?.substring(0,50)}..." sorusunu silmek istediğinize emin misiniz?`)) return;
+        fetch(`/admin/api/academy/questions/${id}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(result => {
+                showToast(result.message, result.success ? 'success' : 'error');
+                if (result.success) loadTestQuestions();
+            });
+    }
+
+    // ============ PRATİK SORULAR ============
+    function loadPracticalQuestions() {
+        fetch(`/admin/api/academy/lessons/${LESSON_ID}/practical`)
+            .then(r => r.json())
+            .then(data => {
+                practicalQuestions = data || [];
+                document.getElementById('practicalCount').textContent = practicalQuestions.length;
+                renderPracticalQuestions();
+            });
+    }
+
+    function renderPracticalQuestions() {
+        const tbody = document.getElementById('practicalTable');
+        if (!practicalQuestions.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem;color:#6a7a8a;"><i class="fas fa-server" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i>Henüz pratik soru eklenmemiş.</td></tr>';
+            return;
+        }
+
+        const diffMap = { easy:'badge-easy', medium:'badge-medium', hard:'badge-hard', expert:'badge-expert' };
+        const diffLabel = { easy:'Kolay', medium:'Orta', hard:'Zor', expert:'Uzman' };
+
+        tbody.innerHTML = practicalQuestions.map((q, i) => `
+            <tr>
+                <td style="color:#6a7a8a;">${i + 1}</td>
+                <td><strong style="color:#e0e0e0;">${escapeHtml(q.title)}</strong></td>
+                <td><code style="color:#6a7a8a;font-size:0.78rem;">${escapeHtml(q.docker_image || '-')}</code></td>
+                <td><span class="badge ${diffMap[q.difficulty] || 'badge-easy'}">${diffLabel[q.difficulty] || q.difficulty}</span></td>
+                <td><span style="color:#00ff9d;font-weight:600;">${q.points_reward}</span></td>
+                <td><span style="color:#ffc832;">${q.hint_cost} puan</span></td>
+                <td><span class="badge ${q.is_active ? 'badge-active' : 'badge-inactive'}">${q.is_active ? '✓ Aktif' : '✗ Pasif'}</span></td>
+                <td>
+                    <button class="btn-icon" onclick="editPractical(${q.id})" title="Düzenle"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon danger" onclick="deletePractical(${q.id})" title="Sil"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function showPracticalModal() {
+        document.getElementById('practicalModalTitle').innerHTML = '<i class="fas fa-terminal"></i> Yeni Pratik Soru';
+        document.getElementById('practicalId').value = '';
+        ['practicalTitle','practicalDescription','practicalDockerImage','practicalFlag','practicalHint'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('practicalPointsReward').value = '50';
+        document.getElementById('practicalDifficulty').value = 'easy';
+        document.getElementById('practicalHintCost').value = '10';
+        document.getElementById('practicalSortOrder').value = '0';
+        document.getElementById('practicalIsActive').value = 'true';
+        document.getElementById('practicalModal').style.display = 'block';
+    }
+
+    function closePracticalModal() {
+        document.getElementById('practicalModal').style.display = 'none';
+    }
+
+    function editPractical(id) {
+        const q = practicalQuestions.find(x => x.id == id);
+        if (!q) return;
+        document.getElementById('practicalModalTitle').innerHTML = '<i class="fas fa-edit"></i> Pratik Soru Düzenle';
+        document.getElementById('practicalId').value = q.id;
+        document.getElementById('practicalTitle').value = q.title;
+        document.getElementById('practicalDescription').value = q.description || '';
+        document.getElementById('practicalDockerImage').value = q.docker_image || '';
+        document.getElementById('practicalFlag').value = '';
+        document.getElementById('practicalPointsReward').value = q.points_reward;
+        document.getElementById('practicalDifficulty').value = q.difficulty;
+        document.getElementById('practicalHint').value = q.hint || '';
+        document.getElementById('practicalHintCost').value = q.hint_cost;
+        document.getElementById('practicalSortOrder').value = q.sort_order || 0;
+        document.getElementById('practicalIsActive').value = String(q.is_active);
+        document.getElementById('practicalModal').style.display = 'block';
+    }
+
+    function savePracticalQuestion() {
+        const id = document.getElementById('practicalId').value;
+        const title = document.getElementById('practicalTitle').value.trim();
+        const flag = document.getElementById('practicalFlag').value.trim();
+
+        if (!title) { showToast('Başlık zorunludur!', 'error'); return; }
+        if (!id && !flag) { showToast('Yeni soru için flag zorunludur!', 'error'); return; }
+
+        const data = {
+            lesson_id: LESSON_ID,
+            title: title,
+            description: document.getElementById('practicalDescription').value.trim(),
+            docker_image: document.getElementById('practicalDockerImage').value.trim(),
+            flag: flag,
+            points_reward: parseInt(document.getElementById('practicalPointsReward').value) || 50,
+            difficulty: document.getElementById('practicalDifficulty').value,
+            hint: document.getElementById('practicalHint').value.trim(),
+            hint_cost: parseInt(document.getElementById('practicalHintCost').value) || 10,
+            sort_order: parseInt(document.getElementById('practicalSortOrder').value) || 0,
+            is_active: document.getElementById('practicalIsActive').value === 'true'
+        };
+
+        const url = id ? `/admin/api/academy/practical/${id}` : '/admin/api/academy/practical';
+        const method = id ? 'PUT' : 'POST';
+
+        fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) })
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    closePracticalModal();
+                    loadPracticalQuestions();
+                } else {
+                    showToast(result.message || 'Bir hata oluştu', 'error');
+                }
+            }).catch(() => showToast('Bağlantı hatası', 'error'));
+    }
+
+    function deletePractical(id) {
+        const q = practicalQuestions.find(x => x.id == id);
+        if (!confirm(`"${q?.title}" pratik sorusunu silmek istediğinize emin misiniz?`)) return;
+        fetch(`/admin/api/academy/practical/${id}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(result => {
+                showToast(result.message, result.success ? 'success' : 'error');
+                if (result.success) loadPracticalQuestions();
+            });
+    }
+
+    // ============ UTILS ============
+    function showToast(message, type) {
+        document.querySelectorAll('.toast-notify').forEach(t => t.remove());
+        const toast = document.createElement('div');
+        toast.className = 'toast-notify';
+        toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${message}`;
+        toast.style.cssText = `
+            position:fixed; bottom:24px; right:24px; z-index:9999;
+            padding:0.9rem 1.4rem; border-radius:10px;
+            background:${type === 'success' ? 'linear-gradient(135deg,#00ff9d,#00b86e)' : 'linear-gradient(135deg,#ff5f56,#cc2200)'};
+            color:#fff; font-weight:600; font-size:0.9rem;
+            display:flex; align-items:center; gap:0.6rem;
+            box-shadow:0 8px 30px rgba(0,0,0,0.4);
+            animation:toastIn 0.3s ease;
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3500);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    window.onclick = function(e) {
+        ['testQuestionModal','practicalModal'].forEach(id => {
+            const modal = document.getElementById(id);
+            if (e.target === modal) modal.style.display = 'none';
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTestQuestions();
+    });
+</script>
+{{end}}

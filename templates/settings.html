@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: rgba(10, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00ff9d;
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00ff9d;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover { color: #00ff9d; }
+
+        .user-points {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #00ff9d;
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            color: #00ff9d;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .login-btn {
+            background: transparent;
+            border: 2px solid #00ff9d;
+            color: #00ff9d;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background: #00ff9d;
+            color: #0a0f0f;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+        }
+
+        .register-btn {
+            background: #00ff9d;
+            border: none;
+            color: #0a0f0f;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .register-btn:hover {
+            background: #00b86e;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* ===== ANA CONTAINER ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 100px 5% 3rem;
+        }
+
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            color: #6a7a8a;
+        }
+
+        .breadcrumb a {
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .breadcrumb a:hover { color: #00ff9d; }
+        .breadcrumb i { font-size: 0.7rem; color: #2a3a4a; }
+
+        /* ===== HEADER ===== */
+        .settings-header {
+            margin-bottom: 3rem;
+        }
+
+        .settings-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.5rem;
+            color: #00ff9d;
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-title::before { content: '['; margin-right: 10px; }
+        .settings-title::after  { content: ']'; margin-left: 10px; }
+        .settings-subtitle { color: #b0b0b0; font-size: 1rem; }
+
+        /* ===== ANA GRID ===== */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* ===== SOL MENÜ ===== */
+        .settings-menu {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 15px;
+            overflow: hidden;
+            position: sticky;
+            top: 90px;
+        }
+
+        .menu-header {
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid #2a3a4a;
+        }
+
+        .menu-header h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .menu-items {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            padding: 1rem 1.5rem;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-left: 3px solid transparent;
+            user-select: none;
+        }
+
+        .menu-item:hover {
+            background: rgba(0, 255, 157, 0.05);
+            color: #00ff9d;
+        }
+
+        .menu-item.active {
+            background: rgba(0, 255, 157, 0.1);
+            color: #00ff9d;
+            border-left-color: #00ff9d;
+        }
+
+        .menu-item i { width: 20px; font-size: 1.1rem; }
+        .menu-item span { flex: 1; }
+
+        /* ===== SAĞ İÇERİK ===== */
+        .settings-content {
+            background: rgba(20, 30, 40, 0.8);
+            border: 1px solid #2a3a4a;
+            border-radius: 15px;
+            padding: 2rem;
+            min-height: 500px;
+        }
+
+        .settings-section { display: none; }
+        .settings-section.active { display: block; }
+
+        .section-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #2a3a4a;
+        }
+
+        .section-header h2 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .section-header p { color: #b0b0b0; font-size: 0.9rem; }
+
+        /* ===== FORM ===== */
+        .form-group { margin-bottom: 1.5rem; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-label i { color: #00ff9d; margin-right: 0.5rem; width: 20px; }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00ff9d;
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+        }
+
+        .form-control:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        textarea.form-control { min-height: 100px; resize: vertical; }
+
+        select.form-control {
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236a7a8a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px;
+        }
+
+        /* ===== AVATAR ===== */
+        .avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .current-avatar {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #00ff9d;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .current-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .current-avatar:hover .avatar-overlay { opacity: 1; }
+        .avatar-overlay i { color: #fff; font-size: 1.5rem; }
+
+        .avatar-info h4 { color: #e0e0e0; margin-bottom: 0.3rem; }
+        .avatar-info p { color: #6a7a8a; font-size: 0.8rem; margin-bottom: 0.7rem; }
+
+        .btn-upload {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid #00ff9d;
+            border-radius: 5px;
+            color: #00ff9d;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-upload:hover { background: #00ff9d; color: #0a0f0f; }
+
+        /* Avatar yükleme progress bar */
+        .avatar-progress {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #2a3a4a;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #00ff9d;
+            transition: width 0.3s;
+        }
+
+        /* ===== KUTU ===== */
+        .info-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box h3 {
+            color: #00ff9d;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .info-box-danger h3 { color: #ff5f56; }
+
+        /* ===== 2FA STATUS ===== */
+        .tfa-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .tfa-title { font-weight: 600; color: #e0e0e0; }
+
+        .status-badge {
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-enabled  { background: rgba(0,255,157,0.2); color: #00ff9d; }
+        .status-disabled { background: rgba(255,95,86,0.2);  color: #ff5f56; }
+
+        /* ===== SESSION ===== */
+        .sessions-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+        .session-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid #2a3a4a;
+            border-radius: 8px;
+        }
+
+        .session-current {
+            background: rgba(0, 255, 157, 0.06);
+            border-color: rgba(0, 255, 157, 0.4);
+        }
+
+        .session-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #2a3a4a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ff9d;
+            flex-shrink: 0;
+        }
+
+        .session-current .session-icon {
+            background: #00ff9d;
+            color: #0a0f0f;
+            border-color: #00ff9d;
+        }
+
+        .session-info { flex: 1; min-width: 0; }
+        .session-device { font-weight: 600; margin-bottom: 0.2rem; }
+        .session-meta { font-size: 0.8rem; color: #6a7a8a; }
+
+        .btn-terminate {
+            padding: 0.5rem 0.8rem;
+            background: transparent;
+            border: 1px solid #ff5f56;
+            border-radius: 5px;
+            color: #ff5f56;
+            cursor: pointer;
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+
+        .btn-terminate:hover { background: #ff5f56; color: #fff; }
+
+        .session-no-data {
+            text-align: center;
+            padding: 2rem;
+            color: #6a7a8a;
+        }
+
+        /* ===== TOGGLE ===== */
+        .notification-group {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid #2a3a4a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .notification-group-title {
+            color: #00ff9d;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .notification-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #2a3a4a;
+            gap: 1rem;
+        }
+
+        .notification-item:last-child { border-bottom: none; }
+
+        .notification-info h4 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+        .notification-info p  { font-size: 0.8rem; color: #6a7a8a; }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #2a3a4a;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: #e0e0e0;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: #00ff9d; }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            background-color: #0a0f0f;
+        }
+
+        /* ===== TEMA ===== */
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .theme-option {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid #2a3a4a;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .theme-option:hover { border-color: #00ff9d; }
+        .theme-option.selected {
+            border-color: #00ff9d;
+            background: rgba(0, 255, 157, 0.1);
+        }
+
+        .theme-icon { font-size: 2rem; color: #00ff9d; margin-bottom: 0.5rem; }
+        .theme-name { font-weight: 600; margin-bottom: 0.2rem; }
+        .theme-preview { font-size: 0.75rem; color: #6a7a8a; }
+
+        /* ===== BUTONLAR ===== */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #2a3a4a;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(45deg, #00ff9d, #00b86e);
+            border: none;
+            border-radius: 8px;
+            color: #0a0f0f;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
+        }
+
+        .btn-secondary {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            border: 1px solid #2a3a4a;
+            border-radius: 8px;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-secondary:hover { border-color: #00ff9d; color: #00ff9d; }
+
+        .btn-danger {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            border: 1px solid #ff5f56;
+            border-radius: 8px;
+            color: #ff5f56;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-danger:hover { background: #ff5f56; color: #fff; }
+
+        /* ===== ALERT ===== */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-success { background: rgba(0,255,157,0.1); border: 1px solid #00ff9d; color: #00ff9d; }
+        .alert-warning { background: rgba(255,189,46,0.1); border: 1px solid #ffbd2e; color: #ffbd2e; }
+        .alert-danger  { background: rgba(255,95,86,0.1);  border: 1px solid #ff5f56; color: #ff5f56; }
+        .alert-info    { background: rgba(0,184,255,0.1);  border: 1px solid #00b8ff; color: #00b8ff; }
+
+        /* ===== ÖZEL DIALOG SİSTEMİ ===== */
+        .hl-dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            animation: dlOverlayIn 0.15s ease;
+        }
+
+        .hl-dialog-overlay.open { display: flex; }
+
+        @keyframes dlOverlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .hl-dialog {
+            background: #0d1117;
+            border: 1px solid #2a3a4a;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 157, 0.08);
+            animation: dlIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        @keyframes dlIn {
+            from { opacity: 0; transform: scale(0.88) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .hl-dialog-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 2rem 0.5rem;
+        }
+
+        .hl-dialog-icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .hl-dialog-icon-circle.warn {
+            background: rgba(255, 189, 46, 0.12);
+            border: 1px solid rgba(255, 189, 46, 0.35);
+            color: #ffbd2e;
+        }
+
+        .hl-dialog-icon-circle.info {
+            background: rgba(0, 184, 255, 0.1);
+            border: 1px solid rgba(0, 184, 255, 0.3);
+            color: #00b8ff;
+        }
+
+        .hl-dialog-icon-circle.danger {
+            background: rgba(255, 95, 86, 0.1);
+            border: 1px solid rgba(255, 95, 86, 0.3);
+            color: #ff5f56;
+        }
+
+        .hl-dialog-icon-circle.success {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            color: #00ff9d;
+        }
+
+        .hl-dialog-body {
+            padding: 0 2rem 1rem;
+            text-align: center;
+        }
+
+        .hl-dialog-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+        }
+
+        .hl-dialog-message {
+            font-size: 0.9rem;
+            color: #8a9a8a;
+            line-height: 1.5;
+        }
+
+        .hl-dialog-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem 1.5rem;
+            justify-content: center;
+        }
+
+        .hl-btn {
+            padding: 0.55rem 1.4rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .hl-btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a3a4a;
+            color: #8a9a8a;
+        }
+
+        .hl-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: #e0e0e0;
+            border-color: #3a4a5a;
+        }
+
+        .hl-btn-confirm {
+            background: rgba(255, 95, 86, 0.15);
+            border: 1px solid rgba(255, 95, 86, 0.4);
+            color: #ff5f56;
+        }
+
+        .hl-btn-confirm:hover {
+            background: rgba(255, 95, 86, 0.28);
+            box-shadow: 0 0 14px rgba(255, 95, 86, 0.25);
+        }
+
+        .hl-btn-ok {
+            background: rgba(0, 255, 157, 0.12);
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            color: #00ff9d;
+        }
+
+        .hl-btn-ok:hover {
+            background: rgba(0, 255, 157, 0.22);
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.2);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top: 4rem;
+            background: rgba(10, 15, 20, 0.9);
+            border-top: 1px solid #2a3a4a;
+            padding: 3rem 5% 2rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .footer-section p { color: #6a7a8a; font-size: 0.85rem; line-height: 1.6; }
+        .footer-section ul { list-style: none; }
+        .footer-section ul li { margin-bottom: 0.5rem; }
+        .footer-section ul li a {
+            color: #6a7a8a;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+        .footer-section ul li a:hover { color: #00ff9d; }
+
+        .social-links { display: flex; gap: 1rem; margin-top: 1rem; }
+        .social-links a {
+            color: #6a7a8a;
+            font-size: 1.2rem;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+        .social-links a:hover { color: #00ff9d; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .settings-grid { grid-template-columns: 1fr; }
+            .settings-menu { position: static; }
+            .footer-content { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .form-row { grid-template-columns: 1fr; }
+            .avatar-upload { flex-direction: column; text-align: center; }
+            .theme-options { grid-template-columns: 1fr; }
+            .form-actions { flex-direction: column; }
+            .form-actions > * { width: 100%; }
+            .footer-content { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .settings-title { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ÖZEL DIALOG: ONAY (confirm) -->
+    <div class="hl-dialog-overlay" id="dlConfirm">
+        <div class="hl-dialog">
+            <div class="hl-dialog-icon">
+                <div class="hl-dialog-icon-circle warn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+            <div class="hl-dialog-body">
+                <div class="hl-dialog-title" id="dlConfirmTitle">Onay</div>
+                <div class="hl-dialog-message" id="dlConfirmMsg">Bu işlemi onaylıyor musunuz?</div>
+            </div>
+            <div class="hl-dialog-actions">
+                <button class="hl-btn hl-btn-cancel" onclick="dlConfirmResolve(false)">
+                    <i class="fas fa-times"></i> Vazgeç
+                </button>
+                <button class="hl-btn hl-btn-confirm" id="dlConfirmBtn" onclick="dlConfirmResolve(true)">
+                    <i class="fas fa-check"></i> Onayla
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÖZEL DIALOG: BİLGİ / UYARI (alert) -->
+    <div class="hl-dialog-overlay" id="dlAlert">
+        <div class="hl-dialog">
+            <div class="hl-dialog-icon">
+                <div class="hl-dialog-icon-circle info" id="dlAlertIcon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+            </div>
+            <div class="hl-dialog-body">
+                <div class="hl-dialog-title" id="dlAlertTitle">Bilgi</div>
+                <div class="hl-dialog-message" id="dlAlertMsg">Mesaj</div>
+            </div>
+            <div class="hl-dialog-actions">
+                <button class="hl-btn hl-btn-ok" onclick="dlAlertClose()">
+                    <i class="fas fa-check"></i> Tamam
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/" class="logo"><i class="fas fa-skull"></i> HACKLAB</a>
+        <div class="nav-links">
+            <a href="/">Ana Sayfa</a>
+            <a href="/machines">Makineler</a>
+            <a href="/academy">Akademi</a>
+            <a href="/leaderboard">Liderlik</a>
+            <a href="/vip">VIP</a>
+            {{if .IsAuthenticated}}
+            <a href="/profile/{{.CurrentUser.Username}}">Profil</a>
+            <a href="/dashboard">Panel</a>
+            {{if .IsAdmin}}<a href="/admin" style="color: #ffd700;">Admin</a>{{end}}
+            <span class="user-points">{{.CurrentUser.Points}} Puan</span>
+            <button class="login-btn" onclick="customLogout()">Çıkış</button>
+            {{else}}
+            <button class="login-btn" onclick="window.location.href='/login'">Giriş</button>
+            <button class="register-btn" onclick="window.location.href='/register'">Kayıt Ol</button>
+            {{end}}
+        </div>
+    </nav>
+
+    <!-- Ana Container -->
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/">Ana Sayfa</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="/dashboard">Dashboard</a>
+            <i class="fas fa-chevron-right"></i>
+            <span style="color: #00ff9d;">Ayarlar</span>
+        </div>
+
+        <!-- Header -->
+        <div class="settings-header">
+            <h1 class="settings-title">AYARLAR</h1>
+            <p class="settings-subtitle">Hesap ayarlarınızı düzenleyin, güvenlik seçeneklerini yapılandırın</p>
+        </div>
+
+        <!-- Grid -->
+        <div class="settings-grid">
+
+            <!-- Sol Menü -->
+            <div class="settings-menu">
+                <div class="menu-header">
+                    <h3><i class="fas fa-cog"></i> AYARLAR</h3>
+                </div>
+                <ul class="menu-items">
+                    <li class="menu-item active" data-section="profile">
+                        <i class="fas fa-user"></i>
+                        <span>Profil Bilgileri</span>
+                    </li>
+                    <li class="menu-item" data-section="security">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Güvenlik</span>
+                    </li>
+                    <li class="menu-item" data-section="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span>Bildirimler</span>
+                    </li>
+                    <li class="menu-item" data-section="privacy">
+                        <i class="fas fa-lock"></i>
+                        <span>Gizlilik</span>
+                    </li>
+                    <li class="menu-item" data-section="appearance">
+                        <i class="fas fa-paint-brush"></i>
+                        <span>Görünüm</span>
+                    </li>
+                    <li class="menu-item" data-section="sessions">
+                        <i class="fas fa-history"></i>
+                        <span>Oturumlar</span>
+                    </li>
+                    <li class="menu-item" data-section="danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Tehlikeli Bölge</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Sağ İçerik -->
+            <div class="settings-content">
+
+                <!-- ── PROFİL ── -->
+                <div class="settings-section active" id="profile">
+                    <div class="section-header">
+                        <h2>Profil Bilgileri</h2>
+                        <p>Kişisel bilgilerinizi düzenleyin</p>
+                    </div>
+
+                    <div class="avatar-upload">
+                        <div class="current-avatar">
+                            {{ if .CurrentUser }}
+                            <img src="{{ .CurrentUser.Avatar }}" alt="Avatar" id="avatarImg">
+                            {{ else }}
+                            <img src="/static/images/avatar.png" alt="Avatar" id="avatarImg">
+                            {{ end }}
+                            <div class="avatar-overlay" onclick="document.getElementById('avatarInput').click()">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                        <div class="avatar-info">
+                            <h4>Profil Fotoğrafı</h4>
+                            <p>JPG, PNG veya GIF. Maksimum 2MB.</p>
+                            <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="uploadAvatar(this.files[0])">
+                            <button class="btn-upload" onclick="document.getElementById('avatarInput').click()">
+                                <i class="fas fa-upload"></i> Yeni Fotoğraf Yükle
+                            </button>
+                            <div class="avatar-progress" id="avatarProgress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill"></div>
+                                </div>
+                                <small style="color:#6a7a8a;">Yükleniyor...</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="profileForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-user"></i> Kullanıcı Adı</label>
+                                <input type="text" class="form-control" id="username"
+                                       value="{{ if .CurrentUser }}{{ .CurrentUser.Username }}{{ end }}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-hashtag"></i> Kullanıcı ID</label>
+                                <input type="text" class="form-control" id="userId"
+                                       value="{{ if .CurrentUser }}#{{ .CurrentUser.ID }}{{ end }}" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-envelope"></i> E-posta Adresi</label>
+                            <input type="email" class="form-control" id="email"
+                                   value="{{ if .CurrentUser }}{{ .CurrentUser.Email }}{{ end }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-align-left"></i> Biyografi</label>
+                            <textarea class="form-control" id="bio" placeholder="Kendinizden bahsedin...">{{ if .CurrentUser }}{{ .CurrentUser.Bio }}{{ end }}</textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="cancelEdit()">İptal</button>
+                            <button type="button" class="btn-primary" onclick="saveProfile()">Değişiklikleri Kaydet</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ── GÜVENLİK ── -->
+                <div class="settings-section" id="security">
+                    <div class="section-header">
+                        <h2>Güvenlik Ayarları</h2>
+                        <p>Hesap güvenliğinizi yönetin</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h3><i class="fas fa-key"></i> Şifre Değiştir</h3>
+                        <div class="form-group">
+                            <label class="form-label">Mevcut Şifre</label>
+                            <input type="password" class="form-control" id="currentPassword">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Yeni Şifre</label>
+                                <input type="password" class="form-control" id="newPassword">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Yeni Şifre (Tekrar)</label>
+                                <input type="password" class="form-control" id="confirmPassword">
+                            </div>
+                        </div>
+                        <div style="margin-top:1rem;">
+                            <button class="btn-primary" onclick="changePassword()">
+                                <i class="fas fa-key"></i> Şifreyi Güncelle
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="tfa-header">
+                            <span class="tfa-title">İki Faktörlü Doğrulama (2FA)</span>
+                            {{ if .Security.TwoFactorEnabled }}
+                            <span class="status-badge status-enabled">Aktif</span>
+                            {{ else }}
+                            <span class="status-badge status-disabled">Devre Dışı</span>
+                            {{ end }}
+                        </div>
+                        <p style="color:#b0b0b0;font-size:0.9rem;margin-bottom:1rem;">
+                            Hesabınıza ekstra güvenlik katmanı ekleyin.
+                        </p>
+                        {{ if .Security.TwoFactorEnabled }}
+                        <button class="btn-danger" onclick="disable2FA()">
+                            <i class="fas fa-shield-alt"></i> 2FA'yı Devre Dışı Bırak
+                        </button>
+                        {{ else }}
+                        <button class="btn-primary" onclick="enable2FA()">
+                            <i class="fas fa-qrcode"></i> 2FA'yı Etkinleştir
+                        </button>
+                        {{ end }}
+                    </div>
+
+                    <!-- Son Oturum Açmalar (güvenlik sekmesinde özet) -->
+                    <div class="info-box">
+                        <h3><i class="fas fa-history"></i> Son Oturum Açmalar</h3>
+                        <div class="sessions-list" id="securitySessionsList">
+                            {{ if .Sessions }}
+                                {{ range first .Sessions 3 }}
+                                <div class="session-item {{ if .IsCurrent }}session-current{{ end }}">
+                                    <div class="session-icon">
+                                        <i class="fas {{ if .IsCurrent }}fa-laptop{{ else }}fa-globe{{ end }}"></i>
+                                    </div>
+                                    <div class="session-info">
+                                        <div class="session-device">{{ .Device }}</div>
+                                        <div class="session-meta">
+                                            {{ if .IsCurrent }}
+                                            <span style="color:#00ff9d;">Şu anki oturum</span> •
+                                            {{ end }}
+                                            IP: {{ .IP }}
+                                            {{ if .Location }} · {{ .Location }}{{ end }}
+                                        </div>
+                                    </div>
+                                </div>
+                                {{ end }}
+                                {{ if gt (len .Sessions) 3 }}
+                                <div style="text-align:center; margin-top:0.5rem;">
+                                    <button class="btn-secondary" onclick="switchToSessionsTab()">
+                                        Tüm oturumları gör ({{ len .Sessions }})
+                                    </button>
+                                </div>
+                                {{ end }}
+                            {{ else }}
+                            <div class="session-no-data">
+                                <i class="fas fa-info-circle"></i> Aktif oturum bilgisi bulunamadı.
+                            </div>
+                            {{ end }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── BİLDİRİMLER ── -->
+                <div class="settings-section" id="notifications">
+                    <div class="section-header">
+                        <h2>Bildirim Ayarları</h2>
+                        <p>Hangi bildirimleri almak istediğinizi seçin</p>
+                    </div>
+
+                    <div class="notification-group">
+                        <div class="notification-group-title">E-posta Bildirimleri</div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Yeni Makine Eklendiğinde</h4>
+                                <p>Platforma yeni makine eklendiğinde bildirim al</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="notif_new_machine"
+                                    {{ if .Settings.EmailNotifications }}checked{{ end }}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Çözüm Onaylandığında</h4>
+                                <p>Gönderdiğiniz flag onaylandığında bildirim al</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="notif_flag_approved"
+                                    {{ if .Settings.EmailNotifications }}checked{{ end }}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Haftalık Rapor</h4>
+                                <p>Haftalık aktivite raporu ve istatistikler</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="notif_weekly"
+                                    {{ if .Settings.EmailNotifications }}checked{{ end }}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="notification-group">
+                        <div class="notification-group-title">Tarayıcı Bildirimleri</div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Anlık Bildirimler</h4>
+                                <p>Tarayıcı açıkken anlık bildirimler göster</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="notif_browser"
+                                    {{ if .Settings.BrowserNotifications }}checked{{ end }}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Sesli Uyarılar</h4>
+                                <p>Bildirim geldiğinde ses çal</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="notif_sound"
+                                    {{ if .Settings.SoundEnabled }}checked{{ end }}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="saveNotifications()">Bildirim Ayarlarını Kaydet</button>
+                    </div>
+                </div>
+
+                <!-- ── GİZLİLİK ── -->
+                <div class="settings-section" id="privacy">
+                    <div class="section-header">
+                        <h2>Gizlilik Ayarları</h2>
+                        <p>Profil gizliliğinizi yönetin</p>
+                    </div>
+
+                    <div class="notification-group">
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Profili Herkese Açık Yap</h4>
+                                <p>Profilinizin herkese açık olarak görüntülenmesine izin ver</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="priv_public"
+                                    {{ if .Settings.ProfilePublic }}checked{{ end }}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Çözüm Geçmişini Göster</h4>
+                                <p>Çözdüğünüz makinelerin herkese açık görüntülenmesi</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="priv_activity"
+                                    {{ if .Settings.ShowActivity }}checked{{ end }}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Online Durumunu Göster</h4>
+                                <p>Diğer kullanıcıların sizin online olup olmadığınızı görmesi</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="priv_online"
+                                    {{ if .Settings.ShowOnlineStatus }}checked{{ end }}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i>
+                        Gizlilik ayarlarınızı değiştirmeniz profilinizin görünürlüğünü anında etkiler.
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="savePrivacy()">Gizlilik Ayarlarını Kaydet</button>
+                    </div>
+                </div>
+
+                <!-- ── GÖRÜNÜM ── -->
+                <div class="settings-section" id="appearance">
+                    <div class="section-header">
+                        <h2>Görünüm Ayarları</h2>
+                        <p>Tema ve görünüm tercihlerinizi yapılandırın</p>
+                    </div>
+
+                    <div class="theme-options">
+                        <div class="theme-option {{ if eq .Settings.Theme "dark" }}selected{{ end }}"
+                             data-theme="dark">
+                            <div class="theme-icon"><i class="fas fa-moon"></i></div>
+                            <div class="theme-name">Koyu Tema</div>
+                            <div class="theme-preview">Varsayılan</div>
+                        </div>
+                        <div class="theme-option {{ if eq .Settings.Theme "light" }}selected{{ end }}"
+                             data-theme="light">
+                            <div class="theme-icon"><i class="fas fa-sun"></i></div>
+                            <div class="theme-name">Açık Tema</div>
+                            <div class="theme-preview">Gündüz modu</div>
+                        </div>
+                        <div class="theme-option {{ if eq .Settings.Theme "system" }}selected{{ end }}"
+                             data-theme="system">
+                            <div class="theme-icon"><i class="fas fa-laptop"></i></div>
+                            <div class="theme-name">Sistem</div>
+                            <div class="theme-preview">Sistem tercihini takip et</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Yazı Tipi Boyutu</label>
+                        <select class="form-control" id="fontSize">
+                            <option value="small"  {{ if eq .Settings.FontSize "small"  }}selected{{ end }}>Küçük</option>
+                            <option value="medium" {{ if eq .Settings.FontSize "medium" }}selected{{ end }}>Orta</option>
+                            <option value="large"  {{ if eq .Settings.FontSize "large"  }}selected{{ end }}>Büyük</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Dil</label>
+                        <select class="form-control" id="language">
+                            <option value="tr" {{ if eq .Settings.Language "tr" }}selected{{ end }}>Türkçe</option>
+                            <option value="en" {{ if eq .Settings.Language "en" }}selected{{ end }}>English</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="saveAppearance()">Görünüm Ayarlarını Kaydet</button>
+                    </div>
+                </div>
+
+                <!-- ── OTURUMLAR ── -->
+                <div class="settings-section" id="sessions">
+                    <div class="section-header">
+                        <h2>Aktif Oturumlar</h2>
+                        <p>Tüm aktif oturumlarınızı görüntüleyin ve yönetin</p>
+                    </div>
+
+                    <div class="sessions-list" id="sessionsList">
+                        {{ if .Sessions }}
+                            {{ range .Sessions }}
+                            <div class="session-item {{ if .IsCurrent }}session-current{{ end }}" data-session-id="{{ .ID }}">
+                                <div class="session-icon">
+                                    <i class="fas {{ if .IsCurrent }}fa-laptop{{ else }}fa-globe{{ end }}"></i>
+                                </div>
+                                <div class="session-info">
+                                    <div class="session-device">{{ .Device }}</div>
+                                    <div class="session-meta">
+                                        {{ if .IsCurrent }}
+                                        <span style="color:#00ff9d;">Şu anki oturum</span> •
+                                        {{ end }}
+                                        IP: {{ .IP }}
+                                        {{ if .Location }} · {{ .Location }}{{ end }}
+                                        <br>
+                                        <small>Son aktivite: {{ formatDate .LastActive }}</small>
+                                    </div>
+                                </div>
+                                {{ if not .IsCurrent }}
+                                <button class="btn-terminate" onclick="terminateSession({{ .ID }})">
+                                    <i class="fas fa-times"></i> Sonlandır
+                                </button>
+                                {{ end }}
+                            </div>
+                            {{ end }}
+                        {{ else }}
+                        <div class="session-no-data">
+                            <i class="fas fa-info-circle"></i> Aktif oturum bulunamadı.
+                        </div>
+                        {{ end }}
+                    </div>
+
+                    {{ if .Sessions }}
+                    <div class="form-actions">
+                        <button class="btn-danger" onclick="terminateAllSessions()">
+                            <i class="fas fa-sign-out-alt"></i> Diğer Tüm Oturumları Sonlandır
+                        </button>
+                    </div>
+                    {{ end }}
+                </div>
+
+                <!-- ── TEHLİKELİ BÖLGE ── -->
+                <div class="settings-section" id="danger">
+                    <div class="section-header">
+                        <h2 style="color:#ff5f56;">Tehlikeli Bölge</h2>
+                        <p>Bu işlemler geri alınamaz, dikkatli olun!</p>
+                    </div>
+
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Bu bölümdeki işlemler hesabınızı kalıcı olarak etkileyebilir.
+                    </div>
+
+                    <div class="info-box info-box-danger">
+                        <h3>Hesabı Kalıcı Olarak Sil</h3>
+                        <p style="color:#b0b0b0;font-size:0.9rem;margin-bottom:1rem;">
+                            Hesabınızı kalıcı olarak silin. Bu işlem geri alınamaz. Tüm verileriniz (çözümleriniz, puanlarınız, profiliniz) tamamen silinecektir.
+                        </p>
+                        <button class="btn-danger" onclick="deleteAccount()">
+                            <i class="fas fa-trash-alt"></i> Hesabı Kalıcı Olarak Sil
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /settings-content -->
+        </div><!-- /settings-grid -->
+    </div><!-- /container -->
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>HACKLAB</h3>
+                <p>Güvenlik araştırmacıları ve etik hacker'lar için CTF platformu.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Hızlı Linkler</h3>
+                <ul>
+                    <li><a href="/machines">Tüm Makineler</a></li>
+                    <li><a href="/leaderboard">Leaderboard</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Destek</h3>
+                <ul>
+                    <li><a href="/faq">SSS</a></li>
+                    <li><a href="/contact">İletişim</a></li>
+                    <li><a href="/discord">Discord</a></li>
+                    <li><a href="/docs">Dokümantasyon</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Yasal</h3>
+                <ul>
+                    <li><a href="/terms">Kullanım Şartları</a></li>
+                    <li><a href="/privacy">Gizlilik Politikası</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // =============================================
+        // ÖZEL DIALOG SİSTEMİ (Promise tabanlı)
+        // =============================================
+        let _dlConfirmResolve = null;
+        let _dlAlertIsOpen = false;
+
+        function showConfirm(title, message, confirmLabel = null) {
+            return new Promise((resolve) => {
+                document.getElementById('dlConfirmTitle').textContent = title || 'Onay';
+                document.getElementById('dlConfirmMsg').textContent = message || 'Bu işlemi onaylıyor musunuz?';
+                const confirmBtn = document.getElementById('dlConfirmBtn');
+                if (confirmLabel) {
+                    confirmBtn.innerHTML = confirmLabel;
+                } else {
+                    confirmBtn.innerHTML = '<i class="fas fa-check"></i> Onayla';
+                }
+                document.getElementById('dlConfirm').classList.add('open');
+                _dlConfirmResolve = (value) => {
+                    document.getElementById('dlConfirm').classList.remove('open');
+                    resolve(value);
+                    _dlConfirmResolve = null;
+                };
+            });
+        }
+
+        function dlConfirmResolve(value) {
+            if (_dlConfirmResolve) _dlConfirmResolve(value);
+        }
+
+        function showAlert(title, message, type = 'info') {
+            if (_dlAlertIsOpen) {
+                dlAlertClose();
+            }
+            const titleEl = document.getElementById('dlAlertTitle');
+            const msgEl = document.getElementById('dlAlertMsg');
+            const iconEl = document.getElementById('dlAlertIcon');
+            
+            titleEl.textContent = title || 'Bilgi';
+            msgEl.textContent = message || '';
+            
+            iconEl.className = 'hl-dialog-icon-circle';
+            if (type === 'success') {
+                iconEl.classList.add('success');
+                iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
+            } else if (type === 'error') {
+                iconEl.classList.add('danger');
+                iconEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            } else if (type === 'warning') {
+                iconEl.classList.add('warn');
+                iconEl.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+            } else {
+                iconEl.classList.add('info');
+                iconEl.innerHTML = '<i class="fas fa-info-circle"></i>';
+            }
+            
+            document.getElementById('dlAlert').classList.add('open');
+            _dlAlertIsOpen = true;
+        }
+
+        function dlAlertClose() {
+            document.getElementById('dlAlert').classList.remove('open');
+            _dlAlertIsOpen = false;
+        }
+
+        // Overlay dışına tıklayınca kapat
+        document.getElementById('dlConfirm').addEventListener('click', function(e) {
+            if (e.target === this) dlConfirmResolve(false);
+        });
+        document.getElementById('dlAlert').addEventListener('click', function(e) {
+            if (e.target === this) dlAlertClose();
+        });
+
+        // ESC tuşu ile kapat
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('dlConfirm').classList.contains('open')) dlConfirmResolve(false);
+                if (document.getElementById('dlAlert').classList.contains('open')) dlAlertClose();
+            }
+        });
+
+        // =============================================
+        // LOGOUT FONKSİYONU
+        // =============================================
+        async function customLogout() {
+            const confirmed = await showConfirm('Çıkış Yap', 'Oturumunuzu kapatmak istediğinize emin misiniz?', '<i class="fas fa-sign-out-alt"></i> Çıkış Yap');
+            if (!confirmed) return;
+            
+            try {
+                const response = await fetch('/api/auth/logout', { method: 'POST' });
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+
+        let selectedTheme = '{{ .Settings.Theme }}' || 'dark';
+
+        /* ── Menü geçişi ── */
+        function switchSettings(section, el) {
+            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+            if (el) {
+                el.classList.add('active');
+            } else {
+                const menuItem = document.querySelector(`.menu-item[data-section="${section}"]`);
+                if (menuItem) menuItem.classList.add('active');
+            }
+            document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Menü item'larına tıklama event'i ekle
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const section = this.getAttribute('data-section');
+                if (section) {
+                    switchSettings(section, this);
+                }
+            });
+        });
+
+        function switchToSessionsTab() {
+            const sessionsMenuItem = document.querySelector('.menu-item[data-section="sessions"]');
+            if (sessionsMenuItem) {
+                switchSettings('sessions', sessionsMenuItem);
+            }
+        }
+
+        /* ── Profil ── */
+        async function saveProfile() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const bio = document.getElementById('bio').value;
+
+            if (!username || !email) {
+                showAlert('Hata', 'Kullanıcı adı ve e-posta adresi zorunludur!', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, bio })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('Başarılı', result.data?.message || 'Profil bilgileri güncellendi!', 'success');
+                } else {
+                    showAlert('Hata', result.message || 'Bir hata oluştu', 'error');
+                }
+            } catch (error) {
+                showAlert('Hata', 'Bir hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        function cancelEdit() {
+            document.getElementById('username').value = '{{ .CurrentUser.Username }}';
+            document.getElementById('email').value = '{{ .CurrentUser.Email }}';
+            document.getElementById('bio').value = '{{ .CurrentUser.Bio }}';
+            showAlert('Bilgi', 'Değişiklikler iptal edildi', 'info');
+        }
+
+        /* ── Avatar Yükleme ── */
+        async function uploadAvatar(file) {
+            if (!file) return;
+            
+            // Dosya tipi kontrolü
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                showAlert('Hata', 'Sadece JPG, PNG veya GIF dosyaları yüklenebilir!', 'error');
+                return;
+            }
+            
+            // Dosya boyutu kontrolü (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showAlert('Hata', 'Dosya boyutu 2MB\'dan küçük olmalıdır!', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            const progressBar = document.getElementById('avatarProgress');
+            const progressFill = document.getElementById('progressFill');
+            progressBar.style.display = 'block';
+            progressFill.style.width = '50%';
+
+            try {
+                const response = await fetch('/api/user/avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                progressFill.style.width = '100%';
+                
+                const result = await response.json();
+                if (result.success) {
+                    const avatarUrl = result.data?.avatar_url || result.avatar_url;
+                    if (avatarUrl) {
+                        document.getElementById('avatarImg').src = avatarUrl + '?t=' + Date.now();
+                    }
+                    showAlert('Başarılı', 'Profil fotoğrafınız güncellendi!', 'success');
+                } else {
+                    showAlert('Hata', result.message || 'Avatar yüklenemedi', 'error');
+                }
+            } catch (error) {
+                showAlert('Hata', 'Avatar yüklenirken bir hata oluştu: ' + error.message, 'error');
+            } finally {
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 1000);
+            }
+        }
+
+        /* ── Şifre ── */
+        async function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (!current || !newPass || !confirm) { 
+                showAlert('Hata', 'Lütfen tüm alanları doldurun!', 'error'); 
+                return; 
+            }
+            if (newPass !== confirm) { 
+                showAlert('Hata', 'Yeni şifreler eşleşmiyor!', 'error'); 
+                return; 
+            }
+            if (newPass.length < 8) { 
+                showAlert('Hata', 'Şifre en az 8 karakter olmalı!', 'error'); 
+                return; 
+            }
+
+            try {
+                const response = await fetch('/api/user/security', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        current_password: current, 
+                        new_password: newPass 
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('Başarılı', result.data?.message || 'Şifre başarıyla değiştirildi!', 'success');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    showAlert('Hata', result.message || 'Şifre değiştirilemedi', 'error');
+                }
+            } catch (error) {
+                showAlert('Hata', 'Bir hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        /* ── 2FA ── */
+        /* ── 2FA ── */
+async function enable2FA() { 
+    try {
+        const response = await fetch('/api/user/security', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ two_factor_enabled: true })
+        });
+        const result = await response.json();
+        if (result.success) {
+            // UI'ı güncelle (sayfa yenilemeden)
+            const badge = document.querySelector('.tfa-header .status-badge');
+            if (badge) {
+                badge.className = 'status-badge status-enabled';
+                badge.textContent = 'Aktif';
+            }
+            // Butonu değiştir
+            const buttonContainer = document.querySelector('.info-box .tfa-header + p + *');
+            if (buttonContainer) {
+                buttonContainer.outerHTML = '<button class="btn-danger" onclick="disable2FA()"><i class="fas fa-shield-alt"></i> 2FA\'yı Devre Dışı Bırak</button>';
+            }
+            showAlert('Başarılı', '2FA etkinleştirildi!', 'success');
+        } else {
+            showAlert('Hata', result.message || '2FA etkinleştirilemedi', 'error');
+        }
+    } catch (error) {
+        showAlert('Hata', 'Bir hata oluştu: ' + error.message, 'error');
+    }
+}
+
+async function disable2FA() {
+    const confirmed = await showConfirm('2FA Devre Dışı Bırak', 'İki faktörlü doğrulamayı devre dışı bırakmak istediğinize emin misiniz?');
+    if (confirmed) {
+        try {
+            const response = await fetch('/api/user/security', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ two_factor_enabled: false })
+            });
+            const result = await response.json();
+            if (result.success) {
+                // UI'ı güncelle (sayfa yenilemeden)
+                const badge = document.querySelector('.tfa-header .status-badge');
+                if (badge) {
+                    badge.className = 'status-badge status-disabled';
+                    badge.textContent = 'Devre Dışı';
+                }
+                // Butonu değiştir
+                const buttonContainer = document.querySelector('.info-box .btn-danger');
+                if (buttonContainer) {
+                    buttonContainer.outerHTML = '<button class="btn-primary" onclick="enable2FA()"><i class="fas fa-qrcode"></i> 2FA\'yı Etkinleştir</button>';
+                }
+                showAlert('Başarılı', '2FA devre dışı bırakıldı.', 'success');
+            } else {
+                showAlert('Hata', result.message || '2FA devre dışı bırakılamadı', 'error');
+            }
+        } catch (error) {
+            showAlert('Hata', 'Bir hata oluştu: ' + error.message, 'error');
+        }
+    }
+}
+        /* ── Bildirimler ── */
+        async function saveNotifications() {
+            const body = {
+                email_notifications:   document.getElementById('notif_new_machine').checked,
+                browser_notifications: document.getElementById('notif_browser').checked,
+                sound_enabled:         document.getElementById('notif_sound').checked,
+            };
+            
+            try {
+                const response = await fetch('/api/user/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('Başarılı', result.data?.message || 'Bildirim ayarları kaydedildi!', 'success');
+                } else {
+                    showAlert('Hata', result.message || 'Bir hata oluştu', 'error');
+                }
+            } catch (error) {
+                showAlert('Hata', 'Bir hata oluştu', 'error');
+            }
+        }
+
+        /* ── Gizlilik ── */
+        async function savePrivacy() {
+            const body = {
+                profile_public:    document.getElementById('priv_public').checked,
+                show_activity:     document.getElementById('priv_activity').checked,
+                show_online_status: document.getElementById('priv_online').checked,
+            };
+            
+            try {
+                const response = await fetch('/api/user/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('Başarılı', result.data?.message || 'Gizlilik ayarları kaydedildi!', 'success');
+                } else {
+                    showAlert('Hata', result.message || 'Bir hata oluştu', 'error');
+                }
+            } catch (error) {
+                showAlert('Hata', 'Bir hata oluştu', 'error');
+            }
+        }
+
+        /* ── Tema ── */
+        function selectTheme(theme, el) {
+            selectedTheme = theme;
+            document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        // Tema option'larına tıklama event'i ekle
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const theme = this.getAttribute('data-theme');
+                if (theme) {
+                    selectTheme(theme, this);
+                }
+            });
+        });
+
+        async function saveAppearance() {
+            const body = {
+                theme:     selectedTheme,
+                font_size: document.getElementById('fontSize').value,
+                language:  document.getElementById('language').value,
+            };
+            
+            try {
+                const response = await fetch('/api/user/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('Başarılı', result.data?.message || 'Görünüm ayarları kaydedildi!', 'success');
+                } else {
+                    showAlert('Hata', result.message || 'Bir hata oluştu', 'error');
+                }
+            } catch (error) {
+                showAlert('Hata', 'Bir hata oluştu', 'error');
+            }
+        }
+
+        /* ── Oturumlar ── */
+        async function terminateSession(sessionId) {
+            const confirmed = await showConfirm('Oturum Sonlandır', 'Bu oturumu sonlandırmak istediğinize emin misiniz?');
+            if (confirmed) {
+                try {
+                    const response = await fetch('/api/sessions/' + sessionId, { method: 'DELETE' });
+                    const result = await response.json();
+                    if (result.success) {
+                        const sessionElement = document.querySelector(`.session-item[data-session-id="${sessionId}"]`);
+                        if (sessionElement) sessionElement.remove();
+                        showAlert('Başarılı', 'Oturum sonlandırıldı!', 'success');
+                    } else {
+                        showAlert('Hata', result.message || 'Oturum sonlandırılamadı', 'error');
+                    }
+                } catch (error) {
+                    showAlert('Hata', 'Bir hata oluştu', 'error');
+                }
+            }
+        }
+
+        async function terminateAllSessions() {
+            const confirmed = await showConfirm('Tüm Oturumları Sonlandır', 'Diğer tüm oturumlar sonlandırılacak (bu oturum hariç). Devam etmek istiyor musunuz?');
+            if (confirmed) {
+                try {
+                    const response = await fetch('/api/sessions/terminate-all', { method: 'POST' });
+                    const result = await response.json();
+                    if (result.success) {
+                        document.querySelectorAll('.session-item:not(.session-current)').forEach(el => el.remove());
+                        showAlert('Başarılı', result.data?.message || 'Diğer tüm oturumlar sonlandırıldı!', 'success');
+                    } else {
+                        showAlert('Hata', result.message || 'Oturumlar sonlandırılamadı', 'error');
+                    }
+                } catch (error) {
+                    showAlert('Hata', 'Bir hata oluştu', 'error');
+                }
+            }
+        }
+
+        /* ── Hesap Silme ── */
+        async function deleteAccount() {
+            const confirmed1 = await showConfirm('Hesabı Sil', '⚠️ HESAP KALICI OLARAK SİLİNECEK! ⚠️\n\nBu işlem geri alınamaz. Tüm verileriniz (çözümler, puanlar, profil) tamamen silinecektir.\n\nEmin misiniz?');
+            if (confirmed1) {
+                const confirmed2 = await showConfirm('SON UYARI', 'Hesabınızı silmek istediğinize kesinlikle emin misiniz? Bu işlemden sonra verilerinizi geri getirmek MÜMKÜN DEĞİLDİR.\n\nDevam etmek için "Hesabımı Sil" butonuna tıklayın.', '<i class="fas fa-trash-alt"></i> Hesabımı Sil');
+                if (confirmed2) {
+                    try {
+                        const response = await fetch('/api/user/delete', { 
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            showAlert('Bilgi', 'Hesabınız siliniyor. Yönlendiriliyorsunuz...', 'info');
+                            setTimeout(() => { window.location.href = '/logout'; }, 2000);
+                        } else {
+                            showAlert('Hata', result.message || 'Hesap silinemedi', 'error');
+                        }
+                    } catch (error) {
+                        showAlert('Hata', 'Bir hata oluştu: ' + error.message, 'error');
+                    }
+                }
+            }
+        }
+
+        // Template için yardımcı fonksiyon
+        function first(arr, count) {
+            if (!arr) return [];
+            return arr.slice(0, count);
+        }
+    </script>
+</body>
+</html>

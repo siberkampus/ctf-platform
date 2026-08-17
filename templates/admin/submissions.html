@@ -1,0 +1,196 @@
+{{define "content"}}
+<div class="submissions-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h2><i class="fas fa-flag"></i> Çözümler</h2>
+            <p>Tüm kullanıcı çözümlerini görüntüleyin</p>
+        </div>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-flag"></i></div>
+            <div class="stat-content">
+                <div class="stat-value">{{.Stats.TotalSubmissions}}</div>
+                <div class="stat-label">Toplam Çözüm</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-content">
+                <div class="stat-value">{{.Stats.AcceptedSubmissions}}</div>
+                <div class="stat-label">Başarılı</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-content">
+                <div class="stat-value">{{.Stats.FailedSubmissions}}</div>
+                <div class="stat-label">Başarısız</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-content">
+                <div class="stat-value">{{.Stats.UniqueSolvers}}</div>
+                <div class="stat-label">Çözen Kişi</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtreler -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label>Durum:</label>
+            <select id="statusFilter" class="filter-select" onchange="applyFilters()">
+                <option value="all" {{if eq .StatusFilter "all"}}selected{{end}}>Tümü</option>
+                <option value="accepted" {{if eq .StatusFilter "accepted"}}selected{{end}}>Başarılı</option>
+                <option value="rejected" {{if eq .StatusFilter "rejected"}}selected{{end}}>Başarısız</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Makine:</label>
+            <select id="machineFilter" class="filter-select" onchange="applyFilters()">
+                <option value="all">Tüm Makineler</option>
+                {{range .Machines}}
+                <option value="{{.ID}}" {{if eq $.MachineFilter (printf "%d" .ID)}}selected{{end}}>{{.Name}}</option>
+                {{end}}
+            </select>
+        </div>
+
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Kullanıcı ara..." class="search-input" value="{{.SearchFilter}}" onkeypress="if(event.keyCode==13) applyFilters()">
+        </div>
+
+        <button class="btn-filter" onclick="applyFilters()">
+            <i class="fas fa-filter"></i> Filtrele
+        </button>
+        <button class="btn-filter" onclick="resetFilters()">
+            <i class="fas fa-undo"></i> Sıfırla
+        </button>
+    </div>
+
+    <!-- Çözüm Tablosu -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Kullanıcı</th>
+                    <th>Makine</th>
+                    <th>Soru</th>
+                    <th>Gönderilen Flag</th>
+                    <th>Durum</th>
+                    <th>Puan</th>
+                    <th>IP</th>
+                    <th>Tarih</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Submissions}}
+                <tr>
+                    <td>#{{.ID}}</td>
+                    <td>
+                        <div class="user-info">
+                            <img src="{{.UserAvatar}}" alt="{{.Username}}" class="user-avatar" onerror="this.src='/static/images/avatar.png'">
+                            <span>{{.Username}}</span>
+                        </div>
+                    </td>
+                    <td>{{.MachineName}}</td>
+                    <td>{{.QuestionTitle}}</td>
+                    <td><code class="flag-code">{{.SubmittedFlag}}</code></td>
+                    <td>
+                        {{if eq .Status "accepted"}}
+                        <span class="badge badge-success">
+                            <i class="fas fa-check-circle"></i> Başarılı
+                        </span>
+                        {{else}}
+                        <span class="badge badge-danger">
+                            <i class="fas fa-times-circle"></i> Başarısız
+                        </span>
+                        {{end}}
+                    </td>
+                    <td>
+                        {{if eq .Status "accepted"}}
+                        <span class="points">+100</span>
+                        {{else}}
+                        <span class="points">0</span>
+                        {{end}}
+                    </td>
+                    <td>{{.IPAddress}}</td>
+                    <td>{{.CreatedAt.Format "02.01.2006 15:04:05"}}</td>
+                    <td>
+                        <button class="btn-icon" onclick="viewSubmission({{.ID}})" title="Detay">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td colspan="10" class="text-center">Henüz çözüm yok</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .submissions-page { display: flex; flex-direction: column; gap: 2rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+    .stat-card { background: rgba(0, 0, 0, 0.2); border: 1px solid #2a3a4a; border-radius: 10px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .stat-value { font-family: 'Share Tech Mono', monospace; font-size: 2rem; font-weight: bold; color: #00ff9d; }
+    .stat-label { color: #b0b0b0; font-size: 0.9rem; }
+    .filters-bar { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; }
+    .filter-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .filter-group label { font-size: 0.8rem; color: #b0b0b0; }
+    .filter-select { padding: 0.5rem 2rem 0.5rem 0.5rem; background: rgba(0, 0, 0, 0.3); border: 1px solid #2a3a4a; border-radius: 5px; color: #e0e0e0; cursor: pointer; }
+    .search-box { flex: 1; position: relative; min-width: 200px; }
+    .search-box i { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #6a7a8a; }
+    .search-input { width: 100%; padding: 0.5rem 1rem 0.5rem 2.5rem; background: rgba(0, 0, 0, 0.3); border: 1px solid #2a3a4a; border-radius: 5px; color: #e0e0e0; }
+    .btn-filter { padding: 0.5rem 1rem; background: rgba(0, 255, 157, 0.1); border: 1px solid #00ff9d; border-radius: 5px; color: #00ff9d; cursor: pointer; transition: 0.3s; }
+    .btn-filter:hover { background: #00ff9d; color: #0a0f0f; }
+    .table-container { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { text-align: left; padding: 1rem 0.5rem; color: #00ff9d; border-bottom: 1px solid #2a3a4a; }
+    .data-table td { padding: 0.8rem 0.5rem; border-bottom: 1px solid #2a3a4a; }
+    .user-info { display: flex; align-items: center; gap: 0.5rem; }
+    .user-avatar { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #00ff9d; object-fit: cover; }
+    .flag-code { background: #1a1f2f; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: #00ff9d; max-width: 200px; display: inline-block; overflow-x: auto; white-space: nowrap; }
+    .badge-success { background: rgba(0, 255, 157, 0.2); color: #00ff9d; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+    .badge-danger { background: rgba(255, 95, 86, 0.2); color: #ff5f56; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+    .points { font-family: 'Share Tech Mono', monospace; font-weight: bold; color: #ffd700; }
+    .btn-icon { background: transparent; border: 1px solid #2a3a4a; border-radius: 5px; padding: 0.3rem 0.6rem; color: #b0b0b0; cursor: pointer; transition: 0.3s; }
+    .btn-icon:hover { border-color: #00ff9d; color: #00ff9d; }
+    .text-center { text-align: center; padding: 2rem; color: #6a7a8a; }
+    @media (max-width: 768px) { .filters-bar { flex-direction: column; } .filter-group { width: 100%; } .search-box { width: 100%; } }
+</style>
+
+<script>
+    function applyFilters() {
+        const status = document.getElementById('statusFilter').value;
+        const machine = document.getElementById('machineFilter').value;
+        const search = document.getElementById('searchInput').value;
+        
+        let url = '/admin/submissions?';
+        if (status !== 'all') url += `status=${status}&`;
+        if (machine !== 'all') url += `machine=${machine}&`;
+        if (search) url += `search=${encodeURIComponent(search)}&`;
+        
+        window.location.href = url.slice(0, -1);
+    }
+
+    function resetFilters() {
+        window.location.href = '/admin/submissions';
+    }
+
+    function viewSubmission(id) {
+        window.location.href = `/admin/submissions/${id}`;
+    }
+</script>
+{{end}}

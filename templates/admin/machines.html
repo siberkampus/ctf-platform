@@ -1,0 +1,619 @@
+{{define "content"}}
+<div class="machines-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h2><i class="fas fa-server"></i> Makine Yönetimi</h2>
+            <p>Platformdaki tüm makineleri yönetin, düzenleyin ve izleyin</p>
+        </div>
+        <div class="header-right">
+            <a href="/admin/machines/add" class="btn-primary">
+                <i class="fas fa-plus"></i> Yeni Makine Ekle
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtre ve Arama -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label>Zorluk:</label>
+            <select id="difficultyFilter" class="filter-select">
+                <option value="all">Tümü</option>
+                <option value="easy">Kolay</option>
+                <option value="medium">Orta</option>
+                <option value="hard">Zor</option>
+                <option value="expert">Uzman</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>Durum:</label>
+            <select id="statusFilter" class="filter-select">
+                <option value="all">Tümü</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Pasif</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>VIP:</label>
+            <select id="vipFilter" class="filter-select">
+                <option value="all">Tümü</option>
+                <option value="vip">Sadece VIP</option>
+                <option value="free">Ücretsiz</option>
+            </select>
+        </div>
+
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Makine ara..." class="search-input">
+        </div>
+
+        <button class="btn-filter" onclick="applyFilters()">
+            <i class="fas fa-filter"></i> Filtrele
+        </button>
+    </div>
+
+    <!-- İstatistik Kartları (Mini) -->
+    <div class="mini-stats">
+        <div class="mini-stat">
+            <span class="mini-stat-value">{{.Stats.TotalMachines}}</span>
+            <span class="mini-stat-label">Toplam Makine</span>
+        </div>
+        <div class="mini-stat">
+            <span class="mini-stat-value">{{.Stats.ActiveMachines}}</span>
+            <span class="mini-stat-label">Aktif</span>
+        </div>
+        <div class="mini-stat">
+            <span class="mini-stat-value">{{.Stats.EasyCount}}</span>
+            <span class="mini-stat-label">Kolay</span>
+        </div>
+        <div class="mini-stat">
+            <span class="mini-stat-value">{{.Stats.MediumCount}}</span>
+            <span class="mini-stat-label">Orta</span>
+        </div>
+        <div class="mini-stat">
+            <span class="mini-stat-value">{{.Stats.HardCount}}</span>
+            <span class="mini-stat-label">Zor</span>
+        </div>
+        <div class="mini-stat">
+            <span class="mini-stat-value">{{.Stats.ExpertCount}}</span>
+            <span class="mini-stat-label">Uzman</span>
+        </div>
+    </div>
+
+    <!-- Makine Tablosu -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Makine</th>
+                    <th>Zorluk</th>
+                    <th>Puan</th>
+                    <th>VIP</th>
+                    <th>Sorular</th>
+                    <th>Çözümler</th>
+                    <th>Oluşturan</th>
+                    <th>Durum</th>
+                    <th>Eklenme</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Machines}}
+                <tr>
+                    <td>#{{.ID}}</td>
+                    <td>
+                        <div class="machine-name">
+                            <img src="{{.ImageURL}}" alt="{{.Name}}" class="machine-icon">
+                            <span>{{.Name}}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="difficulty-badge difficulty-{{.Difficulty}}">
+                            {{.Difficulty | title}}
+                        </span>
+                    </td>
+                    <td><span class="points">{{.PointsReward}}</span></td>
+                    <td>
+                        {{if .IsVIPOnly}}
+                        <span class="badge badge-vip">VIP</span>
+                        {{else}}
+                        <span class="badge">-</span>
+                        {{end}}
+                    </td>
+                    <td><span class="badge">{{.TotalQuestions}}</span></td>
+                    <td><span class="badge">{{.SolverCount}}</span></td>
+                    <td>{{.Creator}}</td>
+                    <td>
+                        {{if .IsActive}}
+                        <span class="status-badge status-active">Aktif</span>
+                        {{else}}
+                        <span class="status-badge status-inactive">Pasif</span>
+                        {{end}}
+                    </td>
+                    <td>{{.CreatedAt.Format "02.01.2006"}}</td>
+                    <td class="actions">
+                        <a href="/admin/machines/{{.ID}}" class="btn-icon" title="Görüntüle">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="/admin/machines/edit/{{.ID}}" class="btn-icon" title="Düzenle">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button onclick="toggleMachine({{.ID}})" class="btn-icon" 
+                                title="{{if .IsActive}}Pasif Yap{{else}}Aktif Yap{{end}}">
+                            <i class="fas {{if .IsActive}}fa-toggle-on{{else}}fa-toggle-off{{end}}"></i>
+                        </button>
+                        <button onclick="deleteMachine({{.ID}})" class="btn-icon" title="Sil">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td colspan="11" class="text-center">Henüz makine eklenmemiş</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sayfalama -->
+    <div class="pagination">
+        <button class="page-btn" onclick="changePage({{.Pagination.PrevPage}})" 
+                {{if not .Pagination.HasPrev}}disabled{{end}}>
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        {{range .Pagination.Pages}}
+        <button class="page-btn {{if eq . $.Pagination.CurrentPage}}active{{end}}" 
+                onclick="changePage({{.}})">
+            {{.}}
+        </button>
+        {{end}}
+        
+        <button class="page-btn" onclick="changePage({{.Pagination.NextPage}})" 
+                {{if not .Pagination.HasNext}}disabled{{end}}>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    /* ── Temel ── */
+    .machines-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    /* ── Header ── */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-left h2 {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 1.3rem;
+        color: #00ff9d;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header-left p {
+        color: #4a5a6a;
+        font-size: 0.82rem;
+        letter-spacing: 0.01em;
+    }
+
+    .btn-primary {
+        padding: 0.6rem 1.25rem;
+        background: #00ff9d;
+        border: none;
+        border-radius: 6px;
+        color: #050d0d;
+        font-weight: 700;
+        font-size: 0.82rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        letter-spacing: 0.03em;
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+        background: #00e68a;
+        box-shadow: 0 0 18px rgba(0, 255, 157, 0.35);
+    }
+
+    /* ── Filtreler ── */
+    .filters-bar {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid #1a2a2a;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .filter-group label {
+        font-size: 0.72rem;
+        color: #4a5a6a;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .filter-select {
+        padding: 0.45rem 0.75rem;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid #1e2e2e;
+        border-radius: 6px;
+        color: #c0ccd0;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        min-width: 110px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #00ff9d40;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 220px;
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #3a4a5a;
+        font-size: 0.8rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.45rem 0.75rem 0.45rem 2.2rem;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid #1e2e2e;
+        border-radius: 6px;
+        color: #c0ccd0;
+        font-size: 0.82rem;
+        transition: border-color 0.2s;
+    }
+
+    .search-input::placeholder {
+        color: #3a4a5a;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #00ff9d40;
+    }
+
+    .btn-filter {
+        padding: 0.45rem 1rem;
+        background: transparent;
+        border: 1px solid #00ff9d50;
+        border-radius: 6px;
+        color: #00ff9d;
+        font-size: 0.82rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-filter:hover {
+        background: rgba(0, 255, 157, 0.08);
+        border-color: #00ff9d90;
+    }
+
+    /* ── Mini Stats ── */
+    .mini-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .mini-stat {
+        background: rgba(255, 255, 255, 0.025);
+        border: 1px solid #1a2a2a;
+        border-radius: 8px;
+        padding: 0.9rem 1rem;
+        text-align: center;
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .mini-stat:hover {
+        border-color: #00ff9d30;
+        background: rgba(0, 255, 157, 0.04);
+    }
+
+    .mini-stat-value {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 1.6rem;
+        color: #00ff9d;
+        display: block;
+        line-height: 1;
+    }
+
+    .mini-stat-label {
+        font-size: 0.68rem;
+        color: #3a4a5a;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-top: 0.35rem;
+        display: block;
+    }
+
+    /* ── Tablo ── */
+    .table-container {
+        overflow-x: auto;
+        border: 1px solid #1a2a2a;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.18);
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+    }
+
+    .data-table thead tr {
+        background: rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid #1a2a2a;
+    }
+
+    .data-table th {
+        padding: 0.7rem 1rem;
+        text-align: left;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #3a5a5a;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .data-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #111d1d;
+        color: #9ab0b0;
+        vertical-align: middle;
+    }
+
+    .data-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .data-table tbody tr {
+        transition: background 0.15s;
+    }
+
+    .data-table tbody tr:hover {
+        background: rgba(0, 255, 157, 0.03);
+    }
+
+    /* ── Makine adı ── */
+    .machine-name {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .machine-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 5px;
+        object-fit: cover;
+        border: 1px solid #1a2a2a;
+    }
+
+    .machine-name span {
+        color: #d0e0e0;
+        font-weight: 500;
+    }
+
+    /* ── Puan ── */
+    .points {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 0.82rem;
+        color: #c0ccd0;
+    }
+
+    /* ── Difficulty badge ── */
+    .difficulty-badge {
+        display: inline-block;
+        padding: 0.2rem 0.55rem;
+        border-radius: 4px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .difficulty-easy    { background: rgba(0, 230, 120, 0.12); color: #00c97a; border: 1px solid rgba(0, 200, 100, 0.2); }
+    .difficulty-medium  { background: rgba(255, 180, 0, 0.12);  color: #e6a800; border: 1px solid rgba(220, 160, 0, 0.2); }
+    .difficulty-hard    { background: rgba(255, 80, 60, 0.12);   color: #ff5040; border: 1px solid rgba(220, 60, 40, 0.2); }
+    .difficulty-expert  { background: rgba(200, 0, 80, 0.12);    color: #e0005a; border: 1px solid rgba(180, 0, 70, 0.2); }
+
+    /* ── Genel badge ── */
+    .badge {
+        display: inline-block;
+        padding: 0.18rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        color: #4a6a6a;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid #1a2a2a;
+    }
+
+    .badge-vip {
+        background: rgba(120, 80, 255, 0.12);
+        color: #a080ff;
+        border: 1px solid rgba(100, 60, 230, 0.25);
+        font-weight: 700;
+        letter-spacing: 0.05em;
+    }
+
+    /* ── Status badge ── */
+    .status-badge {
+        display: inline-block;
+        padding: 0.2rem 0.55rem;
+        border-radius: 4px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+    }
+
+    .status-active {
+        background: rgba(0, 200, 100, 0.1);
+        color: #00c878;
+        border: 1px solid rgba(0, 180, 90, 0.2);
+    }
+
+    .status-inactive {
+        background: rgba(255, 60, 60, 0.1);
+        color: #ff4444;
+        border: 1px solid rgba(220, 40, 40, 0.2);
+    }
+
+    /* ── Eylem butonları ── */
+    .actions {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .btn-icon {
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid #1e2e2e;
+        border-radius: 5px;
+        color: #3a5a5a;
+        font-size: 0.78rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .btn-icon:hover {
+        border-color: #00ff9d50;
+        color: #00ff9d;
+        background: rgba(0, 255, 157, 0.06);
+    }
+
+    /* Sil butonu özel hover */
+    .actions .btn-icon:last-child:hover {
+        border-color: #ff444450;
+        color: #ff4444;
+        background: rgba(255, 68, 68, 0.06);
+    }
+
+    /* ── Sayfalama ── */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.3rem;
+    }
+
+    .page-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid #1a2a2a;
+        border-radius: 6px;
+        color: #3a5a5a;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+        border-color: #00ff9d50;
+        color: #00ff9d;
+        background: rgba(0, 255, 157, 0.05);
+    }
+
+    .page-btn.active {
+        background: #00ff9d;
+        border-color: #00ff9d;
+        color: #050d0d;
+        font-weight: 700;
+    }
+
+    .page-btn:disabled {
+        opacity: 0.25;
+        cursor: not-allowed;
+    }
+
+    /* ── Boş durum ── */
+    .text-center {
+        text-align: center;
+        padding: 3rem;
+        color: #2a3a3a;
+        font-size: 0.85rem;
+        letter-spacing: 0.03em;
+    }
+</style>
+
+<script>
+    function toggleMachine(id) {
+        if (confirm('Makine durumunu değiştirmek istediğinize emin misiniz?')) {
+            fetch(`/admin/api/machines/${id}/toggle`, { method: 'POST' })
+                .then(() => window.location.reload());
+        }
+    }
+
+    function deleteMachine(id) {
+        if (confirm('Bu makineyi silmek istediğinize emin misiniz? Tüm sorular ve çözümler silinecektir!')) {
+            fetch(`/admin/api/machines/${id}`, { method: 'DELETE' })
+                .then(() => window.location.reload());
+        }
+    }
+
+    function applyFilters() {
+        const difficulty = document.getElementById('difficultyFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        const vip = document.getElementById('vipFilter').value;
+        const search = document.getElementById('searchInput').value;
+        
+        window.location.href = `/admin/machines?difficulty=${difficulty}&status=${status}&vip=${vip}&search=${search}`;
+    }
+
+    function changePage(page) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+    }
+</script>
+{{end}}

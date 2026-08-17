@@ -1,0 +1,890 @@
+{{define "content"}}
+<div class="admin-users-page">
+    <!-- Sayfa Başlığı -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-users"></i>
+                Kullanıcı Yönetimi
+            </h1>
+            <p class="page-description">Platformdaki tüm kullanıcıları görüntüleyin ve yönetin</p>
+        </div>
+        <a href="/admin/users/add" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            <span>Yeni Kullanıcı</span>
+        </a>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Toplam Kullanıcı</span>
+                <span class="stat-value">{{.Stats.TotalUsers}}</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Aktif (24s)</span>
+                <span class="stat-value">{{.Stats.ActiveUsers}}</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">VIP Kullanıcı</span>
+                <span class="stat-value">{{.Stats.VIPUsers}}</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Bugün Kayıt</span>
+                <span class="stat-value">{{.Stats.NewToday}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtre ve Arama Formu -->
+    <div class="filters-section">
+        <form id="filterForm" class="filters-form" method="GET" action="/admin/users">
+            <div class="filters-row">
+                <select name="status" class="filter-select">
+                    <option value="">Tüm Durumlar</option>
+                    <option value="active" {{if eq .Filters.Status "active"}}selected{{end}}>Aktif</option>
+                    <option value="inactive" {{if eq .Filters.Status "inactive"}}selected{{end}}>Pasif</option>
+                </select>
+
+                <select name="vip" class="filter-select">
+                    <option value="">Tüm Üyelikler</option>
+                    <option value="vip" {{if eq .Filters.VIP "vip"}}selected{{end}}>VIP</option>
+                    <option value="normal" {{if eq .Filters.VIP "normal"}}selected{{end}}>Normal</option>
+                </select>
+
+                <select name="sort" class="filter-select">
+                    <option value="date_desc" {{if eq .Filters.Sort "date_desc"}}selected{{end}}>Yeni Kayıt</option>
+                    <option value="date_asc" {{if eq .Filters.Sort "date_asc"}}selected{{end}}>Eski Kayıt</option>
+                    <option value="points_desc" {{if eq .Filters.Sort "points_desc"}}selected{{end}}>Puan (Yüksek)</option>
+                    <option value="points_asc" {{if eq .Filters.Sort "points_asc"}}selected{{end}}>Puan (Düşük)</option>
+                    <option value="name_asc" {{if eq .Filters.Sort "name_asc"}}selected{{end}}>İsim (A-Z)</option>
+                    <option value="name_desc" {{if eq .Filters.Sort "name_desc"}}selected{{end}}>İsim (Z-A)</option>
+                </select>
+
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" class="search-input" 
+                           placeholder="Kullanıcı ara..." value="{{.Filters.Search}}">
+                </div>
+
+                <button type="submit" class="btn-filter">
+                    <i class="fas fa-filter"></i>
+                    Filtrele
+                </button>
+            </div>
+            <!-- Sayfa parametresi hidden olarak eklenebilir, JavaScript ile yöneteceğiz -->
+        </form>
+    </div>
+
+    <!-- Kullanıcı Listesi -->
+    {{if .Users}}
+    <div class="users-list">
+        {{range .Users}}
+        <div class="user-card">
+            <div class="user-card-header">
+                <div class="user-avatar-wrapper">
+                   <img src="{{if .Avatar}}{{.Avatar}}{{else}}/static/images/avatar.png{{end}}" alt="{{.Username}}" class="user-avatar">
+                    <span class="user-status {{if .IsActive}}status-online{{else}}status-offline{{end}}"></span>
+                </div>
+                <div class="user-info">
+                    <h3 class="user-username">{{.Username}}</h3>
+                    <p class="user-email">{{.Email}}</p>
+                    {{if .FullName}}
+                    <p class="user-fullname">{{.FullName}}</p>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="user-card-body">
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-star"></i>
+                        <span class="stat-value">{{.Points}}</span>
+                        <span class="stat-label">Puan</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-calendar"></i>
+                        <span class="stat-value">{{.CreatedAt.Format "02.01.2006"}}</span>
+                        <span class="stat-label">Kayıt</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span class="stat-value">
+                            {{if .LastLogin}}
+                                {{.LastLogin.Format "02.01.2006"}}
+                            {{else}}
+                                -
+                            {{end}}
+                        </span>
+                        <span class="stat-label">Son Giriş</span>
+                    </div>
+                </div>
+
+                <div class="user-badges">
+                    {{if .IsVIP}}
+                    <span class="badge badge-vip">
+                        <i class="fas fa-crown"></i>
+                        VIP
+                    </span>
+                    {{end}}
+                    
+                    {{if .IsActive}}
+                    <span class="badge badge-active">Aktif</span>
+                    {{else}}
+                    <span class="badge badge-inactive">Pasif</span>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="user-card-footer">
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="viewUser({{.ID}})" title="Görüntüle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn" onclick="editUser({{.ID}})" title="Düzenle">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn" onclick="toggleVIP({{.ID}})" 
+                            title="{{if .IsVIP}}VIP'den Çıkar{{else}}VIP Yap{{end}}">
+                        <i class="fas fa-crown"></i>
+                    </button>
+                    <button class="action-btn" onclick="toggleStatus({{.ID}})" 
+                            title="{{if .IsActive}}Pasif Yap{{else}}Aktif Yap{{end}}">
+                        <i class="fas fa-power-off"></i>
+                    </button>
+                    <button class="action-btn action-btn-danger" onclick="deleteUser({{.ID}})" title="Sil">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <!-- Sayfalama -->
+    {{if gt .Pagination.TotalPages 1}}
+    <div class="pagination-section">
+        <div class="pagination-info">
+            Gösterilen: {{.Pagination.Start}} - {{.Pagination.End}} / Toplam: {{.Pagination.TotalItems}}
+        </div>
+        <div class="pagination">
+            <button class="page-link" onclick="changePage({{.Pagination.PrevPage}})" 
+                    {{if not .Pagination.HasPrev}}disabled{{end}}>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            {{range .Pagination.Pages}}
+            <button class="page-link {{if eq . $.Pagination.CurrentPage}}active{{end}}" 
+                    onclick="changePage({{.}})">
+                {{.}}
+            </button>
+            {{end}}
+            
+            <button class="page-link" onclick="changePage({{.Pagination.NextPage}})" 
+                    {{if not .Pagination.HasNext}}disabled{{end}}>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+    {{end}}
+
+    {{else}}
+    <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <h3>Kullanıcı Bulunamadı</h3>
+        <p>Henüz hiç kullanıcı kaydı yok veya arama kriterlerine uygun kullanıcı bulunamadı.</p>
+        <a href="/admin/users/add" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            İlk Kullanıcıyı Ekle
+        </a>
+    </div>
+    {{end}}
+</div>
+
+<style>
+/* Aynı CSS stilleri, değişiklik yok */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.admin-users-page {
+    padding: 24px;
+    background: #0a0f0f;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 20px;
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.page-title {
+    color: #00ff9d;
+    font-size: 28px;
+    font-weight: 600;
+    font-family: 'Share Tech Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-title i {
+    font-size: 24px;
+    color: #00ff9d;
+}
+
+.page-description {
+    color: #8a9aa8;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #00ff9d;
+    color: #0a0f0f;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 157, 0.3);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    border-color: #00ff9d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 157, 0.1);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid #00ff9d;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00ff9d;
+    font-size: 20px;
+}
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    color: #8a9aa8;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    color: #00ff9d;
+    font-size: 28px;
+    font-weight: 600;
+    font-family: 'Share Tech Mono', monospace;
+    line-height: 1.2;
+}
+
+/* Filters Section */
+.filters-section {
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.filters-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-select {
+    background: #1e2a2a;
+    border: 1px solid #2a3a3a;
+    color: #e0e0e0;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    min-width: 140px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-select:hover,
+.filter-select:focus {
+    border-color: #00ff9d;
+    outline: none;
+}
+
+.search-wrapper {
+    flex: 1;
+    position: relative;
+    min-width: 250px;
+}
+
+.search-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5a6a6a;
+    font-size: 14px;
+}
+
+.search-input {
+    width: 100%;
+    background: #1e2a2a;
+    border: 1px solid #2a3a3a;
+    color: #e0e0e0;
+    padding: 10px 16px 10px 42px;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #00ff9d;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #5a6a6a;
+}
+
+.btn-filter {
+    background: transparent;
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-filter:hover {
+    background: #00ff9d;
+    color: #0a0f0f;
+}
+
+/* Users List */
+.users-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.user-card {
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.user-card:hover {
+    border-color: #00ff9d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 157, 0.1);
+}
+
+.user-card-header {
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    border-bottom: 1px solid #1e2a2a;
+}
+
+.user-avatar-wrapper {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #00ff9d;
+    object-fit: cover;
+}
+
+.user-status {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #151e1e;
+}
+
+.status-online {
+    background: #00ff9d;
+}
+
+.status-offline {
+    background: #ff5f56;
+}
+
+.user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-username {
+    color: #00ff9d;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.user-email {
+    color: #e0e0e0;
+    font-size: 13px;
+}
+
+.user-fullname {
+    color: #8a9aa8;
+    font-size: 12px;
+}
+
+.user-card-body {
+    padding: 20px;
+    border-bottom: 1px solid #1e2a2a;
+}
+
+.user-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    background: #1e2a2a;
+    border-radius: 8px;
+}
+
+.stat-item i {
+    color: #00ff9d;
+    font-size: 14px;
+}
+
+.stat-item .stat-value {
+    color: #e0e0e0;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.stat-item .stat-label {
+    color: #8a9aa8;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+.user-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-vip {
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: #0a0f0f;
+}
+
+.badge-active {
+    background: rgba(0, 255, 157, 0.15);
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+}
+
+.badge-inactive {
+    background: rgba(255, 95, 86, 0.15);
+    border: 1px solid #ff5f56;
+    color: #ff5f56;
+}
+
+.user-card-footer {
+    padding: 15px 20px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid #2a3a3a;
+    border-radius: 8px;
+    color: #8a9aa8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.action-btn:hover {
+    border-color: #00ff9d;
+    color: #00ff9d;
+    transform: translateY(-2px);
+}
+
+.action-btn-danger:hover {
+    border-color: #ff5f56;
+    color: #ff5f56;
+}
+
+/* Empty State */
+.empty-state {
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+    padding: 60px 20px;
+    text-align: center;
+    max-width: 500px;
+    margin: 40px auto;
+}
+
+.empty-state i {
+    font-size: 60px;
+    color: #2a3a3a;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #00ff9d;
+    font-size: 20px;
+    margin-bottom: 10px;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.empty-state p {
+    color: #8a9aa8;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Pagination */
+.pagination-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+}
+
+.pagination-info {
+    color: #8a9aa8;
+    font-size: 13px;
+}
+
+.pagination {
+    display: flex;
+    gap: 8px;
+}
+
+.page-link {
+    width: 36px;
+    height: 36px;
+    background: #1e2a2a;
+    border: 1px solid #2a3a3a;
+    border-radius: 8px;
+    color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.page-link:hover:not(:disabled) {
+    border-color: #00ff9d;
+    color: #00ff9d;
+}
+
+.page-link.active {
+    background: #00ff9d;
+    border-color: #00ff9d;
+    color: #0a0f0f;
+}
+
+.page-link:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-users-page {
+        padding: 16px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .search-wrapper {
+        width: 100%;
+    }
+
+    .btn-filter {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .users-list {
+        grid-template-columns: 1fr;
+    }
+
+    .pagination-section {
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-card-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .user-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+function viewUser(id) {
+    window.location.href = `/admin/api/users/${id}`;
+}
+
+function editUser(id) {
+    window.location.href = `/admin/users/edit/${id}`;
+}
+
+function toggleVIP(id) {
+    if (confirm('VIP durumunu değiştirmek istediğinize emin misiniz?')) {
+        fetch(`/admin/api/users/${id}/toggle-vip`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('İşlem sırasında bir hata oluştu!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+
+function toggleStatus(id) {
+    if (confirm('Kullanıcı durumunu değiştirmek istediğinize emin misiniz?')) {
+        fetch(`/admin/api/users/${id}/toggle-status`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('İşlem sırasında bir hata oluştu!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+
+function deleteUser(id) {
+    if (confirm('Bu kullanıcıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
+        fetch(`/admin/api/users/${id}`, { 
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Silme işlemi sırasında bir hata oluştu!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+
+// Sayfa değiştirme fonksiyonu
+function changePage(page) {
+    const form = document.getElementById('filterForm');
+    // Eğer formda hidden bir page input'u yoksa oluştur
+    let pageInput = form.querySelector('input[name="page"]');
+    if (!pageInput) {
+        pageInput = document.createElement('input');
+        pageInput.type = 'hidden';
+        pageInput.name = 'page';
+        form.appendChild(pageInput);
+    }
+    pageInput.value = page;
+    form.submit();
+}
+
+// Enter tuşu ile arama
+document.querySelector('.search-input')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        // Sayfayı sıfırla
+        changePage(1);
+    }
+});
+</script>
+{{end}}

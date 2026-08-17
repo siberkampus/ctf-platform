@@ -1,0 +1,33 @@
+{{define "session_item"}}
+<div class="session-item {{ if .IsCurrent }}session-current{{ end }}">
+    <div class="session-icon">
+        {{ if .IsCurrent }}
+            <i class="fas fa-laptop"></i>
+        {{ else }}
+            <i class="fas fa-globe"></i>
+        {{ end }}
+    </div>
+    <div class="session-info">
+        <div class="session-device">{{ .Device }}</div>
+        <div class="session-meta">
+            {{ if .IsCurrent }}
+                <span style="color: #00ff9d;">Şu anki oturum</span> •
+            {{ else }}
+                Son aktif: {{ formatDate .LastActive }} •
+            {{ end }}
+            IP: {{ .IP }}
+            {{ if .Location }} · {{ .Location }}{{ end }}
+        </div>
+        <div class="session-meta">
+            Bitiş: {{ formatDuration .ExpiresAt }}
+        </div>
+    </div>
+    {{ if not .IsCurrent }}
+    <button class="btn-terminate" onclick="terminateSession({{ .ID }})">
+        <i class="fas fa-times"></i>
+    </button>
+    {{ else }}
+    <span style="color: #00ff9d; font-size: 0.8rem; white-space: nowrap;">● Aktif</span>
+    {{ end }}
+</div>
+{{end}}

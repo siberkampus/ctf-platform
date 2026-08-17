@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+
+<!-- JS (kütüphane) -->
+<script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+
+<!-- Eklenti (fit addon) -->
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+    <style>
+        /* (CSS kodunuz aynen kalabilir, sadece ek olarak iframe stili ekleyelim) */
+        
+        /* Web uygulaması için iframe stili */
+        .web-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+        
+        .web-panel {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .web-header {
+            background: #1a1f2f;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #00ff9d;
+            font-size: 0.8rem;
+            color: #00ff9d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .web-url {
+            color: #b0b0b0;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+        
+        .web-open-btn {
+            background: rgba(0,255,157,0.1);
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.3s;
+        }
+        
+        .web-open-btn:hover {
+            background: #00ff9d;
+            color: #0a0f0f;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .navbar {
+            background: rgba(10, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00ff9d;
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+        .flag-result.warning { 
+    background: rgba(255,189,46,0.1); 
+    border: 1px solid #ffbd2e; 
+    color: #ffbd2e; 
+}
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+        .login-btn {
+            background: transparent;
+            border: 2px solid #00ff9d;
+            color: #00ff9d;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background: #00ff9d;
+            color: #0a0f0f;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+        }
+        .register-btn {
+            background: #00ff9d;
+            border: none;
+            color: #0a0f0f;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .register-btn:hover {
+            background: #00b86e;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+            transform: scale(1.05);
+        }
+
+
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { color: #e0e0e0; text-decoration: none; font-weight: 500; transition: 0.3s; position: relative; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: #00ff9d; transition: 0.3s; }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+        .nav-links a:hover, .nav-links a.active { color: #00ff9d; }
+        .user-menu { display: flex; align-items: center; gap: 1rem; }
+        .user-points { background: rgba(0,255,157,0.1); border: 1px solid #00ff9d; padding: 0.4rem 1rem; color: #00ff9d; font-weight: 600; font-size: 0.9rem; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #00ff9d; cursor: pointer; transition: 0.3s; object-fit: cover; }
+        .user-avatar:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(0,255,157,0.3); }
+        .container { max-width: 1600px; margin: 0 auto; padding: 100px 5% 3rem; }
+        .breadcrumb { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.9rem; color: #6a7a8a; }
+        .breadcrumb a { color: #b0b0b0; text-decoration: none; transition: 0.3s; }
+        .breadcrumb a:hover { color: #00ff9d; }
+        .breadcrumb i { font-size: 0.7rem; color: #2a3a4a; }
+        .machine-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+        .machine-title { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+        .machine-icon { width: 70px; height: 70px; background: rgba(0,255,157,0.1); border: 2px solid #00ff9d; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #00ff9d; flex-shrink: 0; }
+        .machine-info h1 { font-family: 'Share Tech Mono', monospace; font-size: 2.2rem; color: #00ff9d; margin-bottom: 0.5rem; }
+        .machine-meta { display: flex; gap: 1.5rem; color: #b0b0b0; font-size: 0.9rem; flex-wrap: wrap; }
+        .machine-meta i { color: #00ff9d; margin-right: 0.4rem; }
+        .machine-actions { display: flex; gap: 1rem; }
+        .btn-start { padding: 1rem 2.5rem; background: linear-gradient(45deg, #00ff9d, #00b86e); border: none; border-radius: 10px; color: #0a0f0f; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 0.8rem; }
+        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,255,157,0.4); }
+        .btn-start:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-stop { padding: 1rem 2.5rem; background: transparent; border: 2px solid #ff5f56; border-radius: 10px; color: #ff5f56; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 0.8rem; }
+        .btn-stop:hover { background: #ff5f56; color: #fff; }
+        .btn-vip { padding: 1rem 2.5rem; background: linear-gradient(45deg, #ffd700, #ffa500); border: none; border-radius: 10px; color: #0a0f0f; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 0.8rem; }
+        .btn-vip:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,215,0,0.4); }
+        .vip-warning { background: rgba(255,215,0,0.1); border: 1px solid #ffd700; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; color: #ffd700; }
+        .progress-bar-container { background: #2a3a4a; border-radius: 10px; height: 8px; margin-top: 0.5rem; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #00ff9d, #00b8ff); border-radius: 10px; transition: width 0.5s ease; }
+        .content-grid { display: grid; grid-template-columns: 350px 1fr 300px; gap: 1.5rem; margin-top: 2rem; align-items: start; }
+        .questions-panel { background: rgba(20,30,40,0.8); border: 1px solid #2a3a4a; border-radius: 10px; overflow: hidden; }
+        .panel-header { padding: 1.5rem; background: rgba(0,0,0,0.3); border-bottom: 1px solid #2a3a4a; }
+        .panel-header h3 { font-family: 'Share Tech Mono', monospace; color: #00ff9d; font-size: 1.2rem; margin-bottom: 0.3rem; }
+        .panel-header p { color: #b0b0b0; font-size: 0.9rem; }
+        .questions-list { padding: 1rem; }
+        .question-item { background: rgba(0,0,0,0.2); border: 1px solid #2a3a4a; border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: 0.3s; }
+        .question-item:hover { border-color: #00b8ff; transform: translateX(4px); }
+        .question-item.active { border-color: #00ff9d; background: rgba(0,255,157,0.08); }
+        .question-item.solved { border-color: rgba(0,255,157,0.5); }
+        .question-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.4rem; }
+        .question-title { font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; color: #e0e0e0; flex: 1; }
+        .question-status { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
+        .status-solved { background: #00ff9d; color: #0a0f0f; }
+        .status-unsolved { background: #2a3a4a; color: #b0b0b0; }
+        .question-points { font-size: 0.8rem; color: #00ff9d; margin-bottom: 0.4rem; }
+        .question-desc { font-size: 0.8rem; color: #6a7a8a; margin-bottom: 0.4rem; line-height: 1.4; }
+        .question-hint { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #ffbd2e; cursor: pointer; padding-top: 0.3rem; border-top: 1px solid #2a3a4a; margin-top: 0.4rem; }
+        .question-hint:hover { text-decoration: underline; }
+        .hint-cost { background: #2a3a4a; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.7rem; color: #b0b0b0; }
+        .no-questions { text-align: center; padding: 2rem; color: #6a7a8a; font-size: 0.9rem; }
+        .terminal-panel { background: #0a0f0f; border: 1px solid #00ff9d; border-radius: 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0,255,157,0.15); height: 600px; display: flex; flex-direction: column; }
+        .terminal-header { background: #1a1f2f; padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00ff9d; flex-shrink: 0; }
+        .terminal-dots { display: flex; gap: 0.5rem; }
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #27c93f; }
+        .terminal-title { color: #00ff9d; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; }
+        .terminal-status { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: #ff5f56; }
+        .terminal-status.online { background: #27c93f; animation: blink 2s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .terminal-actions { display: flex; gap: 0.3rem; }
+        .terminal-btn { background: transparent; border: none; color: #b0b0b0; cursor: pointer; transition: 0.3s; padding: 0.3rem 0.6rem; border-radius: 4px; }
+        .terminal-btn:hover { color: #00ff9d; background: rgba(0,255,157,0.1); }
+        .terminal-body { flex: 1; padding: 0.5rem; overflow: hidden; }
+        #xtermContainer, #webContainer { width: 100%; height: 100%; }
+        .terminal-offline { height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; color: #6a7a8a; font-family: 'Share Tech Mono', monospace; }
+        .terminal-offline i { font-size: 3rem; color: #2a3a4a; }
+        .info-panel { background: rgba(20,30,40,0.8); border: 1px solid #2a3a4a; border-radius: 10px; overflow: hidden; }
+        .info-section { padding: 1.2rem 1.5rem; border-bottom: 1px solid #2a3a4a; }
+        .info-section:last-child { border-bottom: none; }
+        .info-title { font-family: 'Share Tech Mono', monospace; color: #00ff9d; font-size: 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .info-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+        .info-stat { text-align: center; }
+        .info-stat-value { font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; color: #e0e0e0; display: block; }
+        .info-stat-label { font-size: 0.7rem; color: #6a7a8a; }
+        .difficulty-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; }
+        .difficulty-easy   { background: rgba(0,255,157,0.15); color: #00ff9d; border: 1px solid #00ff9d; }
+        .difficulty-medium { background: rgba(255,189,46,0.15); color: #ffbd2e; border: 1px solid #ffbd2e; }
+        .difficulty-hard   { background: rgba(255,95,86,0.15);  color: #ff5f56; border: 1px solid #ff5f56; }
+        .difficulty-expert { background: rgba(255,0,200,0.15);  color: #ff00c8; border: 1px solid #ff00c8; }
+        .timer { font-family: 'Share Tech Mono', monospace; font-size: 1.4rem; color: #00ff9d; display: flex; align-items: center; gap: 0.5rem; }
+        .timer.warning { color: #ffbd2e; }
+        .timer.danger  { color: #ff5f56; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .solver-list { display: flex; flex-direction: column; gap: 0.3rem; }
+        .solver-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid #1a2a3a; }
+        .solver-item:last-child { border-bottom: none; }
+        .solver-avatar { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #00ff9d; object-fit: cover; }
+        .solver-info { flex: 1; }
+        .solver-name { font-size: 0.9rem; color: #e0e0e0; }
+        .solver-time { font-size: 0.75rem; color: #6a7a8a; }
+        .notes-area { width: 100%; min-height: 90px; background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a; border-radius: 5px; padding: 0.8rem; color: #e0e0e0; font-size: 0.85rem; resize: vertical; margin-bottom: 0.8rem; font-family: 'Inter', sans-serif; }
+        .notes-area:focus { outline: none; border-color: #00ff9d; }
+        .btn-full { width: 100%; padding: 0.6rem; background: transparent; border: 1px solid #00ff9d; border-radius: 5px; color: #00ff9d; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
+        .btn-full:hover { background: #00ff9d; color: #0a0f0f; }
+        .btn-full-primary { width: 100%; padding: 0.8rem; background: linear-gradient(45deg, #00ff9d, #00b86e); border: none; border-radius: 8px; color: #0a0f0f; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-full-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(0,255,157,0.3); }
+        .btn-full-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: #1a1f2f; border: 1px solid #00ff9d; border-radius: 10px; max-width: 450px; width: 90%; padding: 2rem; animation: modalSlide 0.3s ease; }
+        @keyframes modalSlide { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-header h3 { font-family: 'Share Tech Mono', monospace; color: #00ff9d; }
+        .modal-close { background: none; border: none; color: #b0b0b0; font-size: 1.5rem; cursor: pointer; transition: 0.3s; line-height: 1; }
+        .modal-close:hover { color: #ff5f56; }
+        .modal-body { margin-bottom: 1.5rem; }
+        .modal-body p { color: #b0b0b0; margin-bottom: 1rem; font-size: 0.9rem; }
+        .question-select { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a; border-radius: 5px; padding: 0.8rem 1rem; color: #e0e0e0; font-size: 0.9rem; margin-bottom: 1rem; font-family: 'Inter', sans-serif; cursor: pointer; }
+        .question-select:focus { outline: none; border-color: #00ff9d; }
+        .question-select option { background: #1a1f2f; }
+        .flag-input-group { display: flex; gap: 0.5rem; }
+        .flag-input { flex: 1; padding: 0.8rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a; border-radius: 5px; color: #e0e0e0; font-size: 0.95rem; font-family: 'Share Tech Mono', monospace; }
+        .flag-input:focus { outline: none; border-color: #00ff9d; }
+        .btn-submit-flag { padding: 0.8rem 1.5rem; background: linear-gradient(45deg, #00ff9d, #00b86e); border: none; border-radius: 5px; color: #0a0f0f; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn-submit-flag:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(0,255,157,0.3); }
+        .btn-submit-flag:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .hint-content { background: rgba(0,0,0,0.3); border-left: 3px solid #ffbd2e; padding: 1rem; border-radius: 5px; color: #b0b0b0; font-style: italic; line-height: 1.6; }
+        .flag-result { padding: 0.8rem 1rem; border-radius: 5px; margin-top: 0.8rem; font-size: 0.9rem; display: none; }
+        .flag-result.success { background: rgba(0,255,157,0.1); border: 1px solid #00ff9d; color: #00ff9d; }
+        .flag-result.error   { background: rgba(255,95,86,0.1);  border: 1px solid #ff5f56; color: #ff5f56; }
+        #toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500; display: none; z-index: 3000; max-width: 300px; }
+        
+        /* Özel Dialog Sistem Stilleri */
+        .hl-dialog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            animation: dlOverlayIn 0.15s ease;
+        }
+
+        .hl-dialog-overlay.open {
+            display: flex;
+        }
+
+        @keyframes dlOverlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .hl-dialog {
+            background: #0d1117;
+            border: 1px solid #2a3a4a;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 157, 0.08);
+            animation: dlIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        @keyframes dlIn {
+            from { opacity: 0; transform: scale(0.88) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .hl-dialog-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 2rem 1rem;
+        }
+
+        .hl-dialog-icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .hl-dialog-icon-circle.warn {
+            background: rgba(255, 189, 46, 0.12);
+            border: 1px solid rgba(255, 189, 46, 0.35);
+            color: #ffbd2e;
+        }
+
+        .hl-dialog-icon-circle.info {
+            background: rgba(0, 184, 255, 0.1);
+            border: 1px solid rgba(0, 184, 255, 0.3);
+            color: #00b8ff;
+        }
+
+        .hl-dialog-icon-circle.danger {
+            background: rgba(255, 95, 86, 0.1);
+            border: 1px solid rgba(255, 95, 86, 0.3);
+            color: #ff5f56;
+        }
+
+        .hl-dialog-icon-circle.success {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            color: #00ff9d;
+        }
+
+        .hl-dialog-body {
+            padding: 0 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .hl-dialog-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.05rem;
+            color: #e0e0e0;
+            margin-bottom: 0.6rem;
+        }
+
+        .hl-dialog-message {
+            font-size: 0.9rem;
+            color: #8a9a8a;
+            line-height: 1.6;
+        }
+
+        .hl-dialog-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #1e2a38;
+            justify-content: flex-end;
+        }
+
+        .hl-dialog-actions.centered {
+            justify-content: center;
+        }
+
+        .hl-btn {
+            padding: 0.55rem 1.4rem;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .hl-btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a3a4a;
+            color: #8a9a8a;
+        }
+
+        .hl-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: #e0e0e0;
+            border-color: #3a4a5a;
+        }
+
+        .hl-btn-confirm {
+            background: rgba(255, 95, 86, 0.15);
+            border: 1px solid rgba(255, 95, 86, 0.4);
+            color: #ff5f56;
+        }
+
+        .hl-btn-confirm:hover {
+            background: rgba(255, 95, 86, 0.28);
+            box-shadow: 0 0 14px rgba(255, 95, 86, 0.25);
+        }
+
+        .hl-btn-ok {
+            background: rgba(0, 255, 157, 0.12);
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            color: #00ff9d;
+        }
+
+        .hl-btn-ok:hover {
+            background: rgba(0, 255, 157, 0.22);
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.2);
+        }
+
+        @media (max-width: 1200px) { .content-grid { grid-template-columns: 300px 1fr 260px; } }
+        @media (max-width: 992px)  { .content-grid { grid-template-columns: 1fr; } .machine-title { flex-direction: column; align-items: flex-start; } .machine-actions { width: 100%; } .btn-start, .btn-stop, .btn-vip { flex: 1; justify-content: center; } }
+        @media (max-width: 768px)  { .nav-links { display: none; } .machine-info h1 { font-size: 1.8rem; } .machine-meta { gap: 0.8rem; } .terminal-panel { height: 400px; } }
+    </style>
+</head>
+<body>
+
+<!-- ÖZEL DIALOG: ONAY (confirm) -->
+<div class="hl-dialog-overlay" id="dlConfirm">
+    <div class="hl-dialog">
+        <div class="hl-dialog-icon">
+            <div class="hl-dialog-icon-circle warn">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+        </div>
+        <div class="hl-dialog-body">
+            <div class="hl-dialog-title" id="dlConfirmTitle">Onay</div>
+            <div class="hl-dialog-message" id="dlConfirmMsg">Bu işlemi onaylıyor musunuz?</div>
+        </div>
+        <div class="hl-dialog-actions">
+            <button class="hl-btn hl-btn-cancel" onclick="dlConfirmResolve(false)">
+                <i class="fas fa-times"></i> Vazgeç
+            </button>
+            <button class="hl-btn hl-btn-confirm" id="dlConfirmBtn" onclick="dlConfirmResolve(true)">
+                <i class="fas fa-check"></i> Onayla
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ÖZEL DIALOG: BİLGİ / UYARI (alert) -->
+<div class="hl-dialog-overlay" id="dlAlert">
+    <div class="hl-dialog">
+        <div class="hl-dialog-icon">
+            <div class="hl-dialog-icon-circle info" id="dlAlertIcon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+        </div>
+        <div class="hl-dialog-body">
+            <div class="hl-dialog-title" id="dlAlertTitle">Bilgi</div>
+            <div class="hl-dialog-message" id="dlAlertMsg">Mesaj</div>
+        </div>
+        <div class="hl-dialog-actions centered">
+            <button class="hl-btn hl-btn-ok" onclick="dlAlertClose()">
+                <i class="fas fa-check"></i> Tamam
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">
+        <i class="fas fa-skull"></i> HACKLAB
+    </div>
+    <div class="nav-links">
+        <a href="/">Ana Sayfa</a>
+        <a href="/machines">Makineler</a>
+        <a href="/academy">Akademi</a>
+        <a href="/leaderboard">Liderlik</a>
+        <a href="/vip">VIP</a>
+        {{if .User}}
+        <a href="/profile/{{.User.Username}}">Profil</a>
+        <a href="/dashboard">Panel</a>
+        {{if and .User .IsAdmin}}
+        <a href="/admin" style="color: #ffd700;">Admin</a>
+        {{end}}
+        <span class="user-points">{{.User.Points}} Puan</span>
+        <button class="login-btn" onclick="customLogout()">Çıkış</button>
+        {{else}}
+        <button class="login-btn" onclick="window.location.href='/login'">Giriş</button>
+        <button class="register-btn" onclick="window.location.href='/register'">Kayıt Ol</button>
+        {{end}}
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="breadcrumb">
+        <a href="/">Ana Sayfa</a>
+        <i class="fas fa-chevron-right"></i>
+        <a href="/machines">Makineler</a>
+        <i class="fas fa-chevron-right"></i>
+        <span style="color:#00ff9d;">{{ .Machine.Name }}</span>
+    </div>
+
+    {{ if and .Machine.IsVIPOnly (not .IsVIP) }}
+    <div class="vip-warning">
+        <i class="fas fa-crown" style="font-size:1.5rem;"></i>
+        <div>
+            <strong>Bu makine sadece VIP üyelere özeldir.</strong>
+            <p style="font-size:0.9rem; margin-top:0.3rem;">
+                VIP üyeliğe geçerek bu ve diğer özel makinelere erişebilirsiniz.
+            </p>
+        </div>
+    </div>
+    {{ end }}
+
+    <div class="machine-header">
+        <div class="machine-title">
+            <div class="machine-icon"><i class="fas fa-server"></i></div>
+            <div class="machine-info">
+                <h1>{{ .Machine.Name }}</h1>
+                <div class="machine-meta">
+                    <span><i class="fas fa-user"></i> @{{ .Machine.CreatorName }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ formatDate .Machine.CreatedAt }}</span>
+                    <span><i class="fas fa-flag"></i> {{ .Machine.SolverCount }} çözüm</span>
+                    <span><i class="fas fa-tasks"></i> {{ .Machine.TotalQuestions }} soru</span>
+                    {{ if .Machine.DockerImage }}
+                    <span><i class="fab fa-docker"></i> {{ .Machine.DockerImage }}</span>
+                    {{ end }}
+                    {{ if and .ActiveSession .AccessURL }}
+                    <span><i class="fas fa-link"></i> <a href="{{ .AccessURL }}" target="_blank" style="color:#00ff9d;">{{ .AccessURL }}</a></span>
+                    {{ end }}
+                </div>
+                {{ if .IsAuthenticated }}
+                <div style="margin-top:0.8rem;">
+                    <div style="font-size:0.8rem; color:#6a7a8a; margin-bottom:0.3rem;" id="progressLabel">
+                        İlerleme: {{ .UserProgress.SolvedQuestions }}/{{ .UserProgress.TotalQuestions }} soru çözüldü
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill"
+                             style="width: {{ percentage .UserProgress.SolvedQuestions .UserProgress.TotalQuestions }}%">
+                        </div>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+
+        <div class="machine-actions">
+            {{ if not .IsAuthenticated }}
+                <button class="btn-start" onclick="window.location.href='/login'">
+                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                </button>
+            {{ else if and .Machine.IsVIPOnly (not .IsVIP) }}
+                <button class="btn-vip" onclick="window.location.href='/vip'">
+                    <i class="fas fa-crown"></i> VIP OL
+                </button>
+            {{ else if .ActiveSession }}
+                <button class="btn-stop" id="stopBtn" onclick="customStopMachine()">
+                    <i class="fas fa-stop"></i> MAKİNEYİ DURDUR
+                </button>
+            {{ else }}
+                <button class="btn-start" id="startBtn" onclick="startMachine()">
+                    <i class="fas fa-play"></i> MAKİNEYİ BAŞLAT
+                </button>
+            {{ end }}
+        </div>
+    </div>
+
+    {{ if .Machine.Description }}
+    <div style="background:rgba(0,0,0,0.2); border:1px solid #2a3a4a; border-radius:8px;
+                padding:1rem 1.5rem; margin-bottom:1.5rem; color:#b0b0b0; font-size:0.95rem;">
+        {{ .Machine.Description }}
+    </div>
+    {{ end }}
+
+    <div class="content-grid">
+
+        <div class="questions-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-tasks"></i> SORULAR</h3>
+                <p>{{ .Machine.TotalQuestions }} soru • {{ .Machine.PointsReward }} puan</p>
+            </div>
+            <div class="questions-list" id="questionsList">
+                {{ if .Questions }}
+                    {{ range .Questions }}
+                        {{ template "question_item" . }}
+                    {{ end }}
+                {{ else }}
+                <div class="no-questions">
+                    <i class="fas fa-inbox"></i>
+                    <p style="margin-top:0.5rem;">Henüz soru eklenmemiş.</p>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+
+        <!-- Orta Panel - Terminal veya Web İframe -->
+        <div class="terminal-panel">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="terminal-dot dot-red"></div>
+                    <div class="terminal-dot dot-yellow"></div>
+                    <div class="terminal-dot dot-green"></div>
+                </div>
+                <div class="terminal-title">
+                    <span class="terminal-status {{ if .ActiveSession }}online{{ end }}" id="terminalStatus"></span>
+                    <i class="fas {{ if eq .AccessType "web" }}fa-globe{{ else }}fa-terminal{{ end }}"></i>
+                    {{ if .ActiveSession }}
+                        {{ if eq .AccessType "web" }}
+                            Web Uygulaması - {{ .Machine.Name }}
+                        {{ else }}
+                            root@{{ .Machine.Name }}:~ 
+                        {{ end }}
+                    {{ else }}
+                        Terminal — Makine başlatılmadı
+                    {{ end }}
+                </div>
+                <div class="terminal-actions">
+                    {{ if eq .AccessType "web" }}
+                        {{ if .AccessURL }}
+                        <button class="terminal-btn" onclick="window.open('{{ .AccessURL }}', '_blank')" title="Yeni Sekmede Aç">
+                            <i class="fas fa-external-link-alt"></i>
+                        </button>
+                        {{ end }}
+                    {{ else }}
+                        <button class="terminal-btn" onclick="clearTerminal()" title="Temizle"><i class="fas fa-trash"></i></button>
+                        <button class="terminal-btn" onclick="copyTerminal()" title="Kopyala"><i class="fas fa-copy"></i></button>
+                        <button class="terminal-btn" onclick="fullscreenTerminal()" title="Tam Ekran"><i class="fas fa-expand"></i></button>
+                    {{ end }}
+                </div>
+            </div>
+            <div class="terminal-body" id="terminalBody">
+                {{ if .ActiveSession }}
+                    {{ if eq .AccessType "web" }}
+                        <div class="web-panel" id="webContainer">
+                            <div class="web-header">
+                                <span><i class="fas fa-link"></i> Uygulama Adresi</span>
+                                <span class="web-url">{{ .AccessURL }}</span>
+                                <button class="web-open-btn" onclick="window.open('{{ .AccessURL }}', '_blank')">
+                                    <i class="fas fa-external-link-alt"></i> Yeni Sekmede Aç
+                                </button>
+                            </div>
+                            <iframe src="{{ .AccessURL }}" class="web-iframe" title="Web Uygulaması"></iframe>
+                        </div>
+                    {{ else }}
+                        <div id="xtermContainer"></div>
+                    {{ end }}
+                {{ else }}
+                <div class="terminal-offline">
+                    <i class="fas fa-power-off"></i>
+                    <span>Makine çevrimdışı</span>
+                    <span style="font-size:0.8rem;">Başlatmak için "MAKİNEYİ BAŞLAT" butonuna tıklayın</span>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-section">
+                <div class="info-title"><i class="fas fa-chart-bar"></i> MAKİNE BİLGİLERİ</div>
+                <div class="difficulty-badge {{ difficultyClass .Machine.Difficulty }}">
+                    {{ difficultyLabel .Machine.Difficulty }}
+                </div>
+                <div class="info-stats">
+                    <div class="info-stat">
+                        <span class="info-stat-value">{{ .Machine.TotalQuestions }}</span>
+                        <span class="info-stat-label">Toplam Soru</span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-value">{{ .Machine.SolverCount }}</span>
+                        <span class="info-stat-label">Çözüm</span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-value">{{ .Machine.PointsReward }}</span>
+                        <span class="info-stat-label">Puan</span>
+                    </div>
+                    {{ if .IsAuthenticated }}
+                    <div class="info-stat">
+                        <span class="info-stat-value" id="progressPct">
+                            {{ percentage .UserProgress.SolvedQuestions .UserProgress.TotalQuestions }}%
+                        </span>
+                        <span class="info-stat-label">İlerlemeniz</span>
+                    </div>
+                    {{ end }}
+                </div>
+            </div>
+
+            {{ if .ActiveSession }}
+            <div class="info-section">
+                <div class="info-title"><i class="fas fa-hourglass-half"></i> KALAN SÜRE</div>
+                <div class="timer" id="timer">
+                    <i class="fas fa-clock"></i>
+                    <span id="timerDisplay">--:--:--</span>
+                </div>
+                <p style="color:#6a7a8a; font-size:0.8rem; margin-top:0.5rem;">
+                    Süre dolduğunda makine otomatik kapanacak
+                </p>
+            </div>
+            {{ end }}
+
+            <div class="info-section">
+                <div class="info-title"><i class="fas fa-users"></i> SON ÇÖZENLER</div>
+                <div class="solver-list" id="solverList">
+                    {{ if .RecentSolvers }}
+                        {{ range .RecentSolvers }}
+                            {{ template "solver_item" . }}
+                        {{ end }}
+                    {{ else }}
+                    <div class="solver-empty">
+                        <i class="fas fa-ghost"></i>
+                        <p style="margin-top:0.3rem;">Henüz çözen yok — İlk sen ol!</p>
+                    </div>
+                    {{ end }}
+                </div>
+            </div>
+
+            {{ if .IsAuthenticated }}
+            <div class="info-section">
+                <div class="info-title"><i class="fas fa-pencil-alt"></i> NOTLARIM</div>
+                <textarea class="notes-area" id="notes"
+                          placeholder="Makineyle ilgili notlarınızı buraya yazın..."></textarea>
+                <button class="btn-full" onclick="saveNotes()">
+                    <i class="fas fa-save"></i> Notları Kaydet
+                </button>
+            </div>
+            {{ end }}
+
+            {{ if .IsAuthenticated }}
+            <div class="info-section">
+                <button class="btn-full-primary" id="flagBtn"
+                    {{if eq .ActiveSession nil}}disabled{{ end }}
+                    onclick="{{ if .ActiveSession }}showFlagModal(){{ end }}">
+                    <i class="fas fa-flag"></i>
+                    {{ if .ActiveSession }}FLAG GÖNDER{{ else }}Makineyi Başlat{{ end }}
+                </button>
+            </div>
+            {{ end }}
+
+        </div>
+    </div>
+</div>
+
+<!-- Flag Modal -->
+<div class="modal" id="flagModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-flag"></i> FLAG GÖNDER</h3>
+            <button class="modal-close" onclick="closeFlagModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="color:#b0b0b0; margin-bottom:0.5rem; font-size:0.85rem;">Soru seçin:</p>
+            <select class="question-select" id="questionSelect">
+                {{ range .Questions }}
+                {{ if not .Solved }}
+                <option value="{{ .ID }}">{{ .QuestionOrder }}. {{ .Title }} ({{ .PointsReward }} puan)</option>
+                {{ end }}
+                {{ end }}
+            </select>
+            <p style="color:#b0b0b0; margin-bottom:0.5rem; font-size:0.85rem;">Flag giriniz:</p>
+            <div class="flag-input-group">
+                <input type="text" class="flag-input" id="flagInput"
+                       placeholder="FLAG{...}" autocomplete="off" spellcheck="false">
+                <button class="btn-submit-flag" id="submitFlagBtn" onclick="submitFlag()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="flag-result" id="flagResult"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Hint Modal -->
+<div class="modal" id="hintModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-lightbulb" style="color:#ffbd2e;"></i> İPUCU</h3>
+            <button class="modal-close" onclick="closeHintModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="hintQuestionLabel" style="color:#ffbd2e; font-weight:600;"></p>
+            <div class="hint-content" id="hintContent"></div>
+            <p style="color:#ffbd2e; margin-top:1rem; font-size:0.85rem;">
+                <i class="fas fa-coins"></i> <span id="hintCostLabel"></span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+    const MACHINE_ID         = {{ .Machine.ID }};
+    const MACHINE_NAME       = "{{ js .Machine.Name }}";
+    const IS_AUTH            = {{ .IsAuthenticated }};
+    const HAS_ACTIVE_SESSION = {{ if .ActiveSession }}true{{ else }}false{{ end }};
+    const ACCESS_TYPE        = "{{ .AccessType }}";
+    const ACCESS_URL         = "{{ .AccessURL }}";
+    let   TIME_REMAINING     = {{ .TimeRemaining }};
+    console.log("Time remaining:", TIME_REMAINING)
+    let term = null;
+    let fitAddon = null;
+    let ws = null;
+
+    // =============================================
+    // ÖZEL DIALOG SİSTEMİ (Promise tabanlı)
+    // =============================================
+    let _dlConfirmResolve = null;
+    let _dlAlertIsOpen = false;
+
+    function showConfirm(title, message, confirmLabel = null) {
+        document.getElementById('dlConfirmTitle').textContent = title || 'Onay';
+        document.getElementById('dlConfirmMsg').textContent = message || 'Bu işlemi onaylıyor musunuz?';
+        const confirmBtn = document.getElementById('dlConfirmBtn');
+        if (confirmLabel) {
+            confirmBtn.innerHTML = confirmLabel;
+        } else {
+            confirmBtn.innerHTML = '<i class="fas fa-check"></i> Onayla';
+        }
+        document.getElementById('dlConfirm').classList.add('open');
+        return new Promise(resolve => {
+            _dlConfirmResolve = resolve;
+        });
+    }
+
+    function dlConfirmResolve(value) {
+        document.getElementById('dlConfirm').classList.remove('open');
+        if (_dlConfirmResolve) {
+            _dlConfirmResolve(value);
+            _dlConfirmResolve = null;
+        }
+    }
+
+    function showAlert(title, message, type = 'info') {
+        if (_dlAlertIsOpen) return;
+        const titleEl = document.getElementById('dlAlertTitle');
+        const msgEl = document.getElementById('dlAlertMsg');
+        const iconEl = document.getElementById('dlAlertIcon');
+        
+        titleEl.textContent = title || 'Bilgi';
+        msgEl.textContent = message || '';
+        
+        // İkon tipini ayarla
+        iconEl.className = 'hl-dialog-icon-circle';
+        if (type === 'success') {
+            iconEl.classList.add('success');
+            iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
+        } else if (type === 'error') {
+            iconEl.classList.add('danger');
+            iconEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        } else if (type === 'warning') {
+            iconEl.classList.add('warn');
+            iconEl.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+        } else {
+            iconEl.classList.add('info');
+            iconEl.innerHTML = '<i class="fas fa-info-circle"></i>';
+        }
+        
+        document.getElementById('dlAlert').classList.add('open');
+        _dlAlertIsOpen = true;
+    }
+
+    function dlAlertClose() {
+        document.getElementById('dlAlert').classList.remove('open');
+        _dlAlertIsOpen = false;
+    }
+
+    // Overlay dışına tıklayınca kapat
+    document.getElementById('dlConfirm').addEventListener('click', function(e) {
+        if (e.target === this) dlConfirmResolve(false);
+    });
+    document.getElementById('dlAlert').addEventListener('click', function(e) {
+        if (e.target === this) dlAlertClose();
+    });
+
+    // ESC tuşu ile kapat
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('dlConfirm').classList.contains('open')) dlConfirmResolve(false);
+            if (document.getElementById('dlAlert').classList.contains('open')) dlAlertClose();
+        }
+    });
+
+    function initTerminal() {
+        if (ACCESS_TYPE !== "terminal") return;
+        
+        const container = document.getElementById('xtermContainer');
+        if (!container) return;
+
+        if (typeof Terminal === 'undefined') {
+            console.error('xterm.js yüklenemedi!');
+            document.getElementById('terminalBody').innerHTML = 
+                '<div class="terminal-offline"><i class="fas fa-exclamation-triangle"></i><span>Terminal yüklenemedi. Sayfayı yenileyin.</span></div>';
+            return;
+        }
+
+        term = new Terminal({
+            theme: {
+                background: '#0a0f0f',
+                foreground: '#00ff9d',
+                cursor: '#00ff9d',
+                selectionBackground: 'rgba(0,255,157,0.3)',
+            },
+            fontFamily: "'Share Tech Mono', monospace",
+            fontSize: 14,
+            cursorBlink: true,
+            convertEol: true,
+            scrollback: 5000,
+        });
+
+        fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(container);
+        fitAddon.fit();
+
+        window.addEventListener('resize', () => fitAddon.fit());
+        connectWebSocket();
+    }
+
+    function connectWebSocket() {
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        const url = `${proto}://${location.host}/ws/machines/${MACHINE_ID}/terminal`;
+
+        term.writeln('\x1b[36m═══════════════════════════════════════════════\x1b[0m');
+        term.writeln('\x1b[32m🔐 Docker container bağlanılıyor...\x1b[0m');
+        term.writeln('\x1b[36m═══════════════════════════════════════════════\x1b[0m');
+
+        ws = new WebSocket(url);
+        ws.binaryType = 'arraybuffer';
+
+        ws.onopen = function() {
+            document.getElementById('terminalStatus').classList.add('online');
+            term.writeln('\x1b[32m✅ Bağlantı kuruldu.\x1b[0m');
+            term.writeln('\x1b[33m💡 İpucu: Container içinde keşif yapabilirsiniz.\x1b[0m');
+            term.writeln('');
+            
+            term.onData(data => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(data);
+                }
+            });
+        };
+
+        ws.onmessage = function(e) {
+            if (e.data instanceof ArrayBuffer) {
+                term.write(new Uint8Array(e.data));
+            } else {
+                term.write(e.data);
+            }
+        };
+
+        ws.onerror = function() {
+            term.writeln('\x1b[31m❌ WebSocket bağlantı hatası!\x1b[0m');
+        };
+
+        ws.onclose = function() {
+            document.getElementById('terminalStatus').classList.remove('online');
+            term.writeln('\x1b[33m⚠️ Bağlantı kesildi.\x1b[0m');
+        };
+    }
+
+    function clearTerminal() {
+        if (term) term.clear();
+    }
+
+    function copyTerminal() {
+        if (!term) return;
+        const sel = term.getSelection();
+        const text = sel || term.buffer.active.getLine(0)?.translateToString() || '';
+        navigator.clipboard.writeText(text)
+            .then(() => showToast('Seçili metin kopyalandı!', 'success'));
+    }
+
+    function fullscreenTerminal() {
+        const panel = document.querySelector('.terminal-panel');
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            panel.requestFullscreen().then(() => { if (fitAddon) fitAddon.fit(); });
+        }
+    }
+
+    function startMachine() {
+        const btn = document.getElementById('startBtn');
+        if (!btn) return;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Başlatılıyor...';
+
+        fetch(`/api/machines/${MACHINE_ID}/start`, { method: 'POST' })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    showToast('Makine başlatıldı! Yükleniyor...', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert('Hata', d.message || 'Makine başlatılamadı', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-play"></i> MAKİNEYİ BAŞLAT';
+                }
+            })
+            .catch(err => {
+                showAlert('Bağlantı Hatası', err.message || 'Bağlantı hatası oluştu', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> MAKİNEYİ BAŞLAT';
+            });
+    }
+
+    async function customStopMachine() {
+        const confirmed = await showConfirm(
+            'Makineyi Durdur',
+            'Makineyi durdurmak istediğinize emin misiniz?\nTüm oturum verileri silinecek.',
+            '<i class="fas fa-stop"></i> Durdur'
+        );
+        if (!confirmed) return;
+
+        const btn = document.getElementById('stopBtn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Durduruluyor...'; }
+        if (ws) ws.close();
+
+        fetch(`/api/machines/${MACHINE_ID}/stop`, { method: 'POST' })
+            .then(r => r.json())
+            .then(d => {
+                showToast(d.message || 'Makine durduruldu', 'success');
+                setTimeout(() => location.reload(), 1200);
+            })
+            .catch(() => {
+                showAlert('Hata', 'Bağlantı hatası oluştu', 'error');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-stop"></i> MAKİNEYİ DURDUR'; }
+            });
+    }
+
+    async function customLogout() {
+        const confirmed = await showConfirm(
+            'Çıkış Yap',
+            'Oturumunuzu kapatmak istediğinize emin misiniz?',
+            '<i class="fas fa-sign-out-alt"></i> Çıkış Yap'
+        );
+        if (!confirmed) return;
+        
+        try {
+            const response = await fetch('/api/auth/logout', { method: 'POST' });
+            if (response.ok) window.location.reload();
+            else showAlert('Hata', 'Çıkış yapılırken bir hata oluştu', 'error');
+        } catch {
+            showAlert('Hata', 'Çıkış yapılırken bir hata oluştu', 'error');
+        }
+    }
+
+    function startTimer() {
+        updateTimerDisplay();
+        const interval = setInterval(() => {
+            TIME_REMAINING--;
+            updateTimerDisplay();
+            if (TIME_REMAINING <= 0) {
+                clearInterval(interval);
+                showAlert('Süre Doldu', 'Makine süresi doldu! Yeniden başlatın.', 'warning');
+                if (ws) ws.close();
+                setTimeout(() => location.reload(), 2000);
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const el = document.getElementById('timerDisplay');
+        if (!el) return;
+        const h = Math.floor(TIME_REMAINING / 3600);
+        const m = Math.floor((TIME_REMAINING % 3600) / 60);
+        const s = TIME_REMAINING % 60;
+        el.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+        const timer = document.getElementById('timer');
+        if (!timer) return;
+        timer.classList.remove('warning', 'danger');
+        if (TIME_REMAINING < 600) timer.classList.add('danger');
+        else if (TIME_REMAINING < 1800) timer.classList.add('warning');
+    }
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    let currentQuestionID = null;
+
+    function selectQuestion(id, title) {
+        currentQuestionID = id;
+        document.querySelectorAll('.question-item').forEach(el => el.classList.remove('active'));
+        const el = document.querySelector(`[data-question-id="${id}"]`);
+        if (el) el.classList.add('active');
+        const sel = document.getElementById('questionSelect');
+        if (sel) sel.value = id;
+    }
+
+    function showFlagModal() {
+        const sel = document.getElementById('questionSelect');
+        if (!sel || sel.options.length === 0) {
+            showAlert('Tebrikler!', 'Tüm sorular çözülmüş!', 'success');
+            return;
+        }
+        if (currentQuestionID) sel.value = currentQuestionID;
+        document.getElementById('flagInput').value = '';
+        document.getElementById('flagResult').style.display = 'none';
+        document.getElementById('submitFlagBtn').disabled = false;
+        document.getElementById('flagModal').classList.add('show');
+        setTimeout(() => document.getElementById('flagInput').focus(), 100);
+    }
+
+    function closeFlagModal() {
+        document.getElementById('flagModal').classList.remove('show');
+    }
+
+    function submitFlag() {
+        const sel = document.getElementById('questionSelect');
+        const flag = document.getElementById('flagInput').value.trim();
+        const qid = sel ? parseInt(sel.value) : currentQuestionID;
+        if (!qid) { showAlert('Hata', 'Lütfen bir soru seçin', 'warning'); return; }
+        if (!flag) { showAlert('Hata', 'Lütfen flag girin', 'warning'); return; }
+
+        const btn = document.getElementById('submitFlagBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        fetch(`/api/machines/${MACHINE_ID}/submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question_id: qid, flag: flag })
+        })
+        .then(r => r.json())
+        .then(d => {
+            const resultEl = document.getElementById('flagResult');
+            resultEl.style.display = 'block';
+            if (d.data && d.data.correct) {
+                resultEl.className = 'flag-result success';
+                resultEl.innerHTML = `<i class="fas fa-check-circle"></i> ${escHtml(d.data.message)}`;
+                markQuestionSolved(qid);
+                if (d.data.total_points !== undefined) {
+                    const ptsEl = document.getElementById('userPoints');
+                    if (ptsEl) ptsEl.innerHTML = `👑 ${d.data.total_points} puan`;
+                }
+                updateProgressUI();
+                if (sel) {
+                    const opt = sel.querySelector(`option[value="${qid}"]`);
+                    if (opt) opt.remove();
+                }
+                setTimeout(() => closeFlagModal(), 2500);
+            } else {
+                const message = d.message || 'Yanlış flag, tekrar dene.';
+                if (message.includes('Bu soruyu zaten çözdünüz') || message.includes('already solved')) {
+                    resultEl.className = 'flag-result warning';
+                    resultEl.innerHTML = `<i class="fas fa-info-circle"></i> ${escHtml(message)}`;
+                    setTimeout(() => closeFlagModal(), 2000);
+                } else {
+                    resultEl.className = 'flag-result error';
+                    resultEl.innerHTML = `<i class="fas fa-times-circle"></i> ${escHtml(message)}`;
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                }
+            }
+        })
+        .catch(err => {
+            showAlert('Bağlantı Hatası', err.message || 'Flag gönderilemedi', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        });
+    }
+
+    function markQuestionSolved(qID) {
+        const el = document.querySelector(`[data-question-id="${qID}"]`);
+        if (!el) return;
+        el.classList.add('solved');
+        const status = el.querySelector('.question-status');
+        if (status) {
+            status.className = 'question-status status-solved';
+            status.innerHTML = '<i class="fas fa-check"></i>';
+        }
+    }
+
+    function updateProgressUI() {
+        const solved = document.querySelectorAll('.question-item.solved').length;
+        const total = document.querySelectorAll('.question-item').length;
+        const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
+        const bar = document.querySelector('.progress-bar-fill');
+        const pctEl = document.getElementById('progressPct');
+        const label = document.getElementById('progressLabel');
+        if (bar) bar.style.width = pct + '%';
+        if (pctEl) pctEl.textContent = pct + '%';
+        if (label) label.textContent = `İlerleme: ${solved}/${total} soru çözüldü`;
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && document.getElementById('flagModal').classList.contains('show')) {
+            const btn = document.getElementById('submitFlagBtn');
+            if (!btn.disabled) submitFlag();
+        }
+        if (e.key === 'Escape') { closeFlagModal(); closeHintModal(); }
+    });
+
+    async function showHint(questionID, hintCost, event) {
+        if (event) event.stopPropagation();
+        
+        const confirmed = await showConfirm(
+            'İpucu Satın Al',
+            `Bu ipucu ${hintCost} puan harcayacak. Devam etmek istiyor musunuz?`,
+            `<i class="fas fa-coins"></i> ${hintCost} Puan Harca`
+        );
+        if (!confirmed) return;
+
+        fetch(`/api/machines/${MACHINE_ID}/hints/${questionID}`, { method: 'GET' })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    document.getElementById('hintQuestionLabel').textContent = d.question_title || '';
+                    document.getElementById('hintContent').textContent = d.hint || 'İpucu bulunmuyor.';
+                    document.getElementById('hintCostLabel').textContent = d.cost ? `${d.cost} puan harcandı` : 'Daha önce kullanıldı';
+                    document.getElementById('hintModal').classList.add('show');
+                    if (d.total_points !== undefined) {
+                        const ptsEl = document.getElementById('userPoints');
+                        if (ptsEl) ptsEl.innerHTML = `👑 ${d.total_points} puan`;
+                    }
+                    const hintBtn = document.querySelector(`[data-question-id="${questionID}"] .question-hint`);
+                    if (hintBtn) {
+                        hintBtn.innerHTML = '<i class="fas fa-lightbulb" style="color:#00ff9d;"></i> İpucu Görüntüle';
+                        hintBtn.onclick = (e) => showHintContent(questionID, e);
+                    }
+                } else {
+                    showAlert('Hata', d.message || 'İpucu alınamadı', 'error');
+                }
+            })
+            .catch(() => showAlert('Hata', 'Bağlantı hatası', 'error'));
+    }
+
+    function showHintContent(questionID, event) {
+        if (event) event.stopPropagation();
+        fetch(`/api/machines/${MACHINE_ID}/hints/${questionID}`, { method: 'GET' })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    document.getElementById('hintQuestionLabel').textContent = d.question_title || '';
+                    document.getElementById('hintContent').textContent = d.hint || 'İpucu bulunmuyor.';
+                    document.getElementById('hintCostLabel').textContent = 'Daha önce satın alındı';
+                    document.getElementById('hintModal').classList.add('show');
+                } else {
+                    showAlert('Hata', d.message || 'İpucu yüklenemedi', 'error');
+                }
+            })
+            .catch(() => showAlert('Hata', 'İpucu yüklenemedi', 'error'));
+    }
+
+    function closeHintModal() {
+        document.getElementById('hintModal').classList.remove('show');
+    }
+
+    function saveNotes() {
+        const notes = document.getElementById('notes')?.value || '';
+        try {
+            sessionStorage.setItem(`hacklab_machine_${MACHINE_ID}_notes`, notes);
+            showAlert('Başarılı', 'Notlar kaydedildi!', 'success');
+        } catch(e) {
+            showAlert('Hata', 'Not kaydedilemedi', 'error');
+        }
+    }
+
+    function loadNotes() {
+        try {
+            const notes = sessionStorage.getItem(`hacklab_machine_${MACHINE_ID}_notes`);
+            const el = document.getElementById('notes');
+            if (el && notes) el.value = notes;
+        } catch(e) { }
+    }
+
+    window.addEventListener('click', e => {
+        ['flagModal', 'hintModal'].forEach(id => {
+            const modal = document.getElementById(id);
+            if (e.target === modal) modal.classList.remove('show');
+        });
+    });
+
+    let toastTimer = null;
+    function showToast(text, type) {
+        const t = document.getElementById('toast');
+        const colors = {
+            success: { bg:'rgba(0,255,157,0.15)', border:'#00ff9d', color:'#00ff9d' },
+            error:   { bg:'rgba(255,95,86,0.15)',  border:'#ff5f56', color:'#ff5f56' },
+            warning: { bg:'rgba(255,189,46,0.15)', border:'#ffbd2e', color:'#ffbd2e' },
+        };
+        const c = colors[type] || colors.success;
+        Object.assign(t.style, {
+            background: c.bg, border: `1px solid ${c.border}`, color: c.color,
+            display: 'block', padding: '1rem 1.5rem', borderRadius: '8px',
+            fontWeight: '500', fontSize: '0.9rem', maxWidth: '320px',
+            position: 'fixed', bottom: '2rem', right: '2rem', zIndex: '3000',
+        });
+        t.textContent = text;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3500);
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    window.addEventListener('load', function() {
+        const first = document.querySelector('.question-item');
+        if (first) {
+            const id = parseInt(first.dataset.questionId);
+            const title = first.querySelector('.question-title')?.textContent?.trim() || '';
+            selectQuestion(id, title);
+        }
+
+        if (HAS_ACTIVE_SESSION && ACCESS_TYPE === "terminal") {
+            startTimer();
+            initTerminal();
+        } else if (HAS_ACTIVE_SESSION && ACCESS_TYPE === "web") {
+            startTimer();
+        }
+
+        loadNotes();
+    });
+</script>
+</body>
+</html>

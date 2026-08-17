@@ -1,0 +1,492 @@
+{{define "content"}}
+<div class="user-detail-page">
+    <!-- Header -->
+    <div class="detail-header">
+        <div class="header-left">
+            <a href="/admin/users" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Geri Dön
+            </a>
+            <h1>Kullanıcı Detayı</h1>
+        </div>
+        <div class="header-actions">
+            <a href="/admin/users/edit/{{.User.ID}}" class="btn-edit">
+                <i class="fas fa-edit"></i>
+                Düzenle
+            </a>
+        </div>
+    </div>
+
+    <!-- Profil Kartı -->
+    <div class="profile-card">
+        <div class="profile-avatar">
+            <img src="{{if .User.Avatar}}{{.User.Avatar}}{{else}}/static/images/avatar.png{{end}}" alt="Avatar">
+            <span class="status-dot {{if .User.IsActive}}online{{else}}offline{{end}}"></span>
+        </div>
+        <div class="profile-info">
+            <h2>{{.User.Username}}</h2>
+            <p class="username">@{{.User.Username}}</p>
+            {{if .User.FullName}}
+                <p class="fullname">{{.User.FullName}}</p>
+            {{end}}
+            <div class="badge-group">
+                <span class="status-badge {{if .User.IsActive}}active{{else}}inactive{{end}}">
+                    {{if .User.IsActive}}Aktif{{else}}Pasif{{end}}
+                </span>
+                {{if .User.IsVIP}}
+                <span class="vip-badge">
+                    <i class="fas fa-crown"></i> VIP
+                </span>
+                {{end}}
+                {{if .User.EmailVerified}}
+                <span class="verified-badge">
+                    <i class="fas fa-check-circle"></i> E-posta Doğrulanmış
+                </span>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- İletişim Bilgileri -->
+    <div class="info-card">
+        <h3><i class="fas fa-envelope"></i> İletişim Bilgileri</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="label">E-posta Adresi</span>
+                <span class="value">{{.User.Email}}</span>
+            </div>
+            
+            {{if .User.FullName}}
+            <div class="info-item">
+                <span class="label">Tam Adı</span>
+                <span class="value">{{.User.FullName}}</span>
+            </div>
+            {{end}}
+            
+            {{if .User.Country}}
+            <div class="info-item">
+                <span class="label">Ülke</span>
+                <span class="value">{{.User.Country}}</span>
+            </div>
+            {{end}}
+            
+            {{if .User.Website}}
+            <div class="info-item">
+                <span class="label">Web Sitesi</span>
+                <span class="value"><a href="{{.User.Website}}" target="_blank">{{.User.Website}}</a></span>
+            </div>
+            {{end}}
+            
+            {{if .User.Bio}}
+            <div class="info-item full-width">
+                <span class="label">Biyografi</span>
+                <span class="value">{{.User.Bio}}</span>
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    <!-- Hesap Bilgileri -->
+    <div class="info-card">
+        <h3><i class="fas fa-user"></i> Hesap Bilgileri</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="label">Hesap Tipi</span>
+                <span class="value">{{if .User.IsVIP}}VIP{{else}}Standart{{end}}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="label">Üyelik Tarihi</span>
+                <span class="value">{{formatDateTime .User.CreatedAt}}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="label">Son Giriş</span>
+                <span class="value">{{formatNullTime .User.LastLogin}}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="label">Puan</span>
+                <span class="value">{{.User.Points}}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="label">Sıralama</span>
+                <span class="value">{{.User.Rank}}</span>
+            </div>
+            
+            {{if .User.IsVIP}}
+            <div class="info-item">
+                <span class="label">VIP Bitiş</span>
+                <span class="value">{{formatNullTime .User.VIPExpiryDate}}</span>
+            </div>
+            {{end}}
+            
+            <div class="info-item">
+                <span class="label">Referans Kodu</span>
+                <span class="value">{{if .User.ReferralCode}}{{.User.ReferralCode}}{{else}}-{{end}}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="label">Bülten</span>
+                <span class="value">{{if .User.Newsletter}}Abone{{else}}Abone Değil{{end}}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="label">2FA</span>
+                <span class="value">{{if .User.TwoFactorEnabled}}Aktif{{else}}Pasif{{end}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hızlı İşlemler -->
+    <div class="quick-actions">
+        <button class="action-btn" onclick="location.href='/admin/users/edit/{{.User.ID}}'">
+            <i class="fas fa-edit"></i>
+            Profili Düzenle
+        </button>
+        
+        <button class="action-btn" onclick="toggleStatus({{.User.ID}})">
+            <i class="fas fa-power-off"></i>
+            {{if .User.IsActive}}Hesabı Pasif Yap{{else}}Hesabı Aktif Yap{{end}}
+        </button>
+        
+        <button class="action-btn" onclick="resetPassword({{.User.ID}})">
+            <i class="fas fa-key"></i>
+            Şifre Sıfırla
+        </button>
+        
+        <button class="action-btn" onclick="toggleVIP({{.User.ID}})">
+            <i class="fas fa-crown"></i>
+            {{if .User.IsVIP}}VIP'den Çıkar{{else}}VIP Yap{{end}}
+        </button>
+    </div>
+</div>
+
+<style>
+.user-detail-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.back-btn {
+    color: #8a9aa8;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.back-btn:hover {
+    color: #00ff9d;
+}
+
+.header-left h1 {
+    color: #00ff9d;
+    font-size: 24px;
+    font-family: 'Share Tech Mono', monospace;
+    margin: 0;
+}
+
+.btn-edit {
+    background: transparent;
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-edit:hover {
+    background: #00ff9d;
+    color: #0a0f0f;
+}
+
+.profile-card {
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 20px;
+}
+
+.profile-avatar {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.profile-avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #00ff9d;
+    object-fit: cover;
+}
+
+.status-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #151e1e;
+}
+
+.status-dot.online {
+    background: #00ff9d;
+}
+
+.status-dot.offline {
+    background: #ff5f56;
+}
+
+.profile-info h2 {
+    color: #e0e0e0;
+    margin: 0 0 4px 0;
+    font-size: 24px;
+}
+
+.profile-info .username {
+    color: #8a9aa8;
+    margin: 0 0 8px 0;
+    font-size: 14px;
+}
+
+.fullname {
+    color: #8a9aa8;
+    font-size: 14px;
+    margin: 4px 0;
+}
+
+.badge-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.status-badge.active {
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+}
+
+.status-badge.inactive {
+    background: rgba(255, 95, 86, 0.1);
+    border: 1px solid #ff5f56;
+    color: #ff5f56;
+}
+
+.vip-badge {
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: #0a0f0f;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.verified-badge {
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.info-card {
+    background: #151e1e;
+    border: 1px solid #1e2a2a;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.info-card h3 {
+    color: #00ff9d;
+    font-size: 16px;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-item .label {
+    color: #8a9aa8;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item .value {
+    color: #e0e0e0;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+.info-item a {
+    color: #00ff9d;
+    text-decoration: none;
+}
+
+.info-item a:hover {
+    text-decoration: underline;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.quick-actions .action-btn {
+    background: #1e2a2a;
+    border: 1px solid #2a3a3a;
+    color: #e0e0e0;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.quick-actions .action-btn:hover {
+    border-color: #00ff9d;
+    color: #00ff9d;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .user-detail-page {
+        padding: 16px;
+    }
+    
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .badge-group {
+        justify-content: center;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .quick-actions .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+function toggleStatus(id) {
+    if (confirm('Kullanıcı durumunu değiştirmek istediğinize emin misiniz?')) {
+        fetch(`/admin/api/users/${id}/toggle-status`, { method: 'POST' })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('İşlem sırasında bir hata oluştu!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+
+function toggleVIP(id) {
+    if (confirm('VIP durumunu değiştirmek istediğinize emin misiniz?')) {
+        fetch(`/admin/api/users/${id}/toggle-vip`, { method: 'POST' })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('İşlem sırasında bir hata oluştu!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+
+function resetPassword(id) {
+    if (confirm('Şifreyi sıfırlamak istediğinize emin misiniz?')) {
+        fetch(`/admin/api/users/${id}/reset-password`, { method: 'POST' })
+        .then(response => {
+            if (response.ok) {
+                alert('Şifre sıfırlama bağlantısı gönderildi!');
+            } else {
+                alert('İşlem sırasında bir hata oluştu!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+</script>
+{{end}}

@@ -1,0 +1,267 @@
+{{define "content"}}
+<div class="logs-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h2><i class="fas fa-history"></i> Sistem Logları</h2>
+            <p>Tüm sistem aktivitelerini görüntüleyin ve analiz edin</p>
+        </div>
+        <div class="header-right">
+            <button class="btn-primary" onclick="exportLogs()">
+                <i class="fas fa-download"></i> Dışa Aktar
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtreler -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label>Log Tipi:</label>
+            <select id="logType" class="filter-select" onchange="loadLogs()">
+                <option value="all">Tümü</option>
+                <option value="user">Kullanıcı İşlemleri</option>
+                <option value="machine">Makine İşlemleri</option>
+                <option value="submission">Çözüm İşlemleri</option>
+                <option value="vip">VIP İşlemleri</option>
+                <option value="admin">Admin İşlemleri</option>
+                <option value="system">Sistem</option>
+                <option value="error">Hata</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Kullanıcı:</label>
+            <input type="text" id="username" class="filter-input" placeholder="Kullanıcı adı" onchange="loadLogs()">
+        </div>
+
+        <div class="filter-group">
+            <label>IP Adresi:</label>
+            <input type="text" id="ipAddress" class="filter-input" placeholder="192.168.1.1" onchange="loadLogs()">
+        </div>
+
+        <div class="filter-group">
+            <label>Tarih Aralığı:</label>
+            <div class="date-range">
+                <input type="date" id="startDate" class="filter-input" onchange="loadLogs()">
+                <span>-</span>
+                <input type="date" id="endDate" class="filter-input" onchange="loadLogs()">
+            </div>
+        </div>
+
+        <button class="btn-filter" onclick="resetFilters()">
+            <i class="fas fa-undo"></i> Sıfırla
+        </button>
+    </div>
+
+    <!-- Log Tablosu -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tarih</th>
+                    <th>İşlem Tipi</th>
+                    <th>Kullanıcı</th>
+                    <th>IP Adresi</th>
+                    <th>Detay</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody id="logsTableBody">
+                <tr><td colspan="7" class="text-center">Yükleniyor...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sayfalama -->
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<style>
+    .logs-page { display: flex; flex-direction: column; gap: 1.5rem; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .header-left h2 { font-family: 'Share Tech Mono', monospace; color: #00ff9d; margin-bottom: 0.3rem; }
+    .header-left p { color: #6a7a8a; font-size: 0.9rem; }
+    
+    .btn-primary { padding: 0.8rem 1.5rem; background: linear-gradient(45deg, #00ff9d, #00b86e); border: none; border-radius: 8px; color: #0a0f0f; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: 0.3s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0, 255, 157, 0.4); }
+    
+    .filters-bar { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; background: rgba(0, 0, 0, 0.2); border: 1px solid #2a3a4a; border-radius: 15px; padding: 1.5rem; }
+    .filter-group { display: flex; flex-direction: column; gap: 0.3rem; min-width: 150px; }
+    .filter-group label { font-size: 0.8rem; color: #6a7a8a; }
+    .filter-select, .filter-input { padding: 0.5rem; background: rgba(0, 0, 0, 0.3); border: 1px solid #2a3a4a; border-radius: 5px; color: #e0e0e0; }
+    .filter-input:focus, .filter-select:focus { outline: none; border-color: #00ff9d; }
+    .date-range { display: flex; align-items: center; gap: 0.5rem; }
+    .date-range input { width: 130px; }
+    .btn-filter { padding: 0.5rem 1.5rem; background: transparent; border: 1px solid #00ff9d; border-radius: 5px; color: #00ff9d; cursor: pointer; transition: 0.3s; height: 37px; margin-top: auto; }
+    .btn-filter:hover { background: rgba(0, 255, 157, 0.1); }
+    
+    .table-container { overflow-x: auto; background: rgba(0, 0, 0, 0.2); border: 1px solid #2a3a4a; border-radius: 15px; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: rgba(0, 255, 157, 0.1); padding: 1rem; text-align: left; font-family: 'Share Tech Mono', monospace; color: #00ff9d; font-size: 0.8rem; border-bottom: 1px solid #2a3a4a; }
+    .data-table td { padding: 1rem; border-bottom: 1px solid #2a3a4a; }
+    .data-table tr:hover { background: rgba(0, 255, 157, 0.05); }
+    
+    .action-badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.7rem; font-weight: 600; background: rgba(0, 255, 157, 0.2); color: #00ff9d; }
+    
+    .btn-icon { padding: 0.3rem 0.5rem; background: transparent; border: 1px solid #2a3a4a; border-radius: 3px; color: #b0b0b0; cursor: pointer; transition: 0.3s; }
+    .btn-icon:hover { border-color: #00ff9d; color: #00ff9d; }
+    
+    .pagination { display: flex; justify-content: center; gap: 0.3rem; margin-top: 1rem; }
+    .page-btn { width: 35px; height: 35px; background: transparent; border: 1px solid #2a3a4a; border-radius: 5px; color: #b0b0b0; cursor: pointer; transition: 0.3s; }
+    .page-btn:hover:not(:disabled) { border-color: #00ff9d; color: #00ff9d; }
+    .page-btn.active { background: #00ff9d; border-color: #00ff9d; color: #0a0f0f; }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    
+    .text-center { text-align: center; color: #6a7a8a; padding: 2rem; }
+</style>
+
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadLogs();
+    });
+
+    async function loadLogs() {
+        const logType = document.getElementById('logType').value;
+        const username = document.getElementById('username').value;
+        const ipAddress = document.getElementById('ipAddress').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        let url = `/admin/api/logs?page=${currentPage}&limit=50`;
+        if (logType !== 'all') url += `&type=${logType}`;
+        if (username) url += `&username=${username}`;
+        if (ipAddress) url += `&ip=${ipAddress}`;
+        if (startDate) url += `&start=${startDate}`;
+        if (endDate) url += `&end=${endDate}`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            renderLogs(data.logs || []);
+            renderPagination(data.pagination);
+        } catch (error) {
+            console.error('Loglar yüklenemedi:', error);
+            document.getElementById('logsTableBody').innerHTML = '<tr><td colspan="7" class="text-center">Loglar yüklenemedi</td></tr>';
+        }
+    }
+
+    function renderLogs(logs) {
+        const tbody = document.getElementById('logsTableBody');
+        
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">Log bulunamadı</td></tr>';
+            return;
+        }
+
+        let html = '';
+        logs.forEach(log => {
+            html += `
+                <tr>
+                    <td>#${log.id}</td>
+                    <td>${formatDate(log.created_at)}</td>
+                    <td><span class="action-badge">${log.action_type}</span></td>
+                    <td>${log.username || '-'}</td>
+                    <td>${log.ip_address || '-'}</td>
+                    <td>${truncateText(log.details, 60)}</td>
+                    <td class="actions">
+                        <button class="btn-icon" onclick="viewLogDetail(${log.id})" title="Detay">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+    }
+
+    function formatDate(timestamp) {
+        if (!timestamp) return '-';
+        const date = new Date(timestamp);
+        return date.toLocaleString('tr-TR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+
+    function truncateText(text, length) {
+        if (!text) return '-';
+        return text.length > length ? text.substring(0, length) + '...' : text;
+    }
+
+    function renderPagination(pagination) {
+        if (!pagination) return;
+        
+        currentPage = pagination.current_page;
+        totalPages = pagination.total_pages;
+        
+        let html = '';
+        
+        html += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-left"></i>
+        </button>`;
+        
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            } else if (i === currentPage - 3 || i === currentPage + 3) {
+                html += `<button class="page-btn" disabled>...</button>`;
+            }
+        }
+        
+        html += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+            <i class="fas fa-chevron-right"></i>
+        </button>`;
+        
+        document.getElementById('pagination').innerHTML = html;
+    }
+
+    function changePage(page) {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        loadLogs();
+    }
+
+    function resetFilters() {
+        document.getElementById('logType').value = 'all';
+        document.getElementById('username').value = '';
+        document.getElementById('ipAddress').value = '';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        currentPage = 1;
+        loadLogs();
+    }
+
+    function viewLogDetail(id) {
+        // Detay modalı için basit alert (isteğe bağlı)
+        window.open(`/admin/api/logs/${id}`, '_blank');
+    }
+
+    async function exportLogs() {
+        const logType = document.getElementById('logType').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        
+        let url = `/admin/api/logs/export?limit=1000`;
+        if (logType !== 'all') url += `&type=${logType}`;
+        if (startDate) url += `&start=${startDate}`;
+        if (endDate) url += `&end=${endDate}`;
+        
+        try {
+            window.location.href = url;
+        } catch (error) {
+            console.error('Dışa aktarma hatası:', error);
+            alert('Dışa aktarma başarısız oldu');
+        }
+    }
+</script>
+{{end}}

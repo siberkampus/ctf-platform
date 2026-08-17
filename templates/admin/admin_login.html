@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap - CTF HACK PLATFORMU</title>
+
+    <!-- Fonts ve Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Matrix efekti */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .matrix-bg::before {
+            content: "01001110 01100101 01110100 01110111 01101111 01110010 01101011 00100000 01010011 01100101 01100011 01110101 01110010 01101001 01110100 01111001 00100000 01000011 01010100 01000110 00100000 01001100 01101111 01100111 01101001 01101110";
+            position: absolute;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            animation: matrix 20s linear infinite;
+        }
+
+        @keyframes matrix {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100%);
+            }
+        }
+
+        /* Ana container */
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Login kartı */
+        .login-card {
+            background: rgba(20, 30, 40, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid #2a3a4a;
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 0 40px rgba(0, 255, 157, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: glowPulse 3s infinite;
+        }
+
+        @keyframes glowPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 40px rgba(0, 255, 157, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 60px rgba(0, 255, 157, 0.4);
+            }
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 157, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 6s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+
+        /* Header */
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .login-header h2 {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .login-header p a {
+            color: #00ff9d;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .login-header p a:hover {
+            text-shadow: 0 0 10px #00ff9d;
+        }
+
+        /* Form grupları */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group label i {
+            color: #00ff9d;
+            margin-right: 0.5rem;
+            width: 20px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #00ff9d;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .input-group input::placeholder {
+            color: #4a5a6a;
+            font-style: italic;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #00ff9d;
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6a7a8a;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 1;
+        }
+
+        .toggle-password:hover {
+            color: #00ff9d;
+        }
+
+        /* Form seçenekleri */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .remember-me input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a3a4a;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .remember-me input[type="checkbox"]:checked {
+            background: #00ff9d;
+            border-color: #00ff9d;
+        }
+
+        .remember-me input[type="checkbox"]:checked::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #0a0f0f;
+            font-size: 10px;
+        }
+
+        .remember-me span {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password {
+            color: #00ff9d;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .forgot-password:hover {
+            text-shadow: 0 0 10px #00ff9d;
+            text-decoration: underline;
+        }
+
+        /* Login butonu */
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, #00ff9d, #00b86e);
+            border: none;
+            border-radius: 8px;
+            color: #0a0f0f;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .login-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Sosyal giriş */
+        .social-login {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-login p {
+            color: #6a7a8a;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .social-login p::before,
+        .social-login p::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background: #2a3a4a;
+        }
+
+        .social-login p::before {
+            left: 0;
+        }
+
+        .social-login p::after {
+            right: 0;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .social-icon {
+            width: 45px;
+            height: 45px;
+            border: 1px solid #2a3a4a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .social-icon:hover {
+            border-color: #00ff9d;
+            color: #00ff9d;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 157, 0.2);
+        }
+
+        /* Hata mesajı */
+        .error-message {
+            background: rgba(255, 95, 86, 0.2);
+            border: 1px solid #ff5f56;
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            color: #ff5f56;
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-message i {
+            font-size: 1rem;
+        }
+
+        .error-message.show {
+            display: flex;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-5px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(5px);
+            }
+        }
+
+        /* Başarı mesajı */
+        .success-message {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid #00ff9d;
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            color: #00ff9d;
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .success-message.show {
+            display: flex;
+            animation: slideDown 0.5s;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #2a3a4a;
+            border-top-color: #00ff9d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Demo hesap */
+        .demo-account {
+            background: rgba(0, 255, 157, 0.05);
+            border: 1px dashed #2a3a4a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .demo-account p {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .demo-account .demo-credentials {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff9d;
+            font-size: 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .demo-account .demo-credentials:hover {
+            background: rgba(0, 255, 157, 0.1);
+        }
+
+        /* Footer link */
+        .back-home {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-home a {
+            color: #6a7a8a;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .back-home a i {
+            margin-right: 0.3rem;
+        }
+
+        .back-home a:hover {
+            color: #00ff9d;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 1rem;
+            }
+
+            .login-card {
+                padding: 1.5rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="matrix-bg"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Header -->
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-skull"></i> HACKLAB
+                </div>
+                <h2>GİRİŞ YAP</h2>
+                <p>Hesabın yok mu? <a href="/register">Kayıt Ol</a></p>
+            </div>
+
+            <!-- Hata Mesajı -->
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="errorText">Kullanıcı adı veya şifre hatalı!</span>
+            </div>
+
+            <!-- Başarı Mesajı -->
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle"></i>
+                <span id="successText">Giriş başarılı! Yönlendiriliyorsunuz...</span>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <!-- Kullanıcı Adı -->
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-user"></i>
+                        Kullanıcı Adı / Email
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-terminal input-icon"></i>
+                        <input type="text" id="username" name="username" placeholder="root@hacklab" required
+                            autocomplete="username">
+                    </div>
+                </div>
+
+                <!-- Şifre -->
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-lock"></i>
+                        Şifre
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-key input-icon"></i>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required
+                            autocomplete="current-password">
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword()" id="togglePassword"></i>
+                    </div>
+                </div>
+
+                <!-- Form Seçenekleri -->
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember" name="remember">
+                        <span>Beni Hatırla</span>
+                    </label>
+                    <a href="/forgot-password" class="forgot-password">Şifremi Unuttum</a>
+                </div>
+
+                <!-- Giriş Butonu -->
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>
+                    GİRİŞ YAP
+                </button>
+            </form>
+
+            <!-- Sosyal Giriş -->
+            <div class="social-login">
+                <p>veya</p>
+                <div class="social-icons">
+                    <a href="#" class="social-icon" onclick="socialLogin('github')">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="social-icon" onclick="socialLogin('google')">
+                        <i class="fab fa-google"></i>
+                    </a>
+                    <a href="#" class="social-icon" onclick="socialLogin('discord')">
+                        <i class="fab fa-discord"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Demo Hesap -->
+            <div class="demo-account">
+                <p>🔧 Demo Hesap</p>
+                <div class="demo-credentials" onclick="fillDemoCredentials()">
+                    <i class="fas fa-user"></i> guest / <i class="fas fa-lock"></i> guest123
+                </div>
+            </div>
+
+            <!-- Ana Sayfaya Dön -->
+            <div class="back-home">
+                <a href="/">
+                    <i class="fas fa-arrow-left"></i>
+                    Ana Sayfaya Dön
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Şifre göster/gizle
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('togglePassword');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Demo hesap bilgilerini doldur
+        function fillDemoCredentials() {
+            document.getElementById('username').value = 'guest';
+            document.getElementById('password').value = 'guest123';
+            showSuccess('Demo hesap bilgileri dolduruldu!');
+        }
+
+        // Login işlemi
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+
+            // Loading göster
+            showLoading(true);
+            hideMessages();
+
+            try {
+                // Gerçek API çağrısı
+                const response = await login(username, password, remember);
+
+                if (response.success) {
+                    // Başarılı giriş
+                    showSuccess('Giriş başarılı! Yönlendiriliyorsunuz...');
+
+                    // Token'ları kaydet (remember me seçiliyse)
+                    if (remember) {
+                        localStorage.setItem('access_token', response.access_token);
+                        localStorage.setItem('refresh_token', response.refresh_token);
+                        if (response.user) {
+                            localStorage.setItem('user', JSON.stringify(response.user));
+                        }
+                    } else {
+                        sessionStorage.setItem('access_token', response.access_token);
+                        if (response.user) {
+                            sessionStorage.setItem('user', JSON.stringify(response.user));
+                        }
+                    }
+
+                    // 2 saniye sonra dashboard'a yönlendir
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard';
+                    }, 2000);
+                } else {
+                    // Hatalı giriş
+                    showError(response.message || 'Kullanıcı adı veya şifre hatalı!');
+                }
+            } catch (error) {
+                showError('Bir hata oluştu. Lütfen tekrar deneyin.');
+                console.error('Login hatası:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Gerçek API login fonksiyonu
+        async function login(username, password, remember) {
+            try {
+                const response = await fetch('/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        remember: remember
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // HTTP hata durumları (400, 401, 500 vs.)
+                    return {
+                        success: false,
+                        message: data.message || 'Giriş başarısız!',
+                        status: response.status
+                    };
+                }
+
+                // Başarılı giriş
+                return {
+                    success: true,
+                    access_token: data.access_token,
+                    refresh_token: data.refresh_token,
+                    user: data.user
+                };
+
+            } catch (error) {
+                // Network hatası veya bağlantı sorunu
+                console.error('API bağlantı hatası:', error);
+                throw error; // Hata'yı handleLogin'e fırlat
+            }
+        }
+
+        // Sosyal medya ile giriş
+        function socialLogin(provider) {
+            showLoading(true);
+
+            // Gerçek OAuth yönlendirmesi burada olacak
+            setTimeout(() => {
+                showLoading(false);
+                showError(`${provider} ile giriş şu anda aktif değil.`);
+            }, 1000);
+        }
+
+        // Loading göster/gizle
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (show) {
+                loading.classList.add('show');
+                loginBtn.disabled = true;
+                loginBtn.style.opacity = '0.5';
+            } else {
+                loading.classList.remove('show');
+                loginBtn.disabled = false;
+                loginBtn.style.opacity = '1';
+            }
+        }
+
+        // Hata mesajı göster
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            errorText.textContent = message;
+            errorMessage.classList.add('show');
+
+            // 5 saniye sonra otomatik gizle
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        // Başarı mesajı göster
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+
+            successText.textContent = message;
+            successMessage.classList.add('show');
+        }
+
+        // Tüm mesajları gizle
+        function hideMessages() {
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        // Enter tuşu ile form gönderme
+        document.getElementById('loginForm').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('loginBtn').click();
+            }
+        });
+
+        // Sayfa yüklendiğinde localStorage'da token varsa direkt dashboard'a yönlendir
+        window.addEventListener('load', function () {
+            const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+            if (token) {
+                // Token geçerliliğini kontrol et
+                // Geçerliyse dashboard'a yönlendir
+                // window.location.href = '/dashboard';
+            }
+        });
+    </script>
+</body>
+
+</html>
